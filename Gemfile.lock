@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    xxx_rename (0.1.0)
+    xxx_rename (1.0.0)
       colorize (~> 0.8.1)
       httparty (~> 0.18.1)
       levenshtein (~> 0.2.2)
