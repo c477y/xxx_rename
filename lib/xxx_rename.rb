@@ -3,7 +3,6 @@
 require "thor"
 require "colorize"
 require "httparty"
-require "pry"
 
 module XxxRename
   class Error < StandardError; end

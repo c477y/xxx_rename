@@ -24,6 +24,8 @@ Commands:
   xxx_rename rollback file               # Rollback changes created by the rename tool
 ```
 
+![output](./output.png)
+
 ## FAQs
 
 ### Why?
