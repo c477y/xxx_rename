@@ -54,6 +54,7 @@ require_relative "xxx_rename/version"
 require_relative "xxx_rename/scene_by_file/base"
 require_relative "xxx_rename/scene_by_file/brazzers"
 require_relative "xxx_rename/scene_by_file/digital_playground"
+require_relative "xxx_rename/scene_by_file/reality_kings"
 
 # Helper for Rename by performer command
 require_relative "xxx_rename/scene_by_performer/base"

@@ -58,6 +58,8 @@ module XxxRename
             XxxRename::SceneByFile::Brazzers.new
           when "dp"
             XxxRename::SceneByFile::DigitalPlayground.new
+          when "rk"
+            XxxRename::SceneByFile::RealityKings.new
           else
             raise "invalid site name #{@site}"
           end
@@ -115,10 +117,8 @@ module XxxRename
           File.rename(file, new_file_name)
           @output.add(Dir.pwd, file, new_file_name, true)
         rescue Errno::ENAMETOOLONG
-          print "Generated name is too long. Renaming to #{new_file_name.to_s.colorize(:green)}\n"
-          alternate_filename = @site_client.create_alternate_filename(scene, file)
-          File.rename(file, alternate_filename)
-          @output.add(Dir.pwd, file, alternate_filename, true)
+          print "Generated name is too long. Skip processing.\n"
+          @output.add(Dir.pwd, file, file, false)
         end
       else
         print "File Match: #{file.to_s.colorize(:red)} can be renamed to #{new_file_name.to_s.colorize(:green)}\n"
