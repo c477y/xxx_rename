@@ -35,22 +35,26 @@ module XxxRename
     LONGDESC
     option :site, alias: :s, type: :string, required: true
     option :save, alias: :e, type: :boolean, default: false
+    option :output, alias: :o, type: :string, required: false
+
     def rename(dir)
+      @op = XxxRename::Output.new(options[:output])
       XxxRename::Validator.validate_rename_input(dir, options[:site])
-      @op = XxxRename::Output.new
-      XxxRename::SearchByFilename.new(@op, dir, options[:site], options[:save])
-    rescue Interrupt
-      say "Exiting...", :green
-    rescue StandardError => e
-      say "Program ran into an error. Dumping output..."
-      say e.message
-      e.backtrace.each { |line| say line }
-    ensure
-      if @op.empty?
-        say "Process completed. No files were renamed"
-      else
-        file = @op.write
-        say "Process completed. Output written to #{file}"
+      begin
+        XxxRename::SearchByFilename.new(@op, dir, options[:site], options[:save])
+      rescue Interrupt
+        say "Exiting...", :green
+      rescue StandardError => e
+        say "Program ran into an error. Dumping output..."
+        say e.message
+        e.backtrace.each { |line| say line }
+      ensure
+        if @op.empty?
+          say "Process completed. No files were renamed"
+        else
+          file = @op.write
+          say "Process completed. Output written to #{file}"
+        end
       end
     end
 
@@ -59,6 +63,7 @@ module XxxRename
     Rolls back any rename operations made by the tool. Input should
     be the generated file.
     LONGDESC
+
     def rollback(filename)
       XxxRename::Validator.validate_rename_from_file(filename)
       XxxRename::Rollback.new(filename)
@@ -83,6 +88,7 @@ module XxxRename
     xxx_rename rename_via_actor DIRECTORY --site "bz"
     LONGDESC
     option :site, alias: :s, type: :string, default: "bz"
+
     def rename_via_actor(dir)
       XxxRename::Validator.validate_dir dir
       @op = XxxRename::Output.new

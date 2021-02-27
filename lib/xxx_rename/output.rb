@@ -4,19 +4,33 @@ require "csv"
 
 module XxxRename
   class Output
+    def initialize(output)
+      if output.nil? || output.empty?
+        # Create a new file
+        @filename = "response_#{Time.now.strftime("%Y%m%d_%H%M")}.csv"
+        # Insert csv headers
+        CSV.open(@filename, "w") do |csv|
+          csv << headers
+        end
+      else
+        raise "Output file #{output} is invalid. Check the path of the file." unless File.exist?(output)
+
+        @filename = output
+      end
+
+    end
+
     def add(path, old_file_name, new_file_name, success)
       response_ar << [path, old_file_name, new_file_name, success]
     end
 
     def write
-      filename = "response_#{Time.now.strftime("%Y%m%d_%H%M")}.csv"
-      CSV.open(filename, "w") do |csv|
-        csv << headers
+      CSV.open(@filename, "a") do |csv|
         response_ar.each do |ar|
           csv << ar
         end
       end
-      filename
+      @filename
     end
 
     def empty?
