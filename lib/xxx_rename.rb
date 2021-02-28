@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "thor"
+require "date"
 require "colorize"
 require "httparty"
 

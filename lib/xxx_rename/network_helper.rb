@@ -30,6 +30,7 @@ module XxxRename
           resp[normalized_title][:male_actors] = male_actors(scene)
           resp[normalized_title][:collection] = collection(scene)
           resp[normalized_title][:title] = title(scene)
+          resp[normalized_title][:date_released] = date_released(scene)
         end
 
         resp
@@ -60,6 +61,10 @@ module XxxRename
 
       def title(scene)
         scene["title"]
+      end
+
+      def date_released(scene)
+        Time.parse(scene["dateReleased"])
       end
     end
   end

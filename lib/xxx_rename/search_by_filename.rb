@@ -2,9 +2,10 @@
 
 module XxxRename
   class SearchByFilename
-    def initialize(output, object, site, save)
+    def initialize(output, object, site, **options)
       @output = output
-      @save = save
+      @save = options[:save]
+      @nested = options[:nested]
 
       site_client(site)
 
@@ -17,6 +18,8 @@ module XxxRename
 
     def process_directory(root_dir)
       process_files_in_directory(root_dir)
+      return unless @nested
+
       Dir.chdir(root_dir) do
         process_sub_dirs_in_directory
       end
@@ -114,6 +117,7 @@ module XxxRename
       if @save
         print "File Match: #{file.to_s.colorize(:red)} renamed to #{new_file_name.to_s.colorize(:green)}\n"
         begin
+          File.utime(File.atime(file), scene[:date_released], file)
           File.rename(file, new_file_name)
           @output.add(Dir.pwd, file, new_file_name, true)
         rescue Errno::ENAMETOOLONG

@@ -36,12 +36,13 @@ module XxxRename
     option :site, alias: :s, type: :string, required: true
     option :save, alias: :e, type: :boolean, default: false
     option :output, alias: :o, type: :string, required: false
+    option :nested, type: :boolean, default: false
 
     def rename(dir)
       @op = XxxRename::Output.new(options[:output])
       XxxRename::Validator.validate_rename_input(dir, options[:site])
       begin
-        XxxRename::SearchByFilename.new(@op, dir, options[:site], options[:save])
+        XxxRename::SearchByFilename.new(@op, dir, options[:site], {save: options[:save], nested: options[:nested]})
       rescue Interrupt
         say "Exiting...", :green
       rescue StandardError => e
