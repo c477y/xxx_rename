@@ -16,5 +16,10 @@ module XxxRename
     def self.validate_dir(dir)
       raise "Not a directory." unless File.directory? dir
     end
+
+    def self.validate_actions(action)
+      valid_actions = %w[set_scene_date verbose]
+      raise "Invalid actions. Acceptable actions are #{valid_actions}" unless valid_actions.include?(action)
+    end
   end
 end

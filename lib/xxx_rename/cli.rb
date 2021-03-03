@@ -17,6 +17,8 @@ module XxxRename
     Supported sites include:
     1. Brazzers (alias `bz`)
     2. Digital Playground (alias `dp`)
+    3. Reality Kings (alias `rk`)
+    4. Babes (alias `bb`)
 
     It should be easy to add support for any other site owned by the
     parent company of Brazzers.
@@ -38,12 +40,16 @@ module XxxRename
     option :output, alias: :o, type: :string, required: false
     option :nested, type: :boolean, default: false
 
-    def rename(dir)
+    def rename(object)
       @op = XxxRename::Output.new(options[:output])
-      XxxRename::Validator.validate_rename_input(dir, options[:site])
+      XxxRename::Validator.validate_rename_input(object, options[:site])
       begin
-        options = { save: options[:save], nested: options[:nested] }
-        XxxRename::SearchByFilename.new(@op, dir, options[:site], **options)
+        site_client = XxxRename::Utils.site_client(options[:site])
+        action = XxxRename::Action.new(site_client)
+        search_opts = { save: options[:save], nested: options[:nested], site_client: site_client, force: false }
+        search = XxxRename::SearchByFilename.new(@op, **search_opts)
+        proc = proc { |hash, file, opt| action.rename_action(hash, file, **opt) }
+        search.process(object, proc)
       rescue Interrupt
         say "Exiting...", :green
       rescue StandardError => e
@@ -53,6 +59,8 @@ module XxxRename
       ensure
         if @op.empty?
           say "Process completed. No files were renamed"
+        elsif @op.file_empty?
+          @op.delete
         else
           file = @op.write
           say "Process completed. Output written to #{file}"
@@ -72,6 +80,44 @@ module XxxRename
       say "Process completed.", :green
     rescue Interrupt
       say "Exiting...", :green
+    end
+
+    desc "modify object", "Perform a specific action given in command"
+    long_desc <<-LONGDESC
+    Modify the files once they have been renamed. This is only meant for advanced/
+    debugging usage.
+
+    Possible actions are:
+    1. `change_date`: Prior to Version 1.2.1, matched sites did not modify the
+    file's modified date to the date the scene was released. Executing this action
+    modifies the date of the files. This is just a temporary action and would not
+    be required.
+
+    2. `verbose`: Print the data matched for the scene matched. This is just for
+    verification.
+
+    LONGDESC
+    option :site, alias: :s, type: :string, required: true
+    option :action, alias: :a, type: :string, required: true
+    option :save, alias: :e, type: :boolean, default: false
+    option :nested, type: :boolean, default: false
+    def modify(object)
+      XxxRename::Validator.validate_rename_input(object, options[:site])
+      XxxRename::Validator.validate_actions(options[:action])
+      begin
+        site_client = XxxRename::Utils.site_client(options[:site])
+        action = XxxRename::Action.new(site_client)
+        search_opts = { save: options[:save], nested: options[:nested], site_client: site_client, force: true }
+        search = XxxRename::SearchByFilename.new(nil, **search_opts)
+        mapped_action = XxxRename::Utils.action_mapper(action, options[:action])
+        search.process(object, mapped_action)
+      rescue Interrupt
+        say "Exiting...", :green
+      rescue StandardError => e
+        # say "Program ran into an error. Dumping output..."
+        say e.message
+        e.backtrace.each { |line| say line }
+      end
     end
 
     desc "rename_via_actor directory", "Attempts to generate scene name with actor name"

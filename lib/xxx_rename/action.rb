@@ -32,9 +32,25 @@ module XxxRename
       end
     end
 
-    def print_action(hash, file, **options)
-      site_client = options[:site_client]
+    def verbose_action(hash, file, **_options)
       print "File: #{file.to_s.colorize(:red)} response: #{hash}\n"
+    end
+
+    def modify_date_action(hash, file, **options)
+      original_mtime = File.mtime(file).strftime("%d/%m/%Y")
+      new_mtime = hash[:date_released].strftime("%d/%m/%Y")
+      return if original_mtime == new_mtime
+
+      if options[:save]
+        print "File Match: #{file.to_s.colorize(:red)} : original modified date is \
+#{original_mtime.to_s.colorize(:green)}. Modified to \
+#{new_mtime.to_s.colorize(:green)}\n"
+        File.utime(File.atime(file), hash[:date_released], file)
+      else
+        print "File Match: #{file.to_s.colorize(:red)} : original modified date is \
+#{original_mtime.to_s.colorize(:green)}. It can be set to \
+#{new_mtime.to_s.colorize(:green)}\n"
+      end
     end
   end
 end

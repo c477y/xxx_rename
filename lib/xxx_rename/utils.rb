@@ -97,6 +97,17 @@ module XxxRename
           raise "invalid site name #{@site}"
         end
       end
+
+      def action_mapper(obj, action)
+        case action
+        when "set_scene_date"
+          proc { |hash, file, opt| obj.modify_date_action(hash, file, **opt) }
+        when "verbose"
+          proc { |hash, file, opt| obj.verbose_action(hash, file, **opt) }
+        else
+          raise "Invalid action #{action}"
+        end
+      end
     end
   end
 end
