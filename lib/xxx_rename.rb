@@ -39,9 +39,13 @@ module XxxRename
 end
 
 # Helper files
+require_relative "xxx_rename/action"
 require_relative "xxx_rename/cli"
 require_relative "xxx_rename/network_helper"
 require_relative "xxx_rename/output"
+require_relative "xxx_rename/file_scanner"
+require_relative "xxx_rename/processed_file"
+require_relative "xxx_rename/scene_matcher"
 require_relative "xxx_rename/utils"
 require_relative "xxx_rename/validator"
 
@@ -53,6 +57,7 @@ require_relative "xxx_rename/version"
 
 # Helper for Rename by files command
 require_relative "xxx_rename/scene_by_file/base"
+require_relative "xxx_rename/scene_by_file/babes"
 require_relative "xxx_rename/scene_by_file/brazzers"
 require_relative "xxx_rename/scene_by_file/digital_playground"
 require_relative "xxx_rename/scene_by_file/reality_kings"
