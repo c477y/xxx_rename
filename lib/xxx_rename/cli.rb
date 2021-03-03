@@ -42,7 +42,8 @@ module XxxRename
       @op = XxxRename::Output.new(options[:output])
       XxxRename::Validator.validate_rename_input(dir, options[:site])
       begin
-        XxxRename::SearchByFilename.new(@op, dir, options[:site], {save: options[:save], nested: options[:nested]})
+        options = { save: options[:save], nested: options[:nested] }
+        XxxRename::SearchByFilename.new(@op, dir, options[:site], **options)
       rescue Interrupt
         say "Exiting...", :green
       rescue StandardError => e
