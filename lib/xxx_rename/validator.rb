@@ -3,7 +3,7 @@
 module XxxRename
   class Validator
     def self.validate_rename_input(obj, site)
-      valid_sites = %w[bz dp rk]
+      valid_sites = %w[bz dp rk bb]
       raise "Object should be a valid file or a valid directory" unless File.file?(obj) || File.directory?(obj)
 
       raise "Site is not valid. Acceptable values are: #{valid_sites}" unless valid_sites.include?(site)
