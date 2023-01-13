@@ -22,7 +22,7 @@ describe XxxRename::Data::FileRenameOpDatastore do
     context "when source file does not exist" do
       it "raises an error" do
         expect { subject }.to raise_error(XxxRename::Contract::FileRenameOpValidationFailure,
-                                          /file_not_found: .*test_folder\/stub_scene.mp4/)
+                                          %r{file_not_found: .*test_folder/stub_scene.mp4})
       end
     end
 
@@ -51,7 +51,7 @@ describe XxxRename::Data::FileRenameOpDatastore do
 
       it "raises an error" do
         expect { subject }.to raise_error(XxxRename::Contract::FileRenameOpValidationFailure,
-                                          /output_file_already_exists: .*test_folder\/new_name_stub_scene.mp4/)
+                                          %r{output_file_already_exists: .*test_folder/new_name_stub_scene.mp4})
       end
     end
 

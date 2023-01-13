@@ -191,7 +191,7 @@ module XxxRename
       #
       # Internal method for testing. Is of no use for a user
       #
-      # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/BlockLength
+      # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
       def valid?(scene_data, filepath: nil)
         validate_file_paths!(filepath, old_filename: nil)
 
@@ -244,7 +244,7 @@ module XxxRename
           end
         end
       end
-      # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/BlockLength
+      # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
       private
 
