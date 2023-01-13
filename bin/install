@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# check if ruby is installed and version is above 2.7
+if [ -x "$(command -v ruby)" ]; then
+  ruby_version=$(ruby -v | awk '{print $2}')
+  if [ "$(echo $ruby_version | cut -d '.' -f 1)" -ge 2 ] && [ "$(echo $ruby_version | cut -d '.' -f 2)" -ge 7 ]; then
+    echo "Uninstalling any previously installed versions"
+    gem uninstall -a -x xxx_rename
+    echo "Building gem"
+    rake build
+    gem_path=$(ls -t ./pkg/*.gem | head -1)
+    echo "Installing xxx_rename"
+    gem install --local $gem_path
+    echo "Done"
+  else
+    echo "Ruby version is $ruby_version, please upgrade to 2.7 or higher"
+    exit 1
+  fi
+else
+  echo "Ruby is not installed, please install ruby 2.7 or higher"
+  exit 1
+fi

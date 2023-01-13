@@ -1,0 +1,38 @@
+{
+  "meta": {
+    "count": 1,
+    "total": 1
+  },
+  "result": [
+    {
+      "brand": "actorsandtags",
+      "id": 67611,
+      "spartanId": 67611,
+      "name": "Azul Hermosa",
+      "gender": "female",
+      "rank": 1,
+      "isExclusive": false,
+      "lastSceneReleaseDate": "2022-05-20 00:00:00",
+      "birthday": "1992-09-15T00:00:00+00:00",
+      "birthPlace": "Oregon",
+      "height": 67,
+      "measurements": "34DDD",
+      "weight": 125
+    },
+    {
+      "brand": "actorsandtags",
+      "id": 247,
+      "spartanId": 247,
+      "name": "Mick Blue",
+      "gender": "male",
+      "rank": 1,
+      "isExclusive": false,
+      "lastSceneReleaseDate": "2022-12-27 00:00:00",
+      "birthday": "1976-09-09T00:00:00+00:00",
+      "birthPlace": "Graz, Austria",
+      "height": 70,
+      "measurements": "9.5",
+      "weight": 70
+    }
+  ]
+}

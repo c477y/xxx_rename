@@ -1,0 +1,86 @@
+{
+  "data": {
+    "searchVideos": {
+      "edges": [
+        {
+          "node": {
+            "videoId": "103765",
+            "title": "Seal The Deal",
+            "releaseDate": "2022-12-18T18:30:00.000Z",
+            "modelsSlugged": [
+              {
+                "name": "Azul Hermosa"
+              },
+              {
+                "name": "Mick Blue"
+              }
+            ]
+          }
+        },
+        {
+          "node": {
+            "videoId": "103655",
+            "title": "The Fixer",
+            "releaseDate": "2022-10-02T17:30:00.000Z",
+            "modelsSlugged": [
+              {
+                "name": "Nicole Aria"
+              },
+              {
+                "name": "Alex Jones"
+              }
+            ]
+          }
+        },
+        {
+          "node": {
+            "videoId": "103536",
+            "title": "The Extra Mile 3",
+            "releaseDate": "2022-09-04T17:30:00.000Z",
+            "modelsSlugged": [
+              {
+                "name": "Hazel Grace"
+              },
+              {
+                "name": "Mick Blue"
+              }
+            ]
+          }
+        },
+        {
+          "node": {
+            "videoId": "103318",
+            "title": "The Extra Mile 2",
+            "releaseDate": "2022-05-29T17:30:00.000Z",
+            "modelsSlugged": [
+              {
+                "name": "Hazel Moore"
+              },
+              {
+                "name": "Mick Blue"
+              }
+            ]
+          }
+        },
+        {
+          "node": {
+            "videoId": "103081",
+            "title": "The Perfect Present",
+            "releaseDate": "2021-11-28T18:30:00.000Z",
+            "modelsSlugged": [
+              {
+                "name": "Emily Willis"
+              },
+              {
+                "name": "Lulu Chu"
+              },
+              {
+                "name": "Manuel Ferrara"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
