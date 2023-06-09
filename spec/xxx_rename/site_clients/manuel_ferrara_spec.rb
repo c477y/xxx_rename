@@ -40,8 +40,7 @@ describe XxxRename::SiteClients::ManuelFerrara do
             front_image: "https://thumbs.julesjordan.com/trial/content//contentthumbs/56/91/5691-dvd-3x.jpg",
             back_image: "https://thumbs.julesjordan.com/trial/content//contentthumbs/57/01/5701-dvd-3x.jpg",
             studio: "Manuel Ferrara"
-          }
-        }
+          } }
       )
     end
 
