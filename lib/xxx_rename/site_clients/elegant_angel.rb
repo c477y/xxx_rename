@@ -111,9 +111,9 @@ module XxxRename
             h[:actors] = scene_doc.css(".scene-performer-names a").map { |x| x.text&.strip }
             h[:collection] = movie_hash[:name]
             h[:collection_tag] = site_config.collection_tag
-            h[:title] = scene_doc.at('//a[@class="scene-title"]//h6/text()[last()]')&.text&.strip
+            h[:title] = scene_doc.css(".scene-title h6").text.strip
             h[:date_released] = movie_hash[:date]
-            scene_path = scene_doc.at('//a[@class="scene-title"]/@href').value
+            scene_path = scene_doc.css(".scene-title").map { |x| x["href"] }.first
             h[:scene_link] = URI.join(self.class.base_uri, scene_path).to_s
             h[:movie] = movie_hash
           end

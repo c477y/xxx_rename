@@ -120,7 +120,7 @@ describe XxxRename::SiteClients::ElegantAngel do
           end
 
           it "returns a successful match" do
-            expect(site_client.search(file)).to eq(scene_data)
+            expect(site_client.search(file)).to eq_scene_data(scene_data)
           end
         end
 
@@ -134,7 +134,7 @@ describe XxxRename::SiteClients::ElegantAngel do
           end
 
           it "returns a successful match" do
-            expect(site_client.search(file)).to eq(scene_data)
+            expect(site_client.search(file)).to eq_scene_data(scene_data)
           end
         end
 

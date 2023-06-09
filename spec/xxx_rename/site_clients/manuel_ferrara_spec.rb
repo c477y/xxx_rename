@@ -33,7 +33,15 @@ describe XxxRename::SiteClients::ManuelFerrara do
           collection_tag: "MNF",
           title: "Kayley Gunner Is Super Stacked",
           id: nil,
-          date_released: Time.parse("2022-08-24") }
+          date_released: Time.parse("2022-08-24"),
+          movie: {
+            name: "Super Stacked #2",
+            url: "https://manuelferrara.com/trial/dvds/super-stacked-2.html",
+            front_image: "https://thumbs.julesjordan.com/trial/content//contentthumbs/56/91/5691-dvd-3x.jpg",
+            back_image: "https://thumbs.julesjordan.com/trial/content//contentthumbs/57/01/5701-dvd-3x.jpg",
+            studio: "Manuel Ferrara"
+          }
+        }
       )
     end
 
@@ -77,7 +85,7 @@ describe XxxRename::SiteClients::ManuelFerrara do
       end
 
       it "returns the expected response", :aggregate_failures do
-        expect(site_client.search(filename)).to eq(scene_data)
+        expect(site_client.search(filename)).to eq_scene_data(scene_data)
         expect(site_client.site_client_datastore.all.length).to eq(1)
         expect(site_client.all_scenes_processed?).to be true
       end
