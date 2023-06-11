@@ -1,7 +1,7 @@
 # XxxRename
 
 ![pipeline](https://github.com/c477y/xxx_rename/actions/workflows/ruby.yml/badge.svg)
-[![Maintainability](https://api.codeclimate.com/v1/badges/d10cfccaa3a83480b99d/maintainability)](https://codeclimate.com/github/c477y/xxx_rename/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/d10cfccaa3a83480b99d/test_coverage)](https://codeclimate.com/github/c477y/xxx_rename/test_coverage)
+[![codecov](https://codecov.io/gh/c477y/xxx_rename/branch/main/graph/badge.svg?token=X252MQTW6F)](https://codecov.io/gh/c477y/xxx_rename)
 
 A gem to rename your porn videos and integrate with your Stash app as a third-
 party scraper.
