@@ -147,7 +147,6 @@ module XxxRename
       end
 
       def movie_hash(doc)
-        # binding.pry
         movie_url, movie_name = movie_details(doc)
         return nil if movie_url.nil?
 
