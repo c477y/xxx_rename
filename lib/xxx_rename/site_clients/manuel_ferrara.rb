@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require "xxx_rename/site_clients/jules_jordan_media"
+require "xxx_rename/site_clients/manuel_ferrara_media"
 require "xxx_rename/site_clients/query_generator/base"
 
 module XxxRename
   module SiteClients
-    class ManuelFerrara < JulesJordanMedia
+    class ManuelFerrara < ManuelFerraraMedia
       base_uri "https://manuelferrara.com/"
 
       site_client_name :manuel_ferrara

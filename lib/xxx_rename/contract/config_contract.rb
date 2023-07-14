@@ -12,13 +12,6 @@ module XxxRename
         required(:file_source_format).value(array[Types::SanitizedString])
       end
 
-      JULES_JORDAN_MEDIA_CONFIG = Dry::Schema.JSON do
-        required(:collection_tag).value(Types::SanitizedString)
-        required(:output_format).value(array[Types::SanitizedString])
-        required(:file_source_format).value(array[Types::SanitizedString])
-        optional(:cookie_file).maybe(Types::SanitizedString)
-      end
-
       STASH_CONFIG = Dry::Schema.JSON do
         required(:collection_tag).value(Types::SanitizedString)
         optional(:username).maybe(Types::SanitizedString)
@@ -76,8 +69,8 @@ module XxxRename
           optional(:elegant_angel).hash(SITE_CONFIG)
           optional(:evil_angel).hash(SITE_CONFIG)
           optional(:goodporn).hash(SITE_CONFIG)
-          optional(:jules_jordan).hash(JULES_JORDAN_MEDIA_CONFIG)
-          optional(:manuel_ferrara).hash(JULES_JORDAN_MEDIA_CONFIG)
+          optional(:jules_jordan).hash(SITE_CONFIG)
+          optional(:manuel_ferrara).hash(SITE_CONFIG)
           optional(:mofos).hash(SITE_CONFIG)
           optional(:naughty_america).hash(NAUGHTY_AMERICA_CONFIG)
           optional(:nf_busty).hash(NF_BUSTY_CONFIG)

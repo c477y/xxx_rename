@@ -89,7 +89,7 @@ module XxxRename
       end
 
       def all_scenes_urls(doc)
-        doc.css(".category_listing_wrapper_updates a")
+        doc.css(".grid-container .grid-item a")
            .map { |x| x["href"] }
            .select { |x| x.include?("/trial/scenes/") }
            .uniq
@@ -100,6 +100,7 @@ module XxxRename
         doc = doc(endpoint)
         actors_hash = actors_hash(actors(doc))
         movie_hash = movie_hash(doc)
+        description = description(doc)
         hash = {}.tap do |h|
           h[:collection] = self.class::COLLECTION
           h[:collection_tag] = site_config.collection_tag
@@ -107,17 +108,32 @@ module XxxRename
           h[:id] = nil
           h[:date_released] = date_released(doc)
           h[:movie] = movie_hash unless movie_hash.nil?
+          h[:description] = description
         end.merge(actors_hash)
         Data::SceneData.new(hash)
       end
 
+      def description(doc)
+        txt = doc.css(".player-scene-description").find { |x| x.text.downcase.include?("description:") }
+        if txt.nil?
+          XxxRename.logger.warn "[PARSING ERROR] No description parsed from scene"
+          return
+        end
+        txt.text.gsub("Description:", "").strip
+      end
+
       def title(doc)
-        doc.css(".title_bar_hilite").text.strip
+        doc.css(".movie_title").text.strip
       end
 
       def date_released(doc)
-        txt = doc.css(".backgroundcolor_info .update_date").text.strip
-        Time.strptime(txt, "%m/%d/%Y")
+        txt = doc.css(".player-scene-description").find { |x| x.text.downcase.include?("date:") }
+        if txt.nil?
+          XxxRename.logger.warn "[PARSING ERROR] No date parsed from scene"
+          return
+        end
+        date_txt = txt.text.downcase.gsub("date:", "").strip
+        Time.strptime(date_txt, "%m/%d/%Y")
       end
 
       def female_actors(actors)
@@ -125,7 +141,7 @@ module XxxRename
       end
 
       def actors(doc)
-        doc.css(".backgroundcolor_info .update_models a")
+        doc.css(".player-scene-description .update_models a")
            .map(&:text)
            .map(&:strip)
       end
@@ -145,8 +161,9 @@ module XxxRename
         h = {
           name: movie_name,
           url: movie_url,
-          front_image: movie_doc.at("//div[@class=\"front\"]/a/img/@src0_3x").value,
-          back_image: movie_doc.at("//div[@class=\"back\"]/a/img/@src0_3x").value,
+          front_image: movie_doc.css(".grid-container-scene").at(0).css("img").attr("src").value,
+          # New Jules Jordan site redesign does not provide the backside of a DVD
+          # back_image: movie_doc.at("//div[@class=\"back\"]/a/img/@src0_3x").value,
           studio: self.class::COLLECTION
         }
         processed_movies[endpoint] = h
@@ -154,11 +171,11 @@ module XxxRename
       end
 
       def movie_details(doc)
-        node = doc.css(".backgroundcolor_info .update_dvds a")
+        node = doc.css(".player-scene-description").find { |x| x.text.downcase.include?("movie:") }
         return [nil, nil] if node.nil?
 
-        url = node.map { |x| x["href"] }.first
-        name = node.map(&:text).map(&:strip)&.first
+        url = node.css("a").map { |x| x["href"] }.first
+        name = node.css("a").at(0).text.strip
         [url, name]
       end
 
