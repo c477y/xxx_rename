@@ -96,7 +96,8 @@ describe XxxRename::SiteClients::ElegantAngel do
 
         context "when the first movie's release year is less than OLDEST_PROCESSABLE_MOVIE_YEAR" do
           before do
-            old_movie = "https://www.elegantangel.com/1047217/no-cocks-allowed-2-streaming-porn-videos.html"
+            # oldest movie on website
+            old_movie = "https://www.elegantangel.com/2970037/everything-is-not-relative-streaming-porn-videos.html"
             expect(site_client).to(receive(:movie_links).with(1).and_wrap_original { |_m, *_args| [old_movie] })
           end
 

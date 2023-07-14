@@ -10,7 +10,7 @@ module XxxRename
 
       base_uri "https://www.elegantangel.com"
       site_client_name :elegant_angel
-      OLDEST_PROCESSABLE_MOVIE_YEAR = 2007
+      OLDEST_PROCESSABLE_MOVIE_YEAR = 2004
       COLLECTION = "Elegant Angel"
       MOVIES_ENDPOINT = "/streaming-elegant-angel-dvds-on-video.html?page=$page$"
 
