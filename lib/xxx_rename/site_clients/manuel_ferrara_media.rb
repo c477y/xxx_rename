@@ -16,7 +16,6 @@ module XxxRename
     # this hacky class should provide matchers using the old layout.
 
     class ManuelFerraraMedia < JulesJordanMedia
-
       private
 
       def all_scenes_urls(doc)

@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    xxx_rename (0.0.1)
+    xxx_rename (0.0.2)
       activesupport (~> 7.0)
       algolia (~> 2.3)
       awesome_print (~> 1.9)
