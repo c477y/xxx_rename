@@ -26,17 +26,33 @@ module XxxRename
       # Step 1: Get the base configuration hash with default values
       def default_config
         {
+          c00: "[String] Path to store all generated files",
           "generated_files_dir" => generated_files_dir,
+          c01: "Configuration to hook into your Stash App",
           "stash_app" => {
+            c00: "[String] URL path where your Stash App is hosted",
+            c01: "e.g. http://localhost:9999",
             "url" => "",
+            c02: "[String] Optional token if your Stash App is password protected",
             "api_token" => nil
           },
+          c02: "Global configurations",
           "global" => {
+            c000: "Some prefixes are optional and will not be inserted into",
+            c001: "the generated filename if the value is empty",
+            c00: "[String] Prefix to identity female actors in a filename",
             "female_actors_prefix" => "[F]",
+            c01: "[String] Prefix to identity male actors in a filename",
             "male_actors_prefix" => "[M]",
+            c02: "[String] Prefix to identity actors in a filename",
+            c03: "This will be used as a fallback if xxx_rename is not able",
+            c04: "to identify the genders of all actors in a scene",
             "actors_prefix" => "[A]",
+            c05: "[String] Prefix to identity scene title in a filename",
             "title_prefix" => "[T]",
+            c06: "[String] Prefix to identity scene ID in a filename",
             "id_prefix" => "[ID]",
+            c07: "[List] Template to use to generate the filename",
             "output_format" => [
               # disable line length check for readability
               # rubocop:disable Layout/LineLength
@@ -47,6 +63,21 @@ module XxxRename
               # rubocop:enable Layout/LineLength
             ]
           },
+          c03: "Individual site configuration. Use this to configure templates to parse filename",
+          c04: "output_format List[String]: List of templates that will be used to generate",
+          c05: "the output filename. This will take precedence over output_format defined in",
+          c06: "global.output_format. If none of the templates defined here are applicable,",
+          c07: "xxx_rename will fallback to use the templates defined in global.output_format",
+          c08: "file_source_format List[String]: List of templates that will be used to generate",
+          c09: "the search params to use search the site client. To ensure maximum correctness,",
+          c10: "try to pass in %actors and %title.",
+          c11: "collection_tag [String]: This is a tag unique to each site client that xxx_rename",
+          c12: "can later reuse to identify the site client from the generated filename.",
+          c13: "database [String] Some site clients lack any search functionality whatsoever.",
+          c14: "So in order for xxx_rename to work properly, it needs to do a one-time scraping",
+          c15: "to get all the scenes from a site and store all the scene details in the file",
+          c16: "defined in database value. It is recommended to leave the value to its default",
+          c17: "value",
           "site" =>
             { "adult_time" =>
                 { "output_format" => [], "file_source_format" => [], "collection_tag" => "AT" },
@@ -69,13 +100,11 @@ module XxxRename
               "jules_jordan" =>
                 { "output_format" => [],
                   "file_source_format" => [],
-                  "collection_tag" => "JJ",
-                  "cookie_file" => nil },
+                  "collection_tag" => "JJ" },
               "manuel_ferrara" =>
                 { "output_format" => [],
                   "file_source_format" => [],
-                  "collection_tag" => "MNF",
-                  "cookie_file" => nil },
+                  "collection_tag" => "MNF" },
               "mofos" =>
                 { "output_format" => [], "file_source_format" => [], "collection_tag" => "MF" },
               "naughty_america" =>
@@ -93,6 +122,9 @@ module XxxRename
               "stash" =>
                 { "output_format" => [],
                   "file_source_format" => [],
+                  c00: "Connection to Stash-Box requires authentication. You need to pass in",
+                  c01: "either your username + password or api_token. If none of the attributes",
+                  c02: "are provided, xxx_rename will raise an error.",
                   "username" => nil,
                   "password" => nil,
                   "api_token" => nil,
@@ -148,7 +180,18 @@ module XxxRename
         raise Errors::FatalError, "config file already exists" if valid_file?(file)
 
         File.open(file, "w") do |f|
-          f.write default_config.to_yaml
+          YAML.dump(default_config).each_line do |l|
+            if l.match(/:c(\d+)?:/)
+              # Removes hash key(c00) from the string
+              # Adds a # in front of the string
+              l.sub!(/:c(\d+)?:/, "#")
+              # Removes " from the beginning of the line
+              l.sub!(/(^\s*# )["']/, '\1')
+              # Removes " from the end of the line
+              l.sub!(/["']\s*$/, "")
+            end
+            f.puts l
+          end
         end
       end
 

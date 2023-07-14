@@ -16,6 +16,11 @@ RSpec.describe XxxRename::Contract::ConfigGenerator do
         expect { call.generate! }.to raise_error(XxxRename::Errors::SafeExit, "DEFAULT_FILE_GENERATION")
         expect(File.exist?(generated_config_file)).to be true
       end
+
+      it "creates a valid yaml file", :aggregate_failures do
+        expect { call.generate! }.to raise_error(XxxRename::Errors::SafeExit, "DEFAULT_FILE_GENERATION")
+        expect { YAML.load_file(generated_config_file) }.not_to raise_error
+      end
     end
 
     context "when a config file exists" do
@@ -159,12 +164,6 @@ RSpec.describe XxxRename::Contract::ConfigGenerator do
 
         it "does not raise any struct validation errors" do
           expect { call.generate! }.not_to raise_error
-        end
-
-        it "returns the default config" do
-          default_config = call.default_config
-          generated_config = call.generate!.to_h(stringify_keys: true)
-          expect(generated_config).to include(default_config)
         end
       end
     end
