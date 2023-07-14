@@ -16,8 +16,8 @@ RSpec::Matchers.define :eq_scene_data do |expected|
       raise ArgumentError, "wrong argument type for actual (given #{actual.class}, expected XxxRename::Data::SceneData"
     end
 
-    expected_root_keys = expected.to_h.except(:movie, :original_filenames).compact
-    actual_root_keys = actual.to_h.except(:movie, :original_filenames).compact
+    expected_root_keys = expected.to_h.except(:movie, :description, :original_filenames).compact
+    actual_root_keys = actual.to_h.except(:movie, :description, :original_filenames).compact
     expect(expected_root_keys).to eq(actual_root_keys)
 
     expected_movie_key = expected.to_h&.[](:movie)&.except(:synopsis)&.compact

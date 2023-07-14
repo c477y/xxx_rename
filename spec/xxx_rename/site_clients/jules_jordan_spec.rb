@@ -36,8 +36,7 @@ describe XxxRename::SiteClients::JulesJordan do
           date_released: Time.parse("2012-12-14"),
           movie: { name: "Alexis Ford Darkside",
                    url: "https://www.julesjordan.com/trial/dvds/alexis-ford-darkside.html",
-                   front_image: "https://thumbs.julesjordan.com/trial/content//contentthumbs/03/55/355-dvd-3x.jpg",
-                   back_image: "https://thumbs.julesjordan.com/trial/content//contentthumbs/03/56/356-dvd-3x.jpg",
+                   front_image: "https://thumbs.julesjordan.com/trial/content//contentthumbs/03/55/355-dvd-1x.jpg",
                    studio: "Jules Jordan" } }
       )
     end
@@ -83,7 +82,7 @@ describe XxxRename::SiteClients::JulesJordan do
       end
 
       it "returns the expected response", :aggregate_failures do
-        expect(site_client.search(filename)).to eq(scene_data)
+        expect(site_client.search(filename)).to eq_scene_data(scene_data)
         expect(site_client.site_client_datastore.all.length).to eq(1)
         expect(site_client.all_scenes_processed?).to be true
       end

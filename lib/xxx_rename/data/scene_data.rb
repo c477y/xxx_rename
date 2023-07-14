@@ -11,6 +11,7 @@ module XxxRename
       attribute :collection, Types::String.default("")
       attribute :collection_tag, Types::String.default("")
       attribute :title, Types::String
+      attribute? :description, Types::String
       attribute? :id, Types::Coercible::String.optional
       attribute? :date_released, Types::Time.optional
       attribute :scene_link, Types::String.default("")
