@@ -19,7 +19,7 @@ require "xxx_rename/log"
 
 module XxxRename
   def self.logger(**opts)
-    @logger ||= XxxRename::Log.new(**opts).logger
+    @logger ||= XxxRename::Log.new(opts["mode"], opts["verbose"]).logger
   end
 end
 

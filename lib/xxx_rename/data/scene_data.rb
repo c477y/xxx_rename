@@ -11,10 +11,12 @@ module XxxRename
       attribute :collection, Types::String.default("")
       attribute :collection_tag, Types::String.default("")
       attribute :title, Types::String
-      attribute? :description, Types::String
       attribute? :id, Types::Coercible::String.optional
       attribute? :date_released, Types::Time.optional
-      attribute :scene_link, Types::String.default("")
+
+      attribute? :director, Types::String.optional
+      attribute? :description, Types::String.optional
+      attribute? :scene_link, Types::String.optional
       attribute :original_filenames, Types::Set.default(Set.new.freeze)
       attribute? :movie do
         attribute :name, Types::String
@@ -66,6 +68,27 @@ module XxxRename
               ">"
             Digest::MD5.hexdigest(str)
           end
+      end
+
+      def to_stashapp_scene_fragment
+        performers = if female_actors.empty?
+                       actors.map { |actor| StashAppPerformerData.new(name: actor) }
+                     else
+                       female_actors.map { |actor| StashAppPerformerData.new(name: actor, gender: "female") } +
+                         male_actors.map { |actor| StashAppPerformerData.new(name: actor, gender: "male") }
+                     end
+        XxxRename.logger.info performers
+        StashAppSceneFragment.new(
+          {
+            id: id,
+            title: title,
+            performers: performers,
+            details: description,
+            director: director,
+            url: scene_link,
+            date: date_released.iso8601(3)
+          }
+        )
       end
     end
   end
