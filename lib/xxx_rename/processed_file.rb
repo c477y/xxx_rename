@@ -136,9 +136,9 @@ module XxxRename
       regexes.map { |regex| process_regex!(regex) }.compact.first
     end
 
-    # rubocop:disable Metrics/PerceivedComplexity
+    # noinspection RubyMismatchedReturnType
     # @return [Data::SceneData]
-    def process_regex!(regex)
+    def process_regex!(regex) # rubocop:disable Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity
       file_without_ext = File.basename(file, File.extname(file))
       match = file_without_ext.match(regex)
       return if match.nil?
@@ -153,21 +153,16 @@ module XxxRename
             h["female_actors"] + h["male_actors"]
           end
         end
-        h["collection"] = clean_s(h["collection"])
-        h["collection_tag"] = clean_s(h["collection_tag"])
-        h["title"] = clean_s(h["title"])
-        h["id"] = clean_s(h["id"])
-        h["title"] = clean_s(h["title"])
-        h["date_released"] = if (dr = date_released(h["year"], h["month"], h["day"]))
-                               dr
-                             elsif File.exist?(@file)
-                               File.mtime(@file)
-                             end
+        h["collection"] = clean_s(h["collection"]) || ""
+        h["collection_tag"] = clean_s(h["collection_tag"]) || ""
+        h["title"] = clean_s(h["title"]) if clean_s(h["title"])
+        h["id"] = clean_s(h["id"]) if clean_s(h["id"])
+        date_released = date_released(h["year"], h["month"], h["day"])
+        h["date_released"] = date_released if date_released
       end
 
       Data::SceneData.new(match_hash)
     end
-    # rubocop:enable Metrics/PerceivedComplexity
 
     private
 

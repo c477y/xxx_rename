@@ -4,6 +4,8 @@ require "rspec"
 require "xxx_rename/site_clients/stash_db"
 
 describe XxxRename::SiteClients::StashDb do
+  WebMock.allow_net_connect!
+
   describe "#setup_credentials" do
     subject(:login) { described_class.new(config).setup_credentials! }
 
@@ -13,16 +15,7 @@ describe XxxRename::SiteClients::StashDb do
       end
 
       context "successful login" do
-        around do |example|
-          stub = stub_request(:post, %r{https://stashdb.org/graphql})
-                 .to_return(
-                   status: 200,
-                   body: "{\"data\":{\"version\":{\"version\":\"some_version\"}}}",
-                   headers: { "content-type" => "application/json" }
-                 )
-          example.run
-          remove_request_stub(stub)
-        end
+        before { SiteClientStubs::StashDb.enable_version_stub }
 
         let(:api_token) { "valid_api_token" }
 
@@ -38,15 +31,7 @@ describe XxxRename::SiteClients::StashDb do
       context "unsuccessful login" do
         let(:api_token) { "invalid_api_token" }
 
-        around do |example|
-          stub = stub_request(:post, %r{https://stashdb.org/graphql})
-                 .to_return(
-                   status: 401,
-                   body: ""
-                 )
-          example.run
-          remove_request_stub(stub)
-        end
+        before { SiteClientStubs::StashDb.enable_unauthorised_stub(%r{https://stashdb.org/graphql}) }
 
         it "raises api exception" do
           expect { login }.to raise_error(XxxRename::SiteClients::Errors::APIError)
@@ -63,10 +48,7 @@ describe XxxRename::SiteClients::StashDb do
       let(:password) { "bar" }
 
       context "given correct credentials" do
-        before do
-          stub_request(:post, "https://stashdb.org/login")
-            .to_return(status: 200, body: "", headers: { "set-cookie" => cookie })
-        end
+        before { SiteClientStubs::StashDb.enable_successful_username_login_stub(cookie) }
 
         let(:cookie) { "session=session_id; Max-Age=3600" }
         it "should return a valid cookie" do
@@ -75,9 +57,7 @@ describe XxxRename::SiteClients::StashDb do
       end
 
       context "given in-correct credentials" do
-        before do
-          stub_request(:post, "https://stashdb.org/login").to_return(status: 401)
-        end
+        before { SiteClientStubs::StashDb.enable_unauthorised_stub(%r{https://stashdb.org/login}) }
 
         it "raise correct error" do
           expect { login }.to raise_error(XxxRename::SiteClients::Errors::UnauthorizedError)
@@ -115,30 +95,12 @@ describe XxxRename::SiteClients::StashDb do
         end
       end
 
-      around do |example|
-        stub = stub_request(:post, %r{https://stashdb.org/graphql})
-               .with(body: hash_including("operationName" => "Version"))
-               .to_return(
-                 status: 200, body: "{\"data\":{\"version\":{\"version\":\"some_version\"}}}",
-                 headers: { "content-type" => "application/json" }
-               )
-        example.run
-        remove_request_stub(stub)
+      before do
+        SiteClientStubs::StashDb.enable_version_stub
+        SiteClientStubs::StashDb.enable_actor_details_stub(actor_name: "Angela White", gender: "FEMALE")
       end
 
       context "when api returns a response" do
-        around do |example|
-          res = "{\"data\":{\"searchPerformer\":[{\"name\":\"Angela White\",\"gender\":\"FEMALE\"}]}}"
-          stub = stub_request(:post, %r{https://stashdb.org/graphql})
-                 .with(body: hash_including("operationName" => "SearchPerformers"))
-                 .to_return(
-                   status: 200, body: res,
-                   headers: { "content-type" => "application/json" }
-                 )
-          example.run
-          remove_request_stub(stub)
-        end
-
         context "successful response" do
           let(:expected_response) { { "gender" => "FEMALE", "name" => "Angela White" } }
 
@@ -163,60 +125,44 @@ describe XxxRename::SiteClients::StashDb do
 
     include_context "config provider" do
       let(:override_config) do
-        { "site" => { "stash" => { "username" => "username", "password" => "password", "file_source_format" => ["%female_actors - %title"] } } }
+        { "site" => { "stash" => { "api_token" => api_token, "file_source_format" => ["%female_actors - %title"] } } }
       end
     end
 
     let(:filename) { "Victoria Lobov - My Friends Hot Mom" }
 
-    let(:search_resp) do
-      { "data" =>
-          { "searchScene" =>
-              [{ "id" => "f82b63b2-9817-428b-8b6a-604e14382fc0",
-                 "date" => "2022-03-18",
-                 "title" => "Busty Blonde MILF Victoria Lobov is dying for some BIG cock",
-                 "studio" => { "name" => "My Friend's Hot Mom" },
-                 "performers" =>
-                   [{ "as" => nil, "performer" => { "id" => "849a6458-b2be-41d1-98e3-e0a9909a2a16", "name" => "Victoria Lobov",
-                                                    "gender" => "FEMALE", "aliases" => ["Arinka Kalinka"] } },
-                    { "as" => nil, "performer" => { "id" => "b0fb123f-6721-49d0-ad7e-fa7aabb3e37e", "name" => "Apollo Banks",
-                                                    "gender" => "MALE", "aliases" => [] } }] },
-               { "id" => "820e4348-3c03-472f-adb1-765bc5badbde",
-                 "date" => "2021-07-09",
-                 "title" => "Sexy Blonde MILF Victoria Lobov loves young cock",
-                 "studio" => { "name" => "My Friend's Hot Mom" },
-                 "performers" =>
-                   [{ "as" => nil, "performer" => { "id" => "849a6458-b2be-41d1-98e3-e0a9909a2a16",
-                                                    "name" => "Victoria Lobov", "gender" => "FEMALE", "aliases" => ["Arinka Kalinka"] } },
-                    { "as" => nil, "performer" => { "id" => "d66532b5-a426-4188-ae1e-15886e75fdaa",
-                                                    "name" => "Johnny", "gender" => "MALE", "aliases" => [] } }] }] } }.to_json
-    end
-
-    let(:nil_search_resp) do
-      { "data" => { "searchScene" => [] } }.to_json
-    end
-
-    let(:expected_resp) do
-      XxxRename::Data::SceneData.new(
-        female_actors: ["Victoria Lobov"],
-        male_actors: ["Apollo Banks"],
-        actors: ["Victoria Lobov", "Apollo Banks"],
-        collection: "My Friend's Hot Mom",
-        collection_tag: "ST",
-        title: "Busty Blonde MILF Victoria Lobov is dying for some BIG cock",
-        id: "f82b63b2-9817-428b-8b6a-604e14382fc0",
-        date_released: Time.parse("2022-03-18")
-      )
-    end
-
-    before do
-      stub_request(:post, "https://stashdb.org/login").to_return(status: 200, body: "", headers: { "set-cookie": "abc" })
-    end
-
     context "when stash db matches a scene" do
-      before do
-        stub_request(:post, "https://stashdb.org/graphql")
-          .to_return(status: 200, body: search_resp, headers: { "content-type" => "application/json" })
+      let(:api_token) do
+        key = ENV.fetch("XXX_RENAME_STASH_DB_API_KEY", nil)
+        if key.present?
+          WebMock.disable_net_connect!(allow: "https://stashdb.org")
+          ENV.fetch("XXX_RENAME_STASH_DB_API_KEY")
+        else
+          WebMock.disable_net_connect!
+          SiteClientStubs::StashDb.enable_version_stub
+          SiteClientStubs::StashDb.enable_search_scene_stub
+          SiteClientStubs::StashDb.enable_scene_stub
+          "api_key"
+        end
+      end
+
+      let(:expected_resp) do
+        XxxRename::Data::SceneData.new(
+          female_actors: ["Victoria Lobov"],
+          male_actors: ["Johnny The Kid"],
+          actors: ["Victoria Lobov", "Johnny The Kid"],
+          collection: "My Friend's Hot Mom",
+          collection_tag: "ST",
+          title: "Sexy Blonde MILF Victoria Lobov loves young cock",
+          id: "820e4348-3c03-472f-adb1-765bc5badbde",
+          date_released: Time.parse("2021-07-9"),
+          scene_link: "https://www.naughtyamerica.com/scene/sexy-blonde-milf-victoria-lobov-loves-young-cock-26651",
+          scene_cover: "https://cdn.stashdb.org/images/1b/db/1bdbfe63-7201-4734-a3a8-0c2ec9b7742f",
+          description: "Sexy MILF Victoria Lobov gets a visit from a friend of her son's to clean their pool. " \
+                        "Its a hot sunny day so she pulls her big round tits out to catch some rays. It surprises " \
+                        "Johnny and out of disbelief he falls in the pool. Victoria takes him inside to make sure " \
+                        "he's ok and notices his huge hard on."
+        )
       end
 
       it "should return scene data" do
@@ -229,6 +175,11 @@ describe XxxRename::SiteClients::StashDb do
         stub_request(:post, "https://stashdb.org/login").to_return(status: 200, body: "", headers: { "set-cookie": "abc" })
         stub_request(:post, "https://stashdb.org/graphql")
           .to_return(status: 200, body: nil_search_resp, headers: { "content-type" => "application/json" })
+      end
+
+      let(:api_token) { "api_token" }
+      let(:nil_search_resp) do
+        { "data" => { "searchScene" => [] } }.to_json
       end
 
       it "should return scene data" do

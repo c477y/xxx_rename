@@ -39,7 +39,8 @@ describe XxxRename::SiteClients::Brazzers do
       title: "Anal Is The Best Medicine",
       id: 1,
       date_released: Time.parse("2013-12-08"),
-      description: "foobar"
+      description: "foobar",
+      scene_link: "https://www.brazzers.com/video/1/anal-is-the-best-medicine"
     )
   end
 

@@ -57,11 +57,16 @@ module XxxRename
       # @param [Nokogiri::HTML::Document] body
       # @param [String] search_string
       # @return [Hash, NilClass]
+      # noinspection RubyMismatchedReturnType
       def parse_scene_details(body, search_string)
         doc = Nokogiri::HTML(body)
-        normalised_title = title(doc).downcase.gsub("-", "").gsub(/['"“”‘’„]/, "-").gsub(/[^\s\w-]/, "").gsub(/\s{2,}/, " ").gsub(
-          /\s/, "-"
-        )
+        normalised_title = title(doc)
+                           .downcase
+                           .gsub("-", "")
+                           .gsub(/['"“”‘’„]/, "-")
+                           .gsub(/[^\s\w-]/, "")
+                           .gsub(/\s{2,}/, " ")
+                           .gsub(/\s/, "-")
         Data::SceneData.new(
           female_actors: female_actors(doc),
           male_actors: [],
@@ -69,8 +74,7 @@ module XxxRename
           collection: collection(doc),
           collection_tag: site_config.collection_tag,
           title: title(doc),
-          id: search_string.gsub(normalised_title, ""), # TODO: This doesn't work some times
-          date_released: nil
+          id: search_string.gsub(normalised_title, "") # TODO: This doesn't work some times
         )
       end
 

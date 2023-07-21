@@ -7,7 +7,6 @@ describe XxxRename::SiteClients::JulesJordan do
   before { WebMock.disable_net_connect!(allow: /julesjordan.com/) }
 
   subject(:site_client) { described_class.new(config) }
-  before { allow_any_instance_of(XxxRename::ActorsHelper).to receive(:auto_fetch!).and_return(nil) }
 
   describe ".search" do
     include_context "config provider" do
@@ -23,6 +22,8 @@ describe XxxRename::SiteClients::JulesJordan do
       end
     end
 
+    before { allow(config.actor_helper).to receive(:auto_fetch!).and_return(nil) }
+
     let(:filename) { "Alexis Ford POV Ass To Mouth [C] JulesJordan [A] Alexis Ford, Jules Jordan.mp4" }
     let(:scene_data) do
       XxxRename::Data::SceneData.new(
@@ -32,8 +33,14 @@ describe XxxRename::SiteClients::JulesJordan do
           collection: "Jules Jordan",
           collection_tag: "JJ",
           title: "Alexis Ford POV Ass To Mouth",
-          id: nil,
           date_released: Time.parse("2012-12-14"),
+          director: "Jules Jordan",
+          scene_link: "https://www.julesjordan.com/trial/scenes/alexis-ford-pov-ass-to-mouth_vids.html",
+          scene_cover: "https://thumbs.julesjordan.com/trial/content//contentthumbs/43/41/174341-1x.jpg",
+          description: "Alexis Ford POV Ass To Mouth. Poor girl thinks she's not normal because she can't " \
+                       "stop thinking of and craving cock. From ALEXIS FORD DARKSIDE here's a big titted blonde " \
+                       "who craves cock in every hole and in this scene your the doctor. Heal the sick, save the " \
+                       "world and get laid. Does it get any better?",
           movie: { name: "Alexis Ford Darkside",
                    url: "https://www.julesjordan.com/trial/dvds/alexis-ford-darkside.html",
                    front_image: "https://thumbs.julesjordan.com/trial/content//contentthumbs/03/55/355-dvd-1x.jpg",
@@ -82,7 +89,7 @@ describe XxxRename::SiteClients::JulesJordan do
       end
 
       it "returns the expected response", :aggregate_failures do
-        expect(site_client.search(filename)).to eq_scene_data(scene_data)
+        expect(site_client.search(filename)).to eq(scene_data)
         expect(site_client.site_client_datastore.all.length).to eq(1)
         expect(site_client.all_scenes_processed?).to be true
       end

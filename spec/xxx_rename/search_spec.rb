@@ -7,6 +7,7 @@ require "xxx_rename/data/scene_datastore"
 
 describe XxxRename::Search do
   include_context "config provider"
+  WebMock.disable_net_connect!
 
   let!(:c) { config.scene_datastore }
 

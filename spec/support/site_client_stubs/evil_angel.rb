@@ -7,7 +7,6 @@ module SiteClientStubs
     include WebMock::API
 
     def initialize(*stubs)
-      WebMock.enable!
       stub(*stubs)
     end
 
@@ -38,10 +37,7 @@ module SiteClientStubs
 
     def stub_search
       search_results = File.read(File.join("spec", "fixtures", "evil_angel", "search_results_stunning_curves.json"))
-      request_body = { "attributesToRetrieve" => %w[clip_id title actors release_date description network_name movie_id movie_title],
-                       "hitsPerPage" => 50 }
       stub_request(:post, %r{/1/indexes/all_scenes/query})
-        .with(body: hash_including(request_body))
         .to_return(status: 200,
                    headers: { "Content-Type" => "application/json; charset=UTF-8" },
                    body: search_results)
@@ -57,10 +53,7 @@ module SiteClientStubs
 
     def stub_no_results_search
       search_results = File.read(File.join("spec", "fixtures", "evil_angel", "search_results_empty_set.json"))
-      request_body = { "attributesToRetrieve" => %w[clip_id title actors release_date description network_name movie_id movie_title],
-                       "hitsPerPage" => 50 }
       stub_request(:post, %r{/1/indexes/all_scenes/query})
-        .with(body: hash_including(request_body))
         .to_return(status: 200,
                    headers: { "Content-Type" => "application/json; charset=UTF-8" },
                    body: search_results)

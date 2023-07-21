@@ -8,7 +8,7 @@ describe XxxRename::Client do
   end
 
   describe ".generate" do
-    subject(:client) { described_class.new(config, verbose: false, override_site: nil, nested: false) }
+    subject(:client) { described_class.new(config, verbose: false, nested: false) }
 
     let(:file) { "StunningCurves_s02_GracieGlam_ChrisStrokes_540p.mp4" }
     let(:actions) { [] }

@@ -102,7 +102,6 @@ module XxxRename
       config = Contract::ConfigGenerator.new(options).generate!
       client = Client.new(config,
                           verbose: options["verbose"],
-                          override_site: options["override_site"]&.to_sym,
                           nested: options["nested"],
                           checkpoint: options["checkpoint"])
       client.generate(object)

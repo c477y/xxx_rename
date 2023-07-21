@@ -4,6 +4,7 @@ require "xxx_rename/contract/file_rename_op_contract"
 require "xxx_rename/data/file_rename_op_datastore"
 require "xxx_rename/site_client_matcher"
 require "xxx_rename/actions/resolver"
+require "active_support/core_ext/module/delegation"
 
 module XxxRename
   class Client
@@ -12,12 +13,10 @@ module XxxRename
     #
     # @param [Data::Config] config
     # @param [Boolean] verbose
-    # @param [Symbol] override_site
     # @param [Boolean] nested
     # @param [String, Nil] checkpoint
-    def initialize(config, verbose:, override_site: nil, nested: false, checkpoint: nil)
+    def initialize(config, verbose:, nested: false, checkpoint: nil)
       @config = config
-      @override_site = override_site
       @nested = nested
       @checkpoint = checkpoint
       @checkpoint_reached = false
@@ -41,12 +40,7 @@ module XxxRename
     end
 
     def matcher
-      @matcher ||=
-        begin
-          m = SiteClientMatcher.new(config, override_site: override_site)
-          ActorsHelper.instance.matcher(m)
-          m
-        end
+      config.site_client_matcher
     end
 
     def resolver
@@ -55,7 +49,7 @@ module XxxRename
 
     private
 
-    attr_reader :config, :override_site, :nested, :object
+    attr_reader :config, :nested, :object
 
     def process_directory
       scanner.each do |file|

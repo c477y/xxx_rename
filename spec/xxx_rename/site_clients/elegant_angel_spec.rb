@@ -9,6 +9,7 @@ describe XxxRename::SiteClients::ElegantAngel do
   subject(:site_client) { described_class.new(config) }
 
   describe ".search" do
+    before { SiteClientStubs::ActorHelperStubs.enable }
     context "force datastore refresh" do
       include_context "config provider" do
         let(:override_config) do
@@ -22,6 +23,16 @@ describe XxxRename::SiteClients::ElegantAngel do
             } }
         end
       end
+
+      before do
+        allow(config.actor_helper).to receive(:auto_fetch!).and_return(nil)
+        config.actors_datastore.create!("Chastity Lynn", "female")
+        config.actors_datastore.create!("Ana Foxxx", "female")
+        config.actors_datastore.create!("Charley Chase", "female")
+        config.actors_datastore.create!("Tori Black", "female")
+        config.actors_datastore.create!("Alexis Texas", "female")
+      end
+
       let(:store) { config.scene_datastore.store }
       let(:force_refresh_datastore) { true }
 
@@ -29,14 +40,16 @@ describe XxxRename::SiteClients::ElegantAngel do
       let(:url1) { "https://www.elegantangel.com/1603549/oiled-up-2-streaming-porn-videos.html" }
       let(:scene_data1) do
         XxxRename::Data::SceneData.new(
-          { female_actors: [],
+          {
             male_actors: [],
             actors: ["Chastity Lynn", "Ana Foxxx"],
+            female_actors: ["Chastity Lynn", "Ana Foxxx"],
             collection: "Oiled Up 2",
             collection_tag: "EL",
             title: "Scene 2",
             date_released: Time.parse("2012-01-26"),
             scene_link: "https://www.elegantangel.com/159802/elegant-angel-scene-2-streaming-scene-video.html",
+            scene_cover: "https://caps1cdn.adultempire.com/r/9948/320/1599948_03880_320.jpg",
             movie: { name: "Oiled Up 2",
                      date: Time.parse("2012-01-26"),
                      url: "https://www.elegantangel.com/1603549/oiled-up-2-streaming-porn-videos.html",
@@ -45,20 +58,23 @@ describe XxxRename::SiteClients::ElegantAngel do
                      studio: "Elegant Angel",
                      synopsis: "These hardbodies starlets are drenched and glistening in oil! Featuring the " \
                                "amazing Jayden Jaymes, as well as Juelz Ventura, Nikki Fairchild, Chasity Lynn, " \
-                               "Anna Foxxx, Shazia Sahari and Victoria Love! Directed by L.T.Do not miss!" } }
+                               "Anna Foxxx, Shazia Sahari and Victoria Love! Directed by L.T.Do not miss!" }
+          }
         )
       end
 
       let(:scene_data2) do
         XxxRename::Data::SceneData.new(
-          { female_actors: [],
+          {
             male_actors: [],
+            female_actors: ["Charley Chase", "Tori Black", "Alexis Texas"],
             actors: ["Charley Chase", "Tori Black", "Alexis Texas"],
             collection: "Tori Black Is Pretty Filthy 2",
             collection_tag: "EL",
             title: "Three hot girls rock the boat",
             date_released: Time.parse("2010-09-30"),
             scene_link: "https://www.elegantangel.com/144628/elegant-angel-three-hot-girls-rock-the-boat-streaming-scene-video.html",
+            scene_cover: "https://caps1cdn.adultempire.com/q/7340/720/1547340_05060_720c.jpg",
             movie: { name: "Tori Black Is Pretty Filthy 2",
                      date: Time.parse("2010-09-30"),
                      url: "https://www.elegantangel.com/1552100/tori-black-is-pretty-filthy-2-streaming-porn-videos.html",
@@ -69,7 +85,8 @@ describe XxxRename::SiteClients::ElegantAngel do
              "and Xbiz award ceremonies. The performer of the year returns in the sequel to her own movie, featuring " \
              "her very 1st DP scene (on or off camera) as well as anal and interracial scenes.. Do not miss this " \
              "intimate insight into the beauty and sexuality of the star who was recently voted \"The Sexiest Pornstar " \
-             "Ever\" by Elegant Angel readers.Tori Black's first Double Penetration!!!" } }
+             "Ever\" by Elegant Angel readers.Tori Black's first Double Penetration!!!" }
+          }
         )
       end
 

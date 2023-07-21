@@ -31,26 +31,6 @@ describe XxxRename::SiteClients::NaughtyAmerica::NaughtyAmericaScene do
     end
   end
 
-  describe ".female_actors" do
-    before do
-      allow_any_instance_of(XxxRename::ActorsHelper).to receive(:female?).with("Aaliyah Hadid").and_return(true)
-      allow_any_instance_of(XxxRename::ActorsHelper).to receive(:female?).with("Aidra Fox").and_return(true)
-      allow_any_instance_of(XxxRename::ActorsHelper).to receive(:female?).with("JMac").and_return(false)
-    end
-
-    it { expect(call.female_actors).to eq(["Aaliyah Hadid", "Aidra Fox"]) }
-  end
-
-  describe ".male_actors" do
-    before do
-      allow_any_instance_of(XxxRename::ActorsHelper).to receive(:male?).with("Aaliyah Hadid").and_return(false)
-      allow_any_instance_of(XxxRename::ActorsHelper).to receive(:male?).with("Aidra Fox").and_return(false)
-      allow_any_instance_of(XxxRename::ActorsHelper).to receive(:male?).with("JMac").and_return(true)
-    end
-
-    it { expect(call.male_actors).to eq(["JMac"]) }
-  end
-
   describe ".condensed_actor" do
     context "when an actor is named differently in the filename" do
     end

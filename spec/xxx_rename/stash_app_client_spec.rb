@@ -45,16 +45,15 @@ RSpec.describe XxxRename::StashAppClient, type: :stash_scraper do
 
     let(:expected_output) do
       {
-        "id": "1234",
-        "title": "Awesome Title",
-        "performers": [
-          { "name": "Foo Bar", "gender": "female" },
-          { "name": "Baz Qux", "gender": "female" },
-          { "name": "Fred Thud", "gender": "male" }
-        ],
-        "details": nil,
-        "director": nil,
-        "date": "2020-01-10T00:00:00.000+00:00"
+        title: "Awesome Title",
+        code: "1234",
+        date: "2020-01-10T00:00:00.000+00:00",
+        urls: [],
+        images: [],
+        studio: { name: "Some Collection" },
+        performers: [{ performer: { name: "Foo Bar", gender: "FEMALE" } },
+                     { performer: { name: "Baz Qux", gender: "FEMALE" } },
+                     { performer: { name: "Fred Thud", gender: "MALE" } }]
       }.to_json
     end
 
@@ -76,7 +75,6 @@ RSpec.describe XxxRename::StashAppClient, type: :stash_scraper do
         config.scene_datastore.create!(stub_scene_data)
         config.scene_datastore.register_file(stub_scene_data, filename1_path)
       end
-
 
       it "should log the scene data to stdout" do
         expect { scene_by_fragment }.to output(expected_output).to_stdout

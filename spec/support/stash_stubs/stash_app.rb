@@ -18,7 +18,7 @@ module StashStubs
             "findScene": {
               "id": id.to_s,
               "title": title,
-              "files": paths.map { |x| { "path": x} }
+              "files": paths.map { |x| { "path": x } }
             }
           }
         }.to_json
@@ -30,4 +30,3 @@ module StashStubs
     end
   end
 end
-

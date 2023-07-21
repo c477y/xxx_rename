@@ -5,7 +5,6 @@ require "xxx_rename/data/stash_app_scene_fragment"
 module XxxRename
   # noinspection RubyMismatchedReturnType
   class StashAppClient
-
     # @param [Data::Config] config
     def initialize(config)
       @config = config
@@ -15,7 +14,7 @@ module XxxRename
       scene_data = lookup(scene_input)
       return if scene_data.nil?
 
-      print JSON.dump(scene_data.to_stashapp_scene_fragment.to_hash)
+      print Data::StashAppSceneFragment.create_from_scene_data(scene_data).to_json
     end
 
     private
@@ -70,7 +69,7 @@ module XxxRename
     def scene_input
       query = $stdin.gets
       XxxRename.logger.info query
-      Data::StashAppSceneFragment.new(JSON.parse(query))
+      Data::StashAppSceneInput.new(JSON.parse(query))
     end
   end
 end

@@ -442,15 +442,6 @@ module XxxRename
         "$#{sanitize(actors.sort.join("|"))}" \
         ">"
       end
-
-      def benchmark(opr = "unnamed")
-        raise "#benchmark called without block" unless block_given?
-
-        resp = nil
-        time = Benchmark.measure { resp = yield }
-        XxxRename.logger.debug "#{"[BENCHMARK]".colorize(:cyan)} #{self.class.name}##{opr}: #{time.real.round(3)}s"
-        resp
-      end
     end
   end
 end

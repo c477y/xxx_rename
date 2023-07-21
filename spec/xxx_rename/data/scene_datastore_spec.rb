@@ -265,7 +265,6 @@ describe XxxRename::Data::SceneDatastoreQuery do
         end
       end
 
-
       context "when the old file does not exist" do
         before do
           FileUtils.touch(File.join("test_folder", "xyz"))

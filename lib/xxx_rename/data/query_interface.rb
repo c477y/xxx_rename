@@ -57,6 +57,10 @@ module XxxRename
         raise "Not Implemented"
       end
 
+      def all
+        raise "Not Implemented"
+      end
+
       # @param [Array[String|Integer]] strs
       def generate_lookup_key(*strs)
         strs.map(&:to_s).map { |x| sanitize(x) }.join("$")
@@ -72,6 +76,15 @@ module XxxRename
       # @return [String]
       def sanitize(str)
         str.to_s.normalize
+      end
+
+      def benchmark(opr = "unnamed")
+        raise "#benchmark called without block" unless block_given?
+
+        resp = nil
+        time = Benchmark.measure { resp = yield }
+        XxxRename.logger.debug "#{"[BENCHMARK]".colorize(:cyan)} #{self.class.name}##{opr}: #{time.real.round(3)}s"
+        resp
       end
     end
   end

@@ -8,6 +8,7 @@ module XxxRename
   module SiteClients
     class AlgoliaV2 < Base
       include AlgoliaCommon
+      CDN_BASE_URL = "https://transform.gammacdn.com"
 
       def client(refresh: false)
         if refresh
@@ -81,7 +82,8 @@ module XxxRename
 
       def default_query
         {
-          attributesToRetrieve: %w[clip_id title actors release_date description network_name movie_id movie_title],
+          attributesToRetrieve: %w[clip_id title actors release_date description
+                                   network_name movie_id movie_title directors sitename pictures],
           hitsPerPage: 50
         }
       end
@@ -101,7 +103,7 @@ module XxxRename
         make_scene_data(scenes.first)
       end
 
-      def make_scene_data(scene)
+      def make_scene_data(scene) # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
         hash = {}.tap do |h|
           h[:female_actors] = female_actors(scene)
           h[:male_actors] = male_actors(scene)
@@ -109,8 +111,16 @@ module XxxRename
           h[:collection] = scene[:network_name]&.strip&.titleize
           h[:collection_tag] = site_config.collection_tag
           h[:title] = scene[:title]&.strip
+
+          # Optional attributes
           h[:id] = scene[:clip_id].to_s
           h[:date_released] = date_released(scene[:release_date])
+          director = scene[:directors].map { |d_hash| d_hash[:name] }&.first
+          h[:director] = director if director
+          h[:description] = scene[:description] if scene[:description]
+          h[:scene_link] = "#{@site_url}/en/video/#{scene[:sitename]}/#{slug(scene[:title])}/#{scene[:clip_id]}"
+          cover = scene.dig(:pictures, :nsfw, :top, :"1920x1080") || scene.dig(:pictures, :resized)
+          h[:scene_cover] = "#{CDN_BASE_URL}#{cover}"
           movie_hash = movie_details(scene[:movie_id]) || nil
           h[:movie] = movie_hash unless movie_hash.nil?
         end

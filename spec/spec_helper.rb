@@ -12,6 +12,7 @@ require "xxx_rename"
 require "fileutils"
 require "json"
 require "pry"
+require "super_diff/rspec"
 require "timecop"
 require "webmock/rspec"
 
@@ -70,8 +71,6 @@ RSpec.configure do |config|
   config.after(:all, type: :cli_mode) do
     $stderr = original_stderr
     $stdout = original_stdout
-    original_stderr = nil
-    original_stdout = nil
   end
 
   config.include_context "stubs provider"

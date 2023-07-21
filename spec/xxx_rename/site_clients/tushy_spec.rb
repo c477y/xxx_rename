@@ -32,9 +32,6 @@ describe XxxRename::SiteClients::Tushy do
   let(:input_filename) { "[Tushy] Azul Hermosa - Seal The Deal" }
 
   before do
-    matcher = XxxRename::SiteClientMatcher.new(config)
-    XxxRename::ActorsHelper.instance.matcher(matcher)
-
     @vixen = SiteClientStubs::VixenMedia.new(:tushy_search_ok)
     @brazzers = SiteClientStubs::Brazzers.new(:actor_search)
     WebMock.disable_net_connect!(allow: "https://www.brazzers.com")

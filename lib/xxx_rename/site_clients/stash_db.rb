@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "active_support/core_ext/object/blank"
 require "xxx_rename/site_clients/query_generator/stash_db"
 
 module XxxRename
@@ -26,17 +27,13 @@ module XxxRename
 
       # @param [String] filename
       # @return [XxxRename::Data::SceneData, nil]
+      # noinspection RubyMismatchedReturnType
       def search(filename)
         setup_credentials! if login_required?
 
         match = search_query(filename)
-        search_string = if match.female_actors.empty?
-                          match.title
-                        else
-                          "#{match.female_actors.join(", ")} - #{match.title}"
-                        end
-        search_results = graphql_search(search_string, 10)
-        find_result_in_search_resp(search_results, match)
+        scene_id = find_matching_scene_id!(match)
+        scene_details(scene_id)
       end
 
       def setup_credentials!
@@ -107,6 +104,41 @@ module XxxRename
         resp.dig("data", "version", "version")
       end
 
+      def scene_details(scene_id)
+        graphql_fetch_scene_details(scene_id)
+      end
+
+      def find_matching_scene_id!(scene_data)
+        if scene_data.actors.present?
+          resp = search_with_title_and_actors(scene_data, 10)
+          return resp["id"] if resp.present?
+        end
+
+        resp = search_with_title(scene_data, 10)
+        return resp["id"] if resp.present?
+
+        raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_RESULT, scene_data.title)
+      end
+
+      def search_with_title(scene_data, limit)
+        term = scene_data.title
+        search_results = graphql_search(term, limit)
+        search_results.select do |x|
+          match?(x["title"], scene_data.title) || match?(x.dig("studio", "name"), scene_data.title)
+        end.first
+      end
+
+      def search_with_title_and_actors(scene_data, limit)
+        actors = (scene_data.female_actors + scene_data.actors).compact.uniq!
+        term = "#{actors.join(", ")} #{scene_data.title}"
+        search_results = graphql_search(term, limit)
+        search_results.select do |x|
+          cond1 = match?(x["title"], scene_data.title) || match?(x.dig("studio", "name"), scene_data.title)
+          cond2 = actors_included?(x, actors)
+          cond1 && cond2
+        end.first
+      end
+
       # @param [String] filename
       # @return [XxxRename::SiteClients::QueryGenerator::Base::SearchParameters]
       # @raise XxxRename::Errors::NoMatchError
@@ -132,25 +164,23 @@ module XxxRename
         resp.parsed_response.dig("data", "searchScene") || []
       end
 
-      def find_result_in_search_resp(api_resp, match_data)
-        matched_scene = api_resp.select do |x|
-          condition1 = match?(x["title"], match_data.title) || match?(x.dig("studio", "name"), match_data.title)
-          condition2 = female_actors_included?(x, match_data.female_actors)
-          condition1 && condition2
-        end.first
-
-        raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_RESULT, match_data.title) if matched_scene.nil?
-
-        Data::SceneData.new(
-          female_actors: female_actors(matched_scene),
-          male_actors: male_actors(matched_scene),
-          actors: female_actors(matched_scene) + male_actors(matched_scene),
-          id: matched_scene["id"],
-          collection_tag: site_config.collection_tag,
-          collection: matched_scene.dig("studio", "name"),
-          title: matched_scene["title"],
-          date_released: Time.strptime(matched_scene["date"], "%Y-%m-%d")
-        )
+      def graphql_fetch_scene_details(scene_id)
+        resp = handle_response! { self.class.post(GRAPHQL_ENDPOINT, body: graphql_fetch_scene_details_body(scene_id)) }
+        scene = resp["data"]["findScene"]
+        hash = {}
+        hash[:female_actors] = female_actors(scene)
+        hash[:male_actors] = male_actors(scene)
+        hash[:actors] = female_actors(scene) + male_actors(scene)
+        hash[:collection] = scene.dig("studio", "name")
+        hash[:collection_tag] = site_config.collection_tag
+        hash[:title] = scene["title"]
+        hash[:id] = scene["id"]
+        hash[:date_released] = Time.strptime(scene["release_date"], "%Y-%m-%d")
+        hash[:director] = scene["director"] if scene["director"]
+        hash[:description] = scene["details"] if scene["details"]
+        hash[:scene_link] = scene_link(scene) if scene_link(scene)
+        hash[:scene_cover] = scene_cover(scene) if scene_cover(scene)
+        Data::SceneData.new(hash)
       end
 
       # @param [Hash] scene
@@ -169,13 +199,29 @@ module XxxRename
           .map {  |x| x["name"] }
       end
 
+      def scene_link(scene)
+        scene["urls"].find { |x| x.dig("site", "name") == "Studio" }&.[]("url")
+      end
+
+      def scene_cover(scene)
+        scene["images"].first&.[]("url")
+      end
+
       # Return an Array of Array[Actor]. The first element of the array main actor name and the others are aliases
       # @param [Hash] scene
       # @return [Array[Array[String]]]
-      def female_actors_arr(scene)
+      def actors_arr(scene, gender)
         actors(scene)
-          .select { |x| x["gender"] == "FEMALE" }
+          .select { |x| x["gender"] == gender }
           .map {  |x| [x["name"]] + x["aliases"] }
+      end
+
+      def female_actors_arr(scene)
+        actors_arr(scene, "FEMALE")
+      end
+
+      def male_actors_arr(scene)
+        actors_arr(scene, "MALE")
       end
 
       # Return an Array of Array[Actor]. The first element of the array main actor name and the others are aliases
@@ -197,10 +243,11 @@ module XxxRename
 
       # @param [Hash] scene
       # @param [Array[String]] female_actors
-      def female_actors_included?(scene, female_actors)
+      def actors_included?(scene, actors)
         female_actors_search = female_actors_arr(scene).flatten.map(&:normalize).to_set
-        rej = female_actors.reject do |actor|
-          female_actors_search.member? actor.normalize
+        male_actors_search = male_actors_arr(scene).flatten.map(&:normalize).to_set
+        rej = actors.reject do |actor|
+          female_actors_search.member?(actor.normalize) || male_actors_search.member?(actor.normalize)
         end
         rej.empty?
       end
@@ -231,6 +278,63 @@ module XxxRename
                     gender
                     aliases
                   }
+                }
+              }
+            }
+          GRAPHQL
+        }.to_json
+      end
+
+      def graphql_fetch_scene_details_body(scene_id)
+        {
+          operationName: "Scene",
+          variables: { id: scene_id },
+          query: <<~GRAPHQL
+            query Scene($id: ID!) {
+              findScene(id: $id) {
+                id
+                release_date
+                title
+                details
+                director
+                urls {
+                  url
+                  site {
+                    id
+                    name
+                    icon
+                  }
+                }
+                images {
+                  id
+                  url
+                  width
+                  height
+                }
+                studio {
+                  id
+                  name
+                  parent {
+                    id
+                    name
+                  }
+                }
+                performers {
+                  as
+                  performer {
+                    id
+                    name
+                    disambiguation
+                    deleted
+                    gender
+                    aliases
+                  }
+                }
+                tags {
+                  id
+                  name
+                  description
+                  aliases
                 }
               }
             }
