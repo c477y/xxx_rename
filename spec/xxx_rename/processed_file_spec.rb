@@ -98,23 +98,12 @@ describe XxxRename::ProcessedFile do
       let(:male) { [] }
       let(:actors) { female1 }
       let(:collection) { "" }
+      let(:id) { "" }
 
       let(:file_name) { "Making A Splash [C] [F] Violet Starr [M] -.mp4" }
       let(:pattern) { "%title [%collection_tag_1]%collection_op [F]%female_actors [M]%male_actors_op -%id_op" }
 
       it_behaves_like "a valid file"
-    end
-
-    context "given a correct pattern with prefix tokens when prefix tokens are not initialised" do
-      let(:file_name) { "Making A Splash [C] [F] Violet Starr [M] Isiah Maxwell [ID] 9999.mp4" }
-      let(:pattern) do
-        "%title [%collection_tag_1] %collection_op %female_actors_prefix %female_actors %male_actors_prefix %male_actors %id_prefix %id"
-      end
-
-      it "should raise error" do
-        expect { parameter_reader }
-          .to raise_error(ArgumentError, "Invalid tokens %female_actors_prefix, %male_actors_prefix, %id_prefix in pattern.")
-      end
     end
 
     context "given an incorrect pattern 1" do

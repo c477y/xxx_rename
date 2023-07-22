@@ -9,20 +9,12 @@ require "xxx_rename/site_clients/wicked"
 describe XxxRename::ActorsHelper do
   include_context "config provider"
 
-  subject(:call) { described_class.instance }
+  subject(:call) { config.actor_helper }
   let(:actor_details) { double(XxxRename::FetchActorDetails) }
+  let(:matcher) { XxxRename::SiteClientMatcher.new(config) }
 
   before do
-    matcher = XxxRename::SiteClientMatcher.new(config)
-    XxxRename::ActorsHelper.instance.matcher(matcher)
-
     expect(XxxRename::FetchActorDetails).to receive(:new).and_return(actor_details)
-  end
-
-  after do
-    call.instance_variable_set("@female_actors", nil)
-    call.instance_variable_set("@male_actors", nil)
-    call.instance_variable_set("@fetch_actor_details", nil)
   end
 
   context "successful actor match" do
@@ -33,23 +25,10 @@ describe XxxRename::ActorsHelper do
       expect(actor_details).to receive(:details).and_return(
         {
           "name" => actor,
-          "gender" => "female",
-          "compressed_name" => compressed_name
+          "gender" => "female"
         }
       )
       call.auto_fetch!(actor)
-    end
-
-    it "marks actor as processed" do
-      expect(call.processed?(actor)).to eq(true)
-    end
-
-    it "female actor hash should contain an actor entry" do
-      expect(call.female_actors).to eq({ "bridgetteb" => actor })
-    end
-
-    it "male actor hash should be empty" do
-      expect(call.male_actors).to eq({})
     end
 
     it "actor specific methods should return correct response" do
@@ -61,37 +40,22 @@ describe XxxRename::ActorsHelper do
   context "duplicate actor match" do
     let(:actor) { "Bridgette B" }
     let(:actor_alias) { "Bridgette B." }
-    let(:compressed_name) { "bridgetteb" }
 
     before do
       expect(actor_details).to receive(:details).with(actor).and_return(
         {
           "name" => actor,
-          "gender" => "female",
-          "compressed_name" => compressed_name
+          "gender" => "female"
         }
       )
       expect(actor_details).to receive(:details).with(actor_alias).and_return(
         {
           "name" => actor_alias,
-          "gender" => "female",
-          "compressed_name" => compressed_name
+          "gender" => "female"
         }
       )
       call.auto_fetch!(actor)
       call.auto_fetch!(actor_alias)
-    end
-
-    it "marks the actor as processed" do
-      expect(call.processed?(actor)).to eq(true)
-    end
-
-    it "female actors hash should store response of first processing" do
-      expect(call.female_actors).to eq({ "bridgetteb" => actor })
-    end
-
-    it "male actor hash should be empty" do
-      expect(call.male_actors).to eq({})
     end
 
     it "actor specific methods should return correct response" do
@@ -108,32 +72,17 @@ describe XxxRename::ActorsHelper do
       expect(actor_details).to receive(:details).with(female_actor).and_return(
         {
           "name" => female_actor,
-          "gender" => "female",
-          "compressed_name" => "bridgetteb"
+          "gender" => "female"
         }
       )
       expect(actor_details).to receive(:details).with(male_actor).and_return(
         {
           "name" => male_actor,
-          "gender" => "male",
-          "compressed_name" => "keiranlee"
+          "gender" => "male"
         }
       )
       call.auto_fetch!(female_actor)
       call.auto_fetch!(male_actor)
-    end
-
-    it "marks the actors as processed" do
-      expect(call.processed?(female_actor)).to eq(true)
-      expect(call.processed?(male_actor)).to eq(true)
-    end
-
-    it "female actors hash should store female actor data" do
-      expect(call.female_actors).to eq({ "bridgetteb" => female_actor })
-    end
-
-    it "male actors hash should store male actor data" do
-      expect(call.male_actors).to eq({ "keiranlee" => male_actor })
     end
 
     it "actor specific methods should return correct response" do
@@ -156,21 +105,6 @@ describe XxxRename::ActorsHelper do
       expect { call.auto_fetch!(actor) }.to raise_error(XxxRename::Errors::UnprocessedEntity, actor)
     end
 
-    it "does not mark the actor as processed" do
-      call.auto_fetch(actor)
-      expect(call.processed?(actor)).to eq(false)
-    end
-
-    it "female actor hash should be empty" do
-      call.auto_fetch(actor)
-      expect(call.female_actors).to eq({})
-    end
-
-    it "male actor hash should be empty" do
-      call.auto_fetch(actor)
-      expect(call.male_actors).to eq({})
-    end
-
     it "actor specific methods should return nil" do
       call.auto_fetch(actor)
       expect(call.female?(actor)).to eq(false)
@@ -182,12 +116,7 @@ end
 describe XxxRename::FetchActorDetails do
   include_context "config provider"
 
-  before do
-    XxxRename::ActorsHelper.instance.matcher(matcher)
-  end
-
-  let(:matcher) { XxxRename::SiteClientMatcher.new(config) }
-  let(:call) { described_class.new(matcher).details(name) }
+  let(:call) { described_class.new(config.site_client_matcher).details(name) }
 
   let(:brazzers_client) { instance_double("XxxRename::SiteClients::Brazzers") }
   let(:wicked_client) { instance_double("XxxRename::SiteClients::Wicked") }
@@ -216,8 +145,7 @@ describe XxxRename::FetchActorDetails do
     let(:response) do
       {
         "name" => name,
-        "gender" => gender,
-        "compressed_name" => "bridgetteb"
+        "gender" => gender
       }
     end
 

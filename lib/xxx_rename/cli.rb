@@ -3,6 +3,20 @@
 require "thor"
 
 module XxxRename
+  class StashAppSubCommand < Thor
+    require "json"
+    require "xxx_rename/stash_app_client"
+
+    desc "scene_by_fragment", "For use through StashApp scraping only"
+    option :config, alias: :c, type: :string, required: false, desc: "path to config file"
+    def scene_by_fragment
+      XxxRename.logger(**{ "mode" => Log::STASHAPP_LOGGING, "verbose" => options["verbose"] })
+      XxxRename.logger.info "Initialising logger in #{Log::STASHAPP_LOGGING} mode"
+      config = Contract::ConfigGenerator.new(options).generate!
+      StashAppClient.new(config).scene_by_fragment
+    end
+  end
+
   class Cli < Thor
     SUPPORTED_SITES = %w[
       adult_time
@@ -84,11 +98,10 @@ module XxxRename
     option :force_refresh,            type: :boolean, default:  false, desc: "force match scenes from original sites"
     option :checkpoint,               type: :string,  required: false, desc: "skip all iterations until check-pointed file is matched"
     def generate(object)
-      XxxRename.logger(verbose: options["verbose"])
+      XxxRename.logger(**{ "mode" => Log::CLI_LOGGING, "verbose" => options["verbose"] })
       config = Contract::ConfigGenerator.new(options).generate!
       client = Client.new(config,
                           verbose: options["verbose"],
-                          override_site: options["override_site"]&.to_sym,
                           nested: options["nested"],
                           checkpoint: options["checkpoint"])
       client.generate(object)
@@ -167,7 +180,9 @@ module XxxRename
     desc "migrate --version=VERSION", "Apply a rename migration file"
     option :config, alias: :c, type: :string, required: false, desc: "path to config file"
     option :version, type: :string, default: "latest", desc: "Name of migration file to apply"
+    option :verbose, alias: :v, type: :boolean, default: false, desc: "enable verbose logging"
     def migrate
+      XxxRename.logger(**{ "mode" => Log::CLI_LOGGING, "verbose" => options["verbose"] })
       config = Contract::ConfigGenerator.new(options.slice("config")).generate!
       MigrationClient.new(config, options["version"]).apply
     rescue Interrupt
@@ -192,7 +207,9 @@ module XxxRename
     desc "rollback --version=VERSION", "Rollback a migration"
     option :config, alias: :c, type: :string, required: false, desc: "path to config file"
     option :version, type: :string, default: "latest", desc: "Name of migration file to apply"
+    option :verbose, alias: :v, type: :boolean, default: false, desc: "enable verbose logging"
     def rollback
+      XxxRename.logger(**{ "mode" => Log::CLI_LOGGING, "verbose" => options["verbose"] })
       config = Contract::ConfigGenerator.new(options.slice("config")).generate!
       MigrationClient.new(config, options["version"]).rollback
     rescue Interrupt
@@ -207,5 +224,8 @@ module XxxRename
       e.backtrace&.each { |x| XxxRename.logger.fatal x }
       exit 1
     end
+
+    desc "stashapp SUBCOMMAND", "Lookup a scene through StashApp"
+    subcommand "stashapp", StashAppSubCommand
   end
 end

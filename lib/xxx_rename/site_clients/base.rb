@@ -14,7 +14,7 @@ module XxxRename
 
       # @param [XxxRename::Data::Config] config
       def initialize(config)
-        @actors_helper = ActorsHelper.instance
+        @actors_helper = config.actor_helper
         @config = config
         @source_format = site_config.file_source_format
         return unless self.class.include?(HTTParty)
@@ -55,6 +55,10 @@ module XxxRename
           male_actors: [],
           actors: actors
         }
+      end
+
+      def slug(str)
+        str.to_s.downcase.gsub(" ", "-").gsub(/[^\w-]/, "")
       end
     end
   end

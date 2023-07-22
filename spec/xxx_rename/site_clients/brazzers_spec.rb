@@ -22,7 +22,8 @@ describe XxxRename::SiteClients::Brazzers do
             "title" => "Anal Is The Best Medicine",
             "dateReleased" => "2013-12-08T00:00:00+00:00",
             "actors" => [{ "name" => "James Deen", "gender" => "male" }, { "name" => "Devon", "gender" => "female" }],
-            "collections" => [{ "name" => "Doctor Adventures" }]
+            "collections" => [{ "name" => "Doctor Adventures" }],
+            "description" => "foobar"
           }
         ]
       }
@@ -37,7 +38,9 @@ describe XxxRename::SiteClients::Brazzers do
       collection_tag: "BZ",
       title: "Anal Is The Best Medicine",
       id: 1,
-      date_released: Time.parse("2013-12-08")
+      date_released: Time.parse("2013-12-08"),
+      description: "foobar",
+      scene_link: "https://www.brazzers.com/video/1/anal-is-the-best-medicine"
     )
   end
 

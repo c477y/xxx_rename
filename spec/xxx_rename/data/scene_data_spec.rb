@@ -18,8 +18,7 @@ describe XxxRename::Data::SceneData do
         title: title,
         collection: collection,
         actors: [],
-        id: nil,
-        date_released: nil
+        id: nil
       )
     end
 
@@ -30,8 +29,16 @@ describe XxxRename::Data::SceneData do
       expect(call.collection).to eq(collection)
       expect(call.collection_tag).to eq("")
       expect(call.title).to eq(title)
-      expect(call.id).to eq(nil)
+      expect(call.id).to eq("")
       expect(call.date_released).to eq(nil)
+    end
+
+    context "date is not passed to the struct" do
+      it "date operations should return nil" do
+        expect(call.year).to eq(nil)
+        expect(call.month).to eq(nil)
+        expect(call.day).to eq(nil)
+      end
     end
   end
 
@@ -77,16 +84,6 @@ describe XxxRename::Data::SceneData do
         expect(call.year).to eq("2013")
         expect(call.month).to eq("12")
         expect(call.day).to eq("08")
-      end
-    end
-
-    context "date is not passed to the struct" do
-      let(:date_released) { nil }
-
-      it "date operations should return nil" do
-        expect(call.year).to eq(nil)
-        expect(call.month).to eq(nil)
-        expect(call.day).to eq(nil)
       end
     end
   end

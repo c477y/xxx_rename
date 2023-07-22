@@ -39,7 +39,12 @@ describe XxxRename::SiteClients::ZeroTolerance do
         title: "When the Dads away the Moms will play",
         id: "178292",
         date_released: Time.parse("2015-05-10"),
-        scene_link: "",
+        director: "Mike Quasar",
+        description: "Sometimes Cougars are on the prowl just waiting for a moment to take a guy and blow his mind, " \
+                      "literally his cock but you get the idea. Van is the lucky guy when Britney Amber calls her " \
+                      "friend Alyssa over for some fun.",
+        scene_link: "https://www.zerotolerancefilms.com/en/video/zerotolerancefilms/when-the-dads-away-the-moms-will-play/178292",
+        scene_cover: "https://transform.gammacdn.com/80619/80619_03/previews/2/507/top_1_1920x1080/80619_03_01.jpg",
         movie:
           { name: "Cougar Sandwich",
             date: Time.parse("2020-10-08"),
@@ -58,7 +63,7 @@ describe XxxRename::SiteClients::ZeroTolerance do
       let(:file) { file1 }
 
       it "returns scene data" do
-        expect(search).to eq(scene_data1)
+        expect(search).to match(scene_data1)
       end
     end
 

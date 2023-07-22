@@ -33,6 +33,7 @@ describe XxxRename::Data::SceneDatastoreQuery do
   let(:id1) { "9999" }
   let(:filename1) { "file_name-1.mp4" }
   let(:filename1_path) { File.expand_path(File.join("test_folder", filename1)) }
+  let(:duplicate_filename1_path) { File.expand_path(File.join("test_folder", "nested_folder", filename1)) }
   let(:filename1_old) { "file_name-1_old.mp4" }
   let(:filename1_old_path) { File.expand_path(File.join("test_folder", filename1_old)) }
 
@@ -62,6 +63,8 @@ describe XxxRename::Data::SceneDatastoreQuery do
 
   before(:each) do
     FileUtils.touch(File.join("test_folder", filename1))
+    FileUtils.mkpath(File.join("test_folder", "nested_folder"))
+    FileUtils.touch(File.join("test_folder", "nested_folder", filename1))
     FileUtils.touch(File.join("test_folder", filename1_old))
     FileUtils.touch(File.join("test_folder", filename2))
   end
@@ -191,6 +194,22 @@ describe XxxRename::Data::SceneDatastoreQuery do
     end
   end
 
+  describe "find_by_base_filename?" do
+    before do
+      data_store.create!(scene1)
+      data_store.register_file(scene1, filename1_path)
+      data_store.register_file(scene1, duplicate_filename1_path)
+    end
+
+    it "returns the scene data if path is valid" do
+      expect(data_store.find_by_base_filename?(filename1)).to eq([scene1, scene1])
+    end
+
+    it "returns nil if the path does not exist" do
+      expect(data_store.find_by_base_filename?(filename2_path)).to be nil
+    end
+  end
+
   describe ".find_by_key?" do
     before { data_store.create!(scene1) }
 
@@ -209,36 +228,56 @@ describe XxxRename::Data::SceneDatastoreQuery do
     context "scene exists with no filename" do
       before { data_store.register_file(scene1, filename1_path) }
 
-      it "adds the filename to the index" do
+      it "adds the absolute path of filename to the index" do
         store.transaction(true) do
           key = data_store.generate_lookup_key(XxxRename::Data::REGISTERED_FILE_PATHS_PREFIX, filename1_path)
           expect(store[key]).to eq(scene1.key)
         end
       end
+
+      it "adds the base filename to the index" do
+        store.transaction(true) do
+          key = data_store.generate_lookup_key(XxxRename::Data::REGISTERED_FILE_BASENAME_PATH_PREFIX, File.basename(filename1_path))
+          expect(store[key]).to eq([scene1.key])
+        end
+      end
     end
 
     context "scene exists with an old name" do
-      it "adds the filename to the index and removes the old name" do
-        data_store.register_file(scene1, filename1_old_path)
-        store.transaction(true) do
-          key = data_store.generate_lookup_key(XxxRename::Data::REGISTERED_FILE_PATHS_PREFIX, filename1_old_path)
-          expect(store[key]).to eq(key1)
+      context "when old filename exists" do
+        before do
+          data_store.register_file(scene1, filename1_old_path)
+          data_store.register_file(scene1, filename1_path, old_filename: filename1_old_path)
         end
-        data_store.register_file(scene1, filename1_path, old_filename: filename1_old_path)
-        store.transaction(true) do
-          key = data_store.generate_lookup_key(XxxRename::Data::REGISTERED_FILE_PATHS_PREFIX, filename1_path)
-          expect(store[key]).to eq(key1)
+
+        it "adds the absolute path of file to the index and removes the old name" do
+          store.transaction(true) do
+            key = data_store.generate_lookup_key(XxxRename::Data::REGISTERED_FILE_PATHS_PREFIX, filename1_path)
+            expect(store[key]).to eq(key1)
+          end
+        end
+
+        it "adds the basename of file to the index and removes the old name" do
+          store.transaction(true) do
+            key = data_store.generate_lookup_key(XxxRename::Data::REGISTERED_FILE_BASENAME_PATH_PREFIX, File.basename(filename1_path))
+            expect(store[key]).to eq([key1])
+          end
         end
       end
 
-      it "does not raise an error if old filename does not exist in data store" do
-        FileUtils.touch(File.join("test_folder", "xyz"))
-        non_existent_file = File.expand_path(File.join("test_folder", "xyz"))
+      context "when the old file does not exist" do
+        before do
+          FileUtils.touch(File.join("test_folder", "xyz"))
+          non_existent_file = File.expand_path(File.join("test_folder", "xyz"))
 
-        data_store.register_file(scene1, filename1_path, old_filename: non_existent_file)
-        store.transaction(true) do
-          key = data_store.generate_lookup_key(XxxRename::Data::REGISTERED_FILE_PATHS_PREFIX, filename1_path)
-          expect(store[key]).to eq(key1)
+          data_store.register_file(scene1, filename1_path, old_filename: non_existent_file)
+        end
+
+        it "does not raise an error if old filename does not exist in data store" do
+          store.transaction(true) do
+            key = data_store.generate_lookup_key(XxxRename::Data::REGISTERED_FILE_PATHS_PREFIX, filename1_path)
+            expect(store[key]).to eq(key1)
+          end
         end
       end
     end

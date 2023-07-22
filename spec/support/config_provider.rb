@@ -19,17 +19,8 @@ shared_context "config provider" do
     write_config_file
   end
 
-  before do
-    matcher = XxxRename::SiteClientMatcher.new(config)
-    XxxRename::ActorsHelper.instance.matcher(matcher)
-  rescue XxxRename::Errors::ConfigValidationError
-    nil
-  end
-
   after(:example) do
     FileUtils.rm_r "test_folder"
-    XxxRename::ActorsHelper.instance.instance_variable_set("@female_actors", {})
-    XxxRename::ActorsHelper.instance.instance_variable_set("@male_actors", {})
   end
 
   def default_config

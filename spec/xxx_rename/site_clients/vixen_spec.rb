@@ -8,11 +8,6 @@ describe XxxRename::SiteClients::Vixen do
 
   include_context "config provider"
 
-  before do
-    matcher = XxxRename::SiteClientMatcher.new(config)
-    XxxRename::ActorsHelper.instance.matcher(matcher)
-  end
-
   let(:opts) { {} }
   let(:scene_data) do
     XxxRename::Data::SceneData.new(

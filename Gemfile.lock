@@ -31,6 +31,7 @@ GEM
       multi_json (~> 1.0)
       net-http-persistent
     ast (2.4.2)
+    attr_extras (7.1.0)
     awesome_print (1.9.2)
     codecov (0.6.0)
       simplecov (>= 0.15, < 0.22)
@@ -106,9 +107,12 @@ GEM
       racc (~> 1.4)
     nokogiri (1.13.10-x86_64-darwin)
       racc (~> 1.4)
+    optimist (3.0.1)
     parallel (1.21.0)
     parser (3.0.3.2)
       ast (~> 2.4.1)
+    patience_diff (1.2.0)
+      optimist (~> 3.0)
     pry (0.13.1)
       coderay (~> 1.1)
       method_source (~> 1.0)
@@ -150,6 +154,10 @@ GEM
       simplecov_json_formatter (~> 0.1)
     simplecov-html (0.12.3)
     simplecov_json_formatter (0.1.3)
+    super_diff (0.9.0)
+      attr_extras (>= 6.2.4)
+      diff-lcs
+      patience_diff
     thor (1.2.1)
     timecop (0.9.4)
     tzinfo (2.0.5)
@@ -170,6 +178,7 @@ DEPENDENCIES
   rspec (~> 3.10)
   rubocop (~> 1.7)
   simplecov
+  super_diff (~> 0.9.0)
   timecop (~> 0.9.4)
   webmock (~> 3.14)
   xxx_rename!

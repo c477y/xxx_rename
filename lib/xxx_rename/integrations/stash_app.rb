@@ -34,6 +34,7 @@ module XxxRename
         super(config)
         raise Errors::FatalError, "Stash App requires 'url'. Check your configuration." unless config.stash_app.url.presence
 
+        self.class.default_options.update(verify: false)
         self.class.base_uri(config.stash_app.url)
         self.class.headers("Content-Type" => "application/json")
       end
@@ -79,6 +80,16 @@ module XxxRename
         response = handle_response! { self.class.post(GRAPHQL_ENDPOINT, body: fetch_scene_body(path)) }
         scenes = response.dig("data", "findScenes", "scenes")
         scenes.length == 1 ? scenes.first : nil
+      end
+
+      def fetch_scene_by_id(id)
+        response = handle_response! { self.class.post(GRAPHQL_ENDPOINT, body: fetch_scene_by_id_body(id)) }
+        response.dig("data", "findScene")
+      end
+
+      def fetch_scene_paths_by_id(id)
+        response = fetch_scene_by_id(id)
+        response["files"].map { |x| x["path"] }
       end
 
       def update_scene(scene_id, movie_id)
@@ -155,6 +166,26 @@ module XxxRename
                       }
                       scene_index
                   }
+                }
+              }
+            }
+          GRAPHQL
+        }.to_json
+      end
+
+      def fetch_scene_by_id_body(id)
+        {
+          operationName: "FindScene",
+          variables: {
+            id: id
+          },
+          query: <<~GRAPHQL
+            query FindScene($id: ID!, $checksum: String) {
+              findScene(id: $id, checksum: $checksum) {
+                id
+                title
+                files {
+                  path
                 }
               }
             }

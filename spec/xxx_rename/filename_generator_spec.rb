@@ -77,9 +77,7 @@ describe XxxRename::FilenameGenerator do
           male_actors: [],
           actors: [],
           collection: "",
-          title: "Anal Is The Best Medicine",
-          id: nil,
-          date_released: nil
+          title: "Anal Is The Best Medicine"
         )
       end
       let(:output_format) { "%title - %id" }
@@ -99,9 +97,7 @@ describe XxxRename::FilenameGenerator do
           male_actors: [],
           actors: [],
           collection: "",
-          title: "Anal Is The Best Medicine",
-          id: nil,
-          date_released: nil
+          title: "Anal Is The Best Medicine"
         )
       end
       context "using token %yyyy_mm_dd" do

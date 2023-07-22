@@ -217,11 +217,11 @@ module XxxRename
         end
 
         def female_actors
-          actors.select { |x| ActorsHelper.instance.female? x }
+          actors.select { |x| config.actor_helper.female? x }
         end
 
         def male_actors
-          actors.select { |x| ActorsHelper.instance.male? x }
+          actors.select { |x| config.actor_helper.male? x }
         end
 
         def condensed_actor(actor)
@@ -253,7 +253,7 @@ module XxxRename
         end
 
         def to_struct
-          actors.each { |x| ActorsHelper.instance.auto_fetch x }
+          actors.each { |x| config.actor_helper.auto_fetch x }
 
           Data::SceneData.new(
             female_actors: female_actors,

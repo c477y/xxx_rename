@@ -105,9 +105,11 @@ module XxxRename
           h[:collection] = self.class::COLLECTION
           h[:collection_tag] = site_config.collection_tag
           h[:title] = title(doc)
-          h[:id] = nil
           h[:date_released] = date_released(doc)
+          h[:director] = "Jules Jordan"
           h[:movie] = movie_hash unless movie_hash.nil?
+          h[:scene_link] = link
+          h[:scene_cover] = scene_cover(doc)
           h[:description] = description
         end.merge(actors_hash)
         Data::SceneData.new(hash)
@@ -137,13 +139,17 @@ module XxxRename
       end
 
       def female_actors(actors)
-        actors.select { |x| ActorsHelper.instance.female? x }
+        actors.select { |x| config.actor_helper.female? x }
       end
 
       def actors(doc)
         doc.css(".player-scene-description .update_models a")
            .map(&:text)
            .map(&:strip)
+      end
+
+      def scene_cover(doc)
+        doc.css("#video-player").attr("poster").value
       end
 
       def movie_hash(doc)

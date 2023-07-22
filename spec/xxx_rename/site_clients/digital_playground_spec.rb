@@ -26,6 +26,7 @@ describe XxxRename::SiteClients::DigitalPlayground do
         title: "Exposure: Scene 3",
         id: "4395046",
         date_released: Time.parse("2019-09-25T00:00:00+00:00"),
+        scene_link: "https://www.digitalplayground.com/video/4395046/exposure-scene-3",
         movie: {
           name: "Exposure",
           date: Time.parse("2019-09-25T00:00:00+00:00"),
@@ -65,6 +66,7 @@ describe XxxRename::SiteClients::DigitalPlayground do
         title: "Word Of Mouth: Episode 2",
         id: "4353221",
         date_released: Time.parse("2019-04-15T00:00:00+00:00"),
+        scene_link: "https://www.digitalplayground.com/video/4353221/word-of-mouth-episode-2",
         movie: {
           name: "Word Of Mouth",
           date: Time.parse("2019-04-08T00:00:00+00:00"),
@@ -88,7 +90,7 @@ describe XxxRename::SiteClients::DigitalPlayground do
     end
 
     it "gives the correct response" do
-      expect(call.search(file)).to eq(expected_response)
+      expect(call.search(file)).to eq_scene_data(expected_response)
     end
   end
 end

@@ -45,7 +45,8 @@ module XxxRename
 
         def parse_file
           parse_file!
-        rescue XxxRename::Errors::ParsingError, Dry::Struct::Error
+        rescue XxxRename::Errors::ParsingError, Dry::Struct::Error => e
+          XxxRename.logger.debug e
           nil
         end
 
@@ -55,7 +56,8 @@ module XxxRename
 
         def parse_file_with_source_pattern
           parse_file_with_source_pattern!
-        rescue XxxRename::Errors::ParsingError, Dry::Struct::Error
+        rescue XxxRename::Errors::ParsingError, Dry::Struct::Error => e
+          XxxRename.logger.debug e
           nil
         end
 
@@ -80,7 +82,8 @@ module XxxRename
 
         def parse_file_with_pattern(pattern)
           parse_file_with_pattern!(pattern)
-        rescue XxxRename::Errors::ParsingError, Dry::Struct::Error
+        rescue XxxRename::Errors::ParsingError, Dry::Struct::Error => e
+          XxxRename.logger.debug e
           nil
         end
       end

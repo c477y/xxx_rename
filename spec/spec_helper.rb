@@ -12,6 +12,7 @@ require "xxx_rename"
 require "fileutils"
 require "json"
 require "pry"
+require "super_diff/rspec"
 require "timecop"
 require "webmock/rspec"
 
@@ -47,11 +48,27 @@ RSpec.configure do |config|
 
   original_stderr = $stderr
   original_stdout = $stdout
-  config.before(:all) do
+
+  config.define_derived_metadata do |metadata|
+    # By default, all specs will run in CLI mode
+    metadata[:type] = :cli_mode unless metadata[:type]
+  end
+
+  config.before(:each, type: :stash_scraper) do
+    XxxRename.logger(**{ "mode" => XxxRename::Log::STASHAPP_LOGGING, "verbose" => true })
+  end
+
+  config.before(:each, type: :cli_mode) do
+    XxxRename.logger(**{ "mode" => XxxRename::Log::CLI_LOGGING, "verbose" => true })
+  end
+
+  config.before(:all, type: :cli_mode) do
+    # suppress logs when running in cli mode
     $stderr = File.open(File::NULL, "w")
     $stdout = File.open(File::NULL, "w")
   end
-  config.after(:all) do
+
+  config.after(:all, type: :cli_mode) do
     $stderr = original_stderr
     $stdout = original_stdout
   end

@@ -1,0 +1,9 @@
+name: "XXX Rename"
+
+# Change the script to add path to your config file if necessary
+sceneByFragment:
+  action: script
+  script:
+    - xxx_rename
+    - stashapp
+    - scene_by_fragment

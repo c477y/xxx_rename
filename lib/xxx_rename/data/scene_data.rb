@@ -4,33 +4,41 @@ require "digest/md5"
 
 module XxxRename
   module Data
+    class SceneMovieData < Base
+      attribute :name, Types::String
+      attribute? :date, Types::Time
+      attribute? :url, Types::String
+      attribute :front_image, Types::String
+      attribute? :back_image, Types::String
+      attribute? :studio, Types::String
+      attribute? :synopsis, Types::String
+    end
+
     class SceneData < Base
       attribute :female_actors, Types::Array.of(Types::String).default([].freeze)
       attribute :male_actors, Types::Array.of(Types::String).default([].freeze)
-      attribute :actors, Types::Array.of(Types::String)
+      attribute :actors, Types::Array.of(Types::String).default([].freeze)
       attribute :collection, Types::String.default("")
       attribute :collection_tag, Types::String.default("")
       attribute :title, Types::String
+
+      attribute? :id, Types::Coercible::String
+      attribute? :date_released, Types::Time
+      attribute? :director, Types::String
       attribute? :description, Types::String
-      attribute? :id, Types::Coercible::String.optional
-      attribute? :date_released, Types::Time.optional
-      attribute :scene_link, Types::String.default("")
-      attribute :original_filenames, Types::Set.default(Set.new.freeze)
-      attribute? :movie do
-        attribute :name, Types::String
-        attribute? :date, Types::Time
-        attribute? :url, Types::String
-        attribute :front_image, Types::String
-        attribute? :back_image, Types::String
-        attribute? :studio, Types::String
-        attribute? :synopsis, Types::String
-      end
+      attribute? :scene_link, Types::String
+      attribute? :scene_cover, Types::String
+      attribute? :movie, SceneMovieData
 
       def yyyy_mm_dd
+        return unless date_released
+
         date_released&.strftime("%Y_%m_%d")
       end
 
       def day
+        return unless date_released
+
         d = date_released&.day.to_s
         return if d.empty?
 
@@ -39,6 +47,8 @@ module XxxRename
       alias dd day
 
       def month
+        return unless date_released
+
         m = date_released&.month.to_s
         return if m.empty?
 
@@ -47,6 +57,8 @@ module XxxRename
       alias mm month
 
       def year
+        return unless date_released
+
         date_released&.year&.to_s
       end
       alias yyyy year

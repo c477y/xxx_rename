@@ -4,7 +4,7 @@ require "rspec"
 require "xxx_rename/integrations/stash_app"
 
 describe XxxRename::Integrations::StashApp do
-  let(:stash_url) { "https://localhost:9999" }
+  let(:stash_url) { "http://localhost:9999" }
 
   describe ".setup_credentials!" do
     subject(:call) { described_class.new(config).setup_credentials! }
@@ -341,6 +341,53 @@ describe XxxRename::Integrations::StashApp do
               },
               "scene_index" => nil
             }
+          ]
+        }
+      end
+
+      it "returns the scene" do
+        expect(call).to eq(expected_response)
+      end
+    end
+  end
+
+  describe ".fetch_scene_by_id_body" do
+    subject(:call) { described_class.new(config).fetch_scene_by_id(id) }
+
+    include_context "config provider" do
+      let(:override_config) { { "stash_app" => { "url" => stash_url } } }
+    end
+
+    before do
+      body = {
+        "data" => {
+          "findScene" => {
+            "id" => "1",
+            "title" => "",
+            "files" => [
+              { "path" => "path_to_file" }
+            ]
+          }
+        }
+      }.to_json
+
+      stub_request(:post, "#{stash_url}/graphql").with do |request|
+        body = JSON.parse(request.body)
+        body["operationName"] == "FindScene"
+      end.to_return(status: 200,
+                    body: body,
+                    headers: { "Content-Type" => "application/json" })
+    end
+
+    context "when scene exists" do
+      let(:id) { "1" }
+
+      let(:expected_response) do
+        {
+          "id" => "1",
+          "title" => "",
+          "files" => [
+            { "path" => "path_to_file" }
           ]
         }
       end

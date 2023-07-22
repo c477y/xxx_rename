@@ -169,10 +169,13 @@ module XxxRename
             h[:title] = title(scene)
             h[:id] = scene_id(scene)
             h[:date_released] = date_released(scene)
-            h[:movie] = movie_hash(scene) unless movie_hash(scene).nil?
+            h[:movie] = movie_hash(scene) if movie_hash(scene)
             h[:female_actors] = female_actors(scene)
             h[:male_actors] = male_actors(scene)
             h[:actors] = female_actors(scene) + male_actors(scene)
+            description = description(scene)
+            h[:description] = description if description
+            h[:scene_link] = scene_link(scene)
           end
           resp[normalized_title] = Data::SceneData.new(hash)
         end
@@ -234,6 +237,14 @@ module XxxRename
 
       def date_released(scene)
         Time.parse(scene["dateReleased"])
+      end
+
+      def description(scene)
+        scene["description"]
+      end
+
+      def scene_link(scene)
+        "#{@site_url}/video/#{scene_id(scene)}/#{slug(scene["title"])}"
       end
 
       def search_scene_title(filename)

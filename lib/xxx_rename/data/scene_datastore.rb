@@ -12,6 +12,7 @@ module XxxRename
 
     METADATA_ROOT = "_m_"
     REGISTERED_FILE_PATHS_PREFIX = "_sp_"
+    REGISTERED_FILE_BASENAME_PATH_PREFIX = "_bp_"
 
     RecordStatus = Struct.new(:key, :scene_saved, :missing_keys, :conflicting_indexes, :expected_filename_key, keyword_init: true) do
       def valid?
@@ -92,6 +93,18 @@ module XxxRename
         end
       end
 
+      def find_by_base_filename?(path)
+        benchmark("find_by_base_filename?") do
+          store.transaction(read_only: true) do
+            index_key = generate_lookup_key(REGISTERED_FILE_BASENAME_PATH_PREFIX, File.basename(path))
+            key = store.fetch(index_key, nil)
+            return if key.nil?
+
+            key.map { |k| store[k] }
+          end
+        end
+      end
+
       def find_by_key?(key)
         benchmark("find_by_key? #{key}") do
           semaphore.synchronize do
@@ -110,15 +123,15 @@ module XxxRename
           semaphore.synchronize do
             store.transaction do
               key = scene_data.key
-              new_index_key = generate_lookup_key(REGISTERED_FILE_PATHS_PREFIX, filename)
-              store[new_index_key] = key
+              register_absolute_path!(store, key, filename)
+              register_file_basename!(store, key, filename)
 
               if old_filename
-                old_index_key = generate_lookup_key(REGISTERED_FILE_PATHS_PREFIX, old_filename)
-                store.delete(old_index_key)
+                delete_absolute_path!(store, old_filename)
+                delete_file_basename!(store, old_filename)
               end
 
-              new_index_key
+              true
             end
           end
         end
@@ -264,6 +277,46 @@ module XxxRename
         raise TypeError, "actors: wrong argument type #{actors.class} (expected Array)" if actors && !(actors.is_a? Array)
       end
 
+      # @param [PStore] store
+      # @param [String] key
+      # @param [String] path
+      def register_absolute_path!(store, key, path)
+        index_key = generate_lookup_key(REGISTERED_FILE_PATHS_PREFIX, path)
+        store[index_key] = key
+      end
+
+      # @param [PStore] store
+      # @param [String] key
+      # @param [String] path
+      def register_file_basename!(store, key, path)
+        index_key = generate_lookup_key(REGISTERED_FILE_BASENAME_PATH_PREFIX, File.basename(path))
+        if store[index_key]
+          store[index_key] << key
+        else
+          store[index_key] = [key]
+        end
+      end
+
+      # @param [PStore] store
+      # @param [String] path
+      def delete_absolute_path!(store, path)
+        index_key = generate_lookup_key(REGISTERED_FILE_PATHS_PREFIX, path)
+        store.delete(index_key)
+      end
+
+      # @param [PStore] store
+      # @param [String] path
+      def delete_file_basename!(store, path)
+        index_key = generate_lookup_key(REGISTERED_FILE_BASENAME_PATH_PREFIX, File.basename(path))
+        return unless store[index_key]
+
+        if store[index_key].length == 1
+          store.delete(index_key)
+        else
+          store[index_key].delete(index_key)
+        end
+      end
+
       #
       # This method id thread unsafe!
       # Always call from a synchronized mutex and within a transaction
@@ -280,6 +333,8 @@ module XxxRename
           [store[generate_lookup_key(collection_tag, title)]]
         elsif title && actors
           store.fetch(generate_lookup_key(title, actors.sort.join("|")), []).to_a
+        else
+          []
         end
       end
 
@@ -386,15 +441,6 @@ module XxxRename
         "<#{sanitize(title)}" \
         "$#{sanitize(actors.sort.join("|"))}" \
         ">"
-      end
-
-      def benchmark(opr = "unnamed")
-        raise "#benchmark called without block" unless block_given?
-
-        resp = nil
-        time = Benchmark.measure { resp = yield }
-        XxxRename.logger.debug "#{"[BENCHMARK]".colorize(:cyan)} #{self.class.name}##{opr}: #{time.real.round(3)}s"
-        resp
       end
     end
   end

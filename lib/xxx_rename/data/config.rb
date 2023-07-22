@@ -1,10 +1,18 @@
 # frozen_string_literal: true
 
 require "xxx_rename/data/scene_datastore"
+require "xxx_rename/data/actors_datastore"
+require "xxx_rename/site_client_matcher"
 
 module XxxRename
   module Data
     class Config < Base
+      def initialize(attributes)
+        super
+        # Inject prefix hash set to processed file
+        ProcessedFile.prefix_hash_set(prefix_hash)
+      end
+
       attribute :global do
         attribute :female_actors_prefix,  Types::String
         attribute :male_actors_prefix,    Types::String
@@ -53,6 +61,7 @@ module XxxRename
       attribute :actions,                 Types::Array.of(Types::String)
       attribute? :override_site,          Types::String
 
+      # @return [Hash{Symbol->String}]
       def prefix_hash
         {
           female_actors_prefix: global.female_actors_prefix,
@@ -63,6 +72,8 @@ module XxxRename
         }
       end
 
+      # Maps a site collection tag to site's name
+      # @return [Hash{String->String}]
       def collection_tag_to_site_client
         @collection_tag_to_site_client ||= {}.tap do |h|
           site.attributes.each_pair do |site_name, site_config|
@@ -71,10 +82,14 @@ module XxxRename
         end
       end
 
+      #
+      # Added to support multi-threaded operations when implemented
+      # @return [Mutex]
       def mutex
         @mutex ||= Mutex.new
       end
 
+      # @return [XxxRename::Data::SceneDatastoreQuery]
       def scene_datastore
         @scene_datastore ||=
           begin
@@ -83,6 +98,7 @@ module XxxRename
           end
       end
 
+      # @return [XxxRename::Data::FileRenameOpDatastore]
       def output_recorder
         @output_recorder ||=
           begin
@@ -91,6 +107,24 @@ module XxxRename
             datastore.migration_status = 0
             datastore
           end
+      end
+
+      # @return [XxxRename::Data::ActorsDatastoreQuery]
+      def actors_datastore
+        @actors_datastore ||=
+          begin
+            store = Data::ActorsDatastore.new(File.join(generated_files_dir, "..")).store
+            ActorsDatastoreQuery.new(store, mutex)
+          end
+      end
+
+      def actor_helper
+        @actor_helper ||= ActorsHelper.new(actors_datastore, site_client_matcher)
+      end
+
+      # @return [XxxRename::SiteClientMatcher]
+      def site_client_matcher
+        @site_client_matcher ||= SiteClientMatcher.new(self, override_site: override_site)
       end
     end
   end

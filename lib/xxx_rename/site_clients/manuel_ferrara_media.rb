@@ -75,6 +75,10 @@ module XxxRename
         name = node.map(&:text).map(&:strip)&.first
         [url, name]
       end
+
+      def scene_cover(doc)
+        doc.css("#hpromo img").attr("src").value
+      end
     end
   end
 end

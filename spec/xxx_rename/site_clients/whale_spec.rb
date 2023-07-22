@@ -17,8 +17,7 @@ describe XxxRename::SiteClients::Whale do
       collection: "Casting Couch X",
       collection_tag: "WH",
       title: "Keely Rose",
-      id: "",
-      date_released: nil
+      id: ""
     )
   end
 

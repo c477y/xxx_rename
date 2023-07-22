@@ -7,7 +7,6 @@ describe XxxRename::SiteClients::ManuelFerrara do
   before { WebMock.disable_net_connect!(allow: /(manuelferrara|julesjordan).com/) }
 
   subject(:site_client) { described_class.new(config) }
-  before { allow_any_instance_of(XxxRename::ActorsHelper).to receive(:auto_fetch!).and_return(nil) }
 
   describe ".search" do
     include_context "config provider" do
@@ -22,6 +21,7 @@ describe XxxRename::SiteClients::ManuelFerrara do
           } }
       end
     end
+    before { allow(config.actor_helper).to receive(:auto_fetch!).and_return(nil) }
 
     let(:filename) { "Kayley Gunner Is Super Stacked [C] Manuel Ferrara [A] Kayley Gunner, Manuel Ferrara.mp4" }
     let(:scene_data) do
@@ -32,8 +32,11 @@ describe XxxRename::SiteClients::ManuelFerrara do
           collection: "Manuel Ferrara",
           collection_tag: "MNF",
           title: "Kayley Gunner Is Super Stacked",
-          id: nil,
           date_released: Time.parse("2022-08-24"),
+          director: "Jules Jordan",
+          scene_link: "https://manuelferrara.com/trial/scenes/Kayley-Gunner-Facial_vids.html",
+          scene_cover: "https://thumbs.julesjordan.com/trial/content//contentthumbs/218621.jpg",
+          description: "Super Stacked nympho, Kayley Gunner yells out \"my pussy needs to be fucked so bad\"!",
           movie: {
             name: "Super Stacked #2",
             url: "https://manuelferrara.com/trial/dvds/super-stacked-2.html",
@@ -84,7 +87,7 @@ describe XxxRename::SiteClients::ManuelFerrara do
       end
 
       it "returns the expected response", :aggregate_failures do
-        expect(site_client.search(filename)).to eq_scene_data(scene_data)
+        expect(site_client.search(filename)).to eq(scene_data)
         expect(site_client.site_client_datastore.all.length).to eq(1)
         expect(site_client.all_scenes_processed?).to be true
       end
