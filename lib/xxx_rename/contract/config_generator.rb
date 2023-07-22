@@ -89,6 +89,8 @@ module XxxRename
                 { "output_format" => [], "file_source_format" => [], "collection_tag" => "BLR" },
               "brazzers" =>
                 { "output_format" => [], "file_source_format" => [], "collection_tag" => "BZ" },
+              "deeper" =>
+                { "output_format" => [], "file_source_format" => [], "collection_tag" => "DEE" },
               "digital_playground" =>
                 { "output_format" => [], "file_source_format" => [], "collection_tag" => "DP" },
               "elegant_angel" =>

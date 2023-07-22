@@ -10,6 +10,8 @@ module XxxRename
 
         def self.generate(filename, source_format)
           if (data = new(filename, source_format, []).parse)
+            return if data.date_released.nil?
+
             "#{data.collection} #{data.title} #{data.date_released.strftime("%m %d %Y")}"
               .downcase
               .gsub(/[^\w\s]/, "")

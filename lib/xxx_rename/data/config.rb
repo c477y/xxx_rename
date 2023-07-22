@@ -28,6 +28,7 @@ module XxxRename
         attribute? :blacked,               Data::VixenMediaConfig
         attribute? :blacked_raw,           Data::VixenMediaConfig
         attribute? :brazzers,              Data::MgPremiumConfig
+        attribute? :deeper,                Data::VixenMediaConfig
         attribute? :digital_playground,    Data::MgPremiumConfig
         attribute? :elegant_angel,         Data::ElegantAngelConfig
         attribute? :evil_angel,            Data::EvilAngelConfig

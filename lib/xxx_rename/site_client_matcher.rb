@@ -216,6 +216,9 @@ module XxxRename
       when :digital_playground
         require "xxx_rename/site_clients/digital_playground"
         XxxRename::SiteClients::DigitalPlayground.new(config)
+      when :deeper
+        require "xxx_rename/site_clients/deeper"
+        XxxRename::SiteClients::Deeper.new(config)
       when :elegant_angel
         require "xxx_rename/site_clients/elegant_angel"
         XxxRename::SiteClients::ElegantAngel.new(config)
