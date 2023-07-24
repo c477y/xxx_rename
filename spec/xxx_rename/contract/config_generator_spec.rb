@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require "rspec"
+require "xxx_rename/contract/config_generator"
+require "xxx_rename/data/file_pre_processor_rule"
 
 RSpec.describe XxxRename::Contract::ConfigGenerator do
   describe(".generate!") do
@@ -25,10 +27,11 @@ RSpec.describe XxxRename::Contract::ConfigGenerator do
 
     context "when a config file exists" do
       include_context "config provider" do
-        let(:override_config) { invalid_config }
+        let(:override_config) { override_config_val }
+        let(:eager_load) { false }
       end
 
-      let(:invalid_config) { {} }
+      let(:override_config_val) { {} }
 
       context "when passing override options" do
         context "when overriding female_actors_prefix" do
@@ -84,7 +87,7 @@ RSpec.describe XxxRename::Contract::ConfigGenerator do
         end
 
         context "when the config file contains invalid `output_format`" do
-          let(:invalid_config) do
+          let(:override_config_val) do
             {
               "site" => {
                 "brazzers" => {
@@ -101,7 +104,7 @@ RSpec.describe XxxRename::Contract::ConfigGenerator do
         end
 
         context "when config file has clashing `source_file_format`" do
-          let(:invalid_config) do
+          let(:override_config_val) do
             {
               "site" => {
                 "brazzers" => { # duplicate 1
@@ -133,7 +136,7 @@ RSpec.describe XxxRename::Contract::ConfigGenerator do
         end
 
         context "when the config file has missing username and present password for stash db" do
-          let(:invalid_config) do
+          let(:override_config_val) do
             {
               "site" => {
                 "stash" => {
@@ -149,6 +152,69 @@ RSpec.describe XxxRename::Contract::ConfigGenerator do
             expect { call.generate! }
               .to raise_error(XxxRename::Errors::ConfigValidationError,
                               "stash_credentials: provide both username and password if you want to use login credentials")
+          end
+        end
+
+        context "file_pre_process" do
+          let(:override_config_val) do
+            {
+              "file_pre_process" => [
+                {
+                  "regex" => regex,
+                  "with" => with
+                }
+              ]
+            }
+          end
+
+          let(:with) { "FOO" }
+          let(:regex) { "\\[XXX\\]" }
+
+          it "contains the default rules" do
+            config = call.generate!
+            expect(config.file_pre_process[0].to_h).to eq(XxxRename::Data::FilePreProcessorRule::DEFAULT_RULES[0])
+            expect(config.file_pre_process[1].to_h).to eq(XxxRename::Data::FilePreProcessorRule::DEFAULT_RULES[1])
+          end
+
+          it "contains the new rule" do
+            config = call.generate!
+            expect(config.file_pre_process.last.to_h).to eq({ regex: "\\[XXX\\]", with: "FOO" })
+          end
+
+          context "with valid regex" do
+            it "does not raise any validation errors" do
+              expect { call.generate! }
+                .not_to raise_error(XxxRename::Errors::ConfigValidationError)
+            end
+          end
+
+          context "with an empty regex" do
+            let(:regex) { "" }
+
+            it "raises a validation error" do
+              expect { call.generate! }
+                .to raise_error(XxxRename::Errors::ConfigValidationError, /file_pre_process.\d.regex: must be filled/)
+            end
+          end
+
+          context "with an invalid regex" do
+            let(:regex) { "((" }
+            let(:error_message) { "file_pre_process: Rule (( failed to parse due to error end pattern with unmatched parenthesis: /((/" }
+
+            it "raises a validation error" do
+              expect { call.generate! }
+                .to raise_error(XxxRename::Errors::ConfigValidationError, error_message)
+            end
+          end
+
+          context "with an empty replacement" do
+            let(:regex) { "\\[XXX\\]" }
+            let(:with) { "" }
+
+            it "does not raise any validation errors" do
+              expect { call.generate! }
+                .not_to raise_error(XxxRename::Errors::ConfigValidationError)
+            end
           end
         end
       end

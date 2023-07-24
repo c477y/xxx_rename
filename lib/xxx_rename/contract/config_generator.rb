@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "xxx_rename/constants"
+require "xxx_rename/data/file_pre_processor_rule"
 require "fileutils"
 
 module XxxRename
@@ -17,6 +18,7 @@ module XxxRename
       end
 
       # @return [Data::Config]
+      # noinspection RubyMismatchedReturnType
       def generate!
         config_hash = make_config_hash
         valid_config = validate_download_filters!(config_hash)
@@ -146,7 +148,15 @@ module XxxRename
               "x_empire" =>
                 { "output_format" => [], "file_source_format" => [], "collection_tag" => "XM" },
               "zero_tolerance" =>
-                { "output_format" => [], "file_source_format" => [], "collection_tag" => "WI" } }
+                { "output_format" => [], "file_source_format" => [], "collection_tag" => "WI" } },
+          c18: "List[Hash{regex->with}]",
+          c19: "Provide a list of custom rules to preprocess a file",
+          c20: "Each hash should contain two keys:",
+          c21: "regex: A valid regex that will be used to create a rule",
+          c22: "with: A value that you want to replace the match with",
+          c23: "By default, the app will always use these rule(s) for pre-processing:",
+          c24: "1. Replace any non-ASCII value (e.g. emojis) with blank strings",
+          "file_pre_process" => []
         }
       end
 
@@ -158,7 +168,16 @@ module XxxRename
         config_file = read_config_file_or_abort!
         override_from_file = config_file.deeper_merge(default_config)
         override_from_options = override_flags_from_options(override_from_file)
-        override_from_options.deeper_merge(override_from_file)
+        deep_merged = override_from_options.deeper_merge(override_from_file)
+        inject_defaults(deep_merged)
+      end
+
+      def inject_defaults(hash)
+        hash.tap do |h|
+          rules = [].concat(Data::FilePreProcessorRule::DEFAULT_RULES)
+          rules.concat(h["file_pre_process"])
+          h["file_pre_process"] = rules
+        end
       end
 
       def generated_files_dir

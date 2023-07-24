@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
-require "active_support/core_ext/string/inflections"
 require "active_support/core_ext/hash/except"
+require "active_support/core_ext/module/delegation"
+require "active_support/core_ext/object/blank"
+require "active_support/core_ext/string/inflections"
 
 require "date"
 require "colorize"
@@ -20,6 +22,27 @@ require "xxx_rename/log"
 module XxxRename
   def self.logger(**opts)
     @logger ||= XxxRename::Log.new(opts["mode"], opts["verbose"]).logger
+  end
+
+  # @return [XxxRename::Data::Config]
+  # @raise [Errors::FatalError] if the config is not initialised
+  def self.config
+    raise Errors::FatalError, "tried to access config, but it was not assigned" unless defined?(@config)
+
+    @config
+  end
+
+  #
+  # This is called automatically as soon as Config instance is initialised.
+  # Now we have access to config globally and can be called by any class
+  # @param [XxxRename::Data::Config] config
+  def self.config_set(config)
+    if config.class.name != Data::Config.name
+      raise ArgumentError,
+            "expected to set config #{Data::Config.class.name}, but received type #{config.class.name}"
+    end
+
+    @config = config
   end
 end
 
@@ -43,7 +66,6 @@ require_relative "xxx_rename/data/types"
 require_relative "xxx_rename/data/base"
 require_relative "xxx_rename/data/site_config"
 require_relative "xxx_rename/data/config"
-require_relative "xxx_rename/data/naughty_america_database"
 require_relative "xxx_rename/data/scene_data"
 
 # Schema Files

@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require "singleton"
-require "active_support/core_ext/module/delegation"
-
 module XxxRename
   class ActorsHelper
     # @param [XxxRename::Data::ActorsDatastoreQuery] datastore

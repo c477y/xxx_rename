@@ -16,7 +16,7 @@ module XxxRename
             return unless filename.match? Constants::MG_PREMIUM_ORIGINAL_FILE_FORMAT
 
             basename = File.basename(filename, ".*")
-            scene_title = basename.split("_")&.first&.split("-")
+            scene_title = basename.split("_").first&.split("-")
             SearchParameters.new(title: adjust_apostrophe(scene_title))
           end
         end

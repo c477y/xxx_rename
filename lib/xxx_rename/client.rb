@@ -4,7 +4,6 @@ require "xxx_rename/contract/file_rename_op_contract"
 require "xxx_rename/data/file_rename_op_datastore"
 require "xxx_rename/site_client_matcher"
 require "xxx_rename/actions/resolver"
-require "active_support/core_ext/module/delegation"
 
 module XxxRename
   class Client

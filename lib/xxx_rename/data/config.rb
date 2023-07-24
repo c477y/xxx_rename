@@ -2,6 +2,7 @@
 
 require "xxx_rename/data/scene_datastore"
 require "xxx_rename/data/actors_datastore"
+require "xxx_rename/data/file_pre_processor_rule"
 require "xxx_rename/site_client_matcher"
 
 module XxxRename
@@ -9,6 +10,10 @@ module XxxRename
     class Config < Base
       def initialize(attributes)
         super
+
+        # Initialise config
+        XxxRename.config_set(self)
+
         # Inject prefix hash set to processed file
         ProcessedFile.prefix_hash_set(prefix_hash)
       end
@@ -55,6 +60,7 @@ module XxxRename
         attribute :api_token,             Types::String.optional
       end
 
+      attribute :file_pre_process,        Types::Array.of(FilePreProcessorRule)
       attribute :generated_files_dir,     Types::String
       # CLI Flags
       attribute :force_refresh_datastore, Types::Bool

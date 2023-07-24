@@ -86,6 +86,11 @@ module XxxRename
           optional(:x_empire).hash(SITE_CONFIG)
           optional(:zero_tolerance).hash(SITE_CONFIG)
         end
+
+        required(:file_pre_process).array(:hash) do
+          required(:regex).filled(:string)
+          required(:with).value(:string)
+        end
       end
       # rubocop:enable Metrics/BlockLength
 
@@ -188,6 +193,8 @@ module XxxRename
         end
       end
 
+      rule("file_pre_process") { validate_pre_processor_rules(key, value) }
+
       private
 
       INVALID_PREFIX_MSG = "should only contain A-Z a-z 0-9 [ ] _ -"
@@ -232,6 +239,19 @@ module XxxRename
         resp = []
         frequency.each_pair { |key, value| resp << key if value > 1 }
         resp
+      end
+
+      def validate_pre_processor_rules(key, values)
+        messages = []
+        values.each do |rule|
+          Regexp.new(rule[:regex])
+
+          message << "regex rule cannot be empty" if rule[:regex].blank?
+        rescue RegexpError => e
+          messages << "Rule #{rule[:regex]} failed to parse due to error #{e.message}"
+        end
+
+        key.failure(messages.join(",")) unless messages.empty?
       end
     end
   end

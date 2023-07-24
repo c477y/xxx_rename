@@ -113,7 +113,10 @@ module XxxRename
 
     # @param [String] file Name of file
     def initialize(file)
-      @file = file
+      XxxRename.config.file_pre_process.map do |processor|
+        file = processor.replace(file)
+      end
+      @file = file.strip
     end
 
     # @param [String] pattern
@@ -155,7 +158,7 @@ module XxxRename
         end
         h["collection"] = clean_s(h["collection"]) || ""
         h["collection_tag"] = clean_s(h["collection_tag"]) || ""
-        h["title"] = clean_s(h["title"]) if clean_s(h["title"])
+        h["title"] = clean_s(h["title"]) || ""
         h["id"] = clean_s(h["id"]) if clean_s(h["id"])
         date_released = date_released(h["year"], h["month"], h["day"])
         h["date_released"] = date_released if date_released
