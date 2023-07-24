@@ -20,6 +20,8 @@ module XxxRename
           get_video_by_id(match.id, match.collection)
         elsif match.title && match.actors
           get_video_by_metadata(match.title, match.actors)
+        else
+          raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_RESULT, filename)
         end
       end
 
@@ -61,6 +63,8 @@ module XxxRename
             }.merge(actors_hash(search_result["modelsSlugged"].map { |m| m["name"] }))
           )
         end
+
+        raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_RESULT, "#{title}-#{actors.join(",")}") if search_results.blank?
       end
 
       def scene_match?(search_result, title, actors)

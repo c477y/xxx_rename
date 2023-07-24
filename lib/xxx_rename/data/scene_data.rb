@@ -20,7 +20,7 @@ module XxxRename
       attribute :actors, Types::Array.of(Types::String).default([].freeze)
       attribute :collection, Types::String.default("")
       attribute :collection_tag, Types::String.default("")
-      attribute :title, Types::String
+      attribute :title, Types::String.default("")
 
       attribute? :id, Types::Coercible::String
       attribute? :date_released, Types::Time

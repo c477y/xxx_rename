@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require "active_support/core_ext/object/blank"
 require "xxx_rename/site_clients/query_generator/stash_db"
 
 module XxxRename

@@ -7,6 +7,7 @@ require "xxx_rename/contract/config_generator"
 shared_context "config provider" do
   # Input: Pass some keys in this hash to override default keys
   let(:override_config) { {} }
+  let(:eager_load) { true }
 
   # Output: Access config
   let(:config) { XxxRename::Contract::ConfigGenerator.new({ "config" => config_file }).generate! }
@@ -17,6 +18,7 @@ shared_context "config provider" do
     allow_any_instance_of(XxxRename::SystemConstants).to receive(:home_dir).and_return("test_folder")
     FileUtils.mkpath(File.join("test_folder", ".config", "xxx_rename", "generated", "output"))
     write_config_file
+    config if eager_load
   end
 
   after(:example) do

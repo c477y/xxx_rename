@@ -65,6 +65,7 @@ module XxxRename
           optional(:blacked).hash(SITE_CONFIG)
           optional(:blacked_raw).hash(SITE_CONFIG)
           optional(:brazzers).hash(SITE_CONFIG)
+          optional(:deeper).hash(SITE_CONFIG)
           optional(:digital_playground).hash(SITE_CONFIG)
           optional(:elegant_angel).hash(SITE_CONFIG)
           optional(:evil_angel).hash(SITE_CONFIG)
@@ -84,6 +85,11 @@ module XxxRename
           optional(:wicked).hash(SITE_CONFIG)
           optional(:x_empire).hash(SITE_CONFIG)
           optional(:zero_tolerance).hash(SITE_CONFIG)
+        end
+
+        required(:file_pre_process).array(:hash) do
+          required(:regex).filled(:string)
+          required(:with).value(:string)
         end
       end
       # rubocop:enable Metrics/BlockLength
@@ -105,6 +111,7 @@ module XxxRename
       rule("site.blacked.output_format") { validate_format!(key, value) }
       rule("site.blacked_raw.output_format") { validate_format!(key, value) }
       rule("site.brazzers.output_format") { validate_format!(key, value) }
+      rule("site.deeper.output_format") { validate_format!(key, value) }
       rule("site.digital_playground.output_format") { validate_format!(key, value) }
       rule("site.elegant_angel.output_format") { validate_format!(key, value) }
       rule("site.evil_angel.output_format") { validate_format!(key, value) }
@@ -129,6 +136,7 @@ module XxxRename
       rule("site.blacked.file_source_format") { validate_source_format!(key, value) }
       rule("site.blacked_raw.file_source_format") { validate_source_format!(key, value) }
       rule("site.brazzers.file_source_format") { validate_source_format!(key, value) }
+      rule("site.deeper.file_source_format") { validate_source_format!(key, value) }
       rule("site.digital_playground.file_source_format") { validate_source_format!(key, value) }
       rule("site.elegant_angel.file_source_format") { validate_source_format!(key, value) }
       rule("site.evil_angel.file_source_format") { validate_source_format!(key, value) }
@@ -152,6 +160,7 @@ module XxxRename
            "site.blacked.file_source_format",
            "site.blacked_raw.file_source_format",
            "site.brazzers.file_source_format",
+           "site.deeper.file_source_format",
            "site.digital_playground.file_source_format",
            "site.elegant_angel.file_source_format",
            "site.evil_angel.file_source_format",
@@ -183,6 +192,8 @@ module XxxRename
           key(:stash_credentials).failure("provide both username and password if you want to use login credentials")
         end
       end
+
+      rule("file_pre_process") { validate_pre_processor_rules(key, value) }
 
       private
 
@@ -228,6 +239,19 @@ module XxxRename
         resp = []
         frequency.each_pair { |key, value| resp << key if value > 1 }
         resp
+      end
+
+      def validate_pre_processor_rules(key, values)
+        messages = []
+        values.each do |rule|
+          Regexp.new(rule[:regex])
+
+          message << "regex rule cannot be empty" if rule[:regex].blank?
+        rescue RegexpError => e
+          messages << "Rule #{rule[:regex]} failed to parse due to error #{e.message}"
+        end
+
+        key.failure(messages.join(",")) unless messages.empty?
       end
     end
   end
