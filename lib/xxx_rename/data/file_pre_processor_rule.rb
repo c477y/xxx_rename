@@ -22,7 +22,7 @@ module XxxRename
       ].freeze
 
       def replace(file)
-        # At the point, the regexp will be validate by the contract
+        # At the point, the regexp will be validated by the contract
         # We don't expect this to raise any RegexpError
         re = Regexp.new(regex)
         file.gsub(re, with)
