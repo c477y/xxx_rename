@@ -8,8 +8,75 @@ describe XxxRename::SiteClients::ElegantAngel do
 
   subject(:site_client) { described_class.new(config) }
 
+  describe ".datastore_refresh_required?" do
+    include_context "config provider" do
+      let(:override_config) do
+        { "force_refresh_datastore" => force_refresh_datastore }
+      end
+    end
+
+    context "when force override is true" do
+      let(:force_refresh_datastore) { true }
+      it { expect(site_client.datastore_refresh_required?).to eq(true) }
+    end
+
+    context "when force override is false" do
+      let(:force_refresh_datastore) { false }
+
+      context "when site datastore is empty" do
+        it { expect(site_client.datastore_refresh_required?).to eq(true) }
+      end
+
+      context "when site client has all the latest scenes" do
+        before do
+          allow(config.actor_helper).to receive(:auto_fetch!).and_return(nil)
+          expect(site_client).to(receive(:movie_links).with(1).twice.and_wrap_original { |m, *args| [m.call(*args).first] })
+          expect(site_client).to(receive(:movie_links).with(2).and_wrap_original { |_m, *_args| [] })
+
+          site_client.refresh_datastore(1)
+        end
+
+        it { expect(site_client.datastore_refresh_required?).to eq(false) }
+      end
+    end
+  end
+
+  describe ".refresh_datastore" do
+    include_context "config provider"
+
+    context "when all the scenes are processed" do
+      before do
+        allow(config.actor_helper).to receive(:auto_fetch!).and_return(nil)
+        expect(site_client).to(receive(:movie_links).with(1).and_wrap_original { |m, *args| [m.call(*args).first] })
+      end
+
+      before do
+        expect(site_client).to(receive(:movie_links).with(2).and_wrap_original { |_m, *_args| [] })
+
+        site_client.refresh_datastore(1)
+      end
+
+      it "updates the metadata as complete" do
+        expect(site_client.metadata.complete?).to eq(true)
+      end
+    end
+
+    context "when the scraping fails due to some error" do
+      # TODO: This needs to be implemented
+      # before do
+      #   expect(site_client).to(receive(:movie_links).with(2).and_raise(RuntimeError, "some error"))
+      # end
+      #
+      # it "raises an error and updates the metadata" do
+      #   expect { site_client.refresh_datastore(2) }.to raise_error(RuntimeError)
+      #
+      #   expect(site_client.metadata.failure?).to eq(true)
+      #   expect(site_client.metadata.failure.checkpoint).not_to eq(nil)
+      # end
+    end
+  end
+
   describe ".search" do
-    before { SiteClientStubs::ActorHelperStubs.enable }
     context "force datastore refresh" do
       include_context "config provider" do
         let(:override_config) do
@@ -153,32 +220,6 @@ describe XxxRename::SiteClients::ElegantAngel do
 
           it "returns a successful match" do
             expect(site_client.search(file)).to eq_scene_data(scene_data)
-          end
-        end
-
-        context "with empty datastore" do
-          let(:file) { file1 }
-          let(:force_refresh_datastore) { false }
-
-          it "raises no match error" do
-            expect { site_client.search(file) }
-              .to raise_error(
-                an_instance_of(XxxRename::SiteClients::Errors::NoMatchError)
-                  .and(having_attributes(code: XxxRename::SiteClients::Errors::NoMatchError::ERR_NO_RESULT))
-              )
-          end
-        end
-
-        context "with unmatched filename" do
-          let(:file) { "foobar.xyz" }
-          let(:force_refresh_datastore) { false }
-
-          it "raises no match error" do
-            expect { site_client.search(file) }
-              .to raise_error(
-                an_instance_of(XxxRename::SiteClients::Errors::NoMatchError)
-                  .and(having_attributes(code: XxxRename::SiteClients::Errors::NoMatchError::ERR_NO_METADATA))
-              )
           end
         end
       end

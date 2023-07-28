@@ -5,6 +5,7 @@ require "benchmark"
 require "pathname"
 
 require "xxx_rename/data/query_interface"
+require "xxx_rename/data/site_client_meta_data"
 
 module XxxRename
   module Data
@@ -172,6 +173,16 @@ module XxxRename
         end
       end
 
+      def empty?
+        benchmark("empty?") do
+          semaphore.synchronize do
+            store.transaction(true) do
+              store.roots.length.zero?
+            end
+          end
+        end
+      end
+
       def all
         benchmark("all") do
           semaphore.synchronize do
@@ -184,19 +195,25 @@ module XxxRename
         end
       end
 
+      # @return [XxxRename::Data::SiteClientMetaData]
       def metadata
         semaphore.synchronize do
           store.transaction(true) do
-            store.fetch(METADATA_ROOT, {})
+            store.fetch(METADATA_ROOT, nil)
           end
         end
       end
 
-      def update_metadata(hash)
+      # @param [XxxRename::Data::SiteClientMetaData] metadata
+      def update_metadata(metadata)
+        # binding.pry
+        if metadata.class.name != Data::SiteClientMetaData.name
+          raise ArgumentError, "expected metadata of type #{Data::SiteClientMetaData.name}, but received #{metadata.class.name}"
+        end
+
         semaphore.synchronize do
           store.transaction do
-            store[METADATA_ROOT] ||= {}
-            store[METADATA_ROOT] = store[METADATA_ROOT].merge(hash)
+            store[METADATA_ROOT] = metadata
           end
         end
       end

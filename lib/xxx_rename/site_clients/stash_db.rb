@@ -174,12 +174,35 @@ module XxxRename
         hash[:collection_tag] = site_config.collection_tag
         hash[:title] = scene["title"]
         hash[:id] = scene["id"]
-        hash[:date_released] = Time.strptime(scene["release_date"], "%Y-%m-%d")
+        hash[:date_released] = date_released?(scene["release_date"]) if date_released?(scene["release_date"])
         hash[:director] = scene["director"] if scene["director"]
         hash[:description] = scene["details"] if scene["details"]
         hash[:scene_link] = scene_link(scene) if scene_link(scene)
         hash[:scene_cover] = scene_cover(scene) if scene_cover(scene)
         Data::SceneData.new(hash)
+      end
+
+      def date_released?(date)
+        return if date.blank?
+
+        parsed = nil
+        begin
+          parsed = Time.strptime(date, "%Y-%m-%d")
+        rescue ArgumentError
+          nil
+        end
+
+        return parsed if parsed
+
+        begin
+          parsed = Time.strptime(date, "%Y")
+        rescue ArgumentError
+          nil
+        end
+
+        return parsed if parsed
+
+        nil
       end
 
       # @param [Hash] scene
