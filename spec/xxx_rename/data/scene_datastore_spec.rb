@@ -2,6 +2,7 @@
 
 require "rspec"
 require "xxx_rename/data/scene_datastore"
+require "xxx_rename/data/site_client_meta_data"
 require "xxx_rename/data/scene_data"
 
 describe XxxRename::Data::SceneDatastoreQuery do
@@ -100,6 +101,27 @@ describe XxxRename::Data::SceneDatastoreQuery do
     end
   end
 
+  describe ".empty?" do
+    context "when datastore is empty" do
+      it { expect(data_store.empty?).to eq(true) }
+    end
+
+    context "when datastore not empty" do
+      before { data_store.create!(scene1) }
+
+      it { expect(data_store.empty?).to eq(false) }
+    end
+
+    context "when datastore is emptied" do
+      before do
+        data_store.create!(scene1)
+        data_store.destroy(scene1)
+      end
+
+      it { expect(data_store.empty?).to eq(true) }
+    end
+  end
+
   describe ".all" do
     before do
       data_store.create!(scene1)
@@ -112,27 +134,51 @@ describe XxxRename::Data::SceneDatastoreQuery do
   end
 
   describe ".metadata" do
-    let(:site_client) { :brazzers }
-    context "when metadata does not exist for a site_client" do
-      it "returns an empty hash" do
-        expect(data_store.metadata).to eq({})
-      end
+    context "when metadata does not exist" do
+      it { expect(data_store.metadata).to be_nil }
     end
 
-    context "when setting metadata" do
-      before { data_store.update_metadata({ foo: :bar }) }
+    context "when metadata exists" do
+      let(:metadata) { XxxRename::Data::SiteClientMetaData.create("some url") }
 
-      it "returns the set metadata" do
-        expect(data_store.metadata).to eq({ foo: :bar })
-      end
+      before { data_store.update_metadata(metadata) }
+
+      it { expect(data_store.metadata).to eq(metadata) }
+    end
+  end
+
+  describe ".update_metadata" do
+    context "when metadata type is incorrect" do
+      it {
+        # noinspection RubyMismatchedArgumentType
+        expect { data_store.update_metadata({}) }
+          .to raise_error(ArgumentError, "expected metadata of type XxxRename::Data::SiteClientMetaData, but received Hash")
+      }
     end
 
-    context "when updating metadata" do
-      before { data_store.update_metadata({ foo: :bar, bar: :baz }) }
+    context "when metadata type is correct" do
+      let(:metadata) { XxxRename::Data::SiteClientMetaData.create("some url") }
 
-      it "returns the updated metadata" do
-        data_store.update_metadata({ bar: :tao })
-        expect(data_store.metadata).to eq({ foo: :bar, bar: :tao })
+      before { data_store.update_metadata(metadata) }
+
+      it "stores the metadata" do
+        store.transaction(true) do
+          actual_metadata = store[XxxRename::Data::METADATA_ROOT]
+          expect(actual_metadata).to eq(metadata)
+        end
+      end
+
+      context "when metadata is updated" do
+        let(:updated_metadata) { metadata.mark_complete }
+
+        before { data_store.update_metadata(updated_metadata) }
+
+        it "stores the metadata" do
+          store.transaction(true) do
+            actual_metadata = store[XxxRename::Data::METADATA_ROOT]
+            expect(actual_metadata).to eq(updated_metadata)
+          end
+        end
       end
     end
   end

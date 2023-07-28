@@ -24,7 +24,7 @@ module XxxRename
         # @param [Array[String]] source_pattern
         # @param [Array[String]] processed_file_patterns
         def initialize(filename, source_pattern, processed_file_patterns)
-          @filename = File.basename(filename, File.extname(filename))
+          @filename = filename
           @source_pattern = source_pattern
           @processed_file_patterns = processed_file_patterns
         end

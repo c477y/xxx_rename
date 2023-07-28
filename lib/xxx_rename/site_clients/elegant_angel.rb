@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "nokogiri"
+require "xxx_rename/data/site_client_meta_data"
 require "xxx_rename/site_clients/query_generator/base"
 
 module XxxRename
@@ -26,6 +27,42 @@ module XxxRename
 
       def oldest_processable_date?
         oldest_processable_date
+      end
+
+      def datastore_refresh_required?
+        if config.force_refresh_datastore
+          XxxRename.logger.info "#{"[FORCE REFRESH]".colorize(:green)} #{self.class.name}"
+          true
+        elsif site_client_datastore.empty?
+          XxxRename.logger.info "#{"[EMPTY DATASTORE] Scraping scenes".colorize(:green)} #{self.class.name}"
+          true
+        else
+          datastore_update_required?
+        end
+      end
+
+      def refresh_datastore(page)
+        movie_links = movie_links(page)
+
+        if movie_links.blank?
+          @all_scenes_processed = true
+        elsif page == 1
+          # noinspection RubyMismatchedArgumentType
+          update_metadata(Data::SiteClientMetaData.create(movie_links.first))
+        end
+
+        movie_links.map do |path|
+          movie_doc = doc(path)
+          movie_hash = movie_hash(movie_doc, path)
+          if movie_hash[:date].year < OLDEST_PROCESSABLE_MOVIE_YEAR
+            @oldest_processable_date = true
+            break
+          end
+          scenes = movie_scenes(movie_doc, movie_hash)
+          scenes.map { |scene_data| site_client_datastore.create!(scene_data, force: true) }
+        end
+
+        stop_processing? ? true : refresh_datastore(page + 1)
       end
 
       private
@@ -54,39 +91,22 @@ module XxxRename
         @oldest_processable_date ||= false
       end
 
-      def datastore_refresh_required?
-        if config.force_refresh_datastore
-          XxxRename.logger.info "#{"[FORCE REFRESH]".colorize(:green)} #{self.class.name}"
-          true
-        else
-          false
-        end
+      def datastore_update_required?
+        return true if metadata.nil?
+
+        first_link = movie_links(1).first
+        metadata.latest_url != first_link
       end
 
-      def refresh_datastore(page)
-        movie_links = movie_links(page)
-        @all_scenes_processed = true if movie_links.blank?
-
-        movie_links.map do |path|
-          movie_doc = doc(path)
-          movie_hash = movie_hash(movie_doc, path)
-          if movie_hash[:date].year < OLDEST_PROCESSABLE_MOVIE_YEAR
-            @oldest_processable_date = true
-            break
-          end
-          scenes = movie_scenes(movie_doc, movie_hash)
-          scenes.map { |scene_data| site_client_datastore.create!(scene_data, force: true) }
-        end
-
-        stop_processing? ? true : refresh_datastore(page + 1)
-      end
-
+      # noinspection RubyMismatchedArgumentType
       def stop_processing?
         if all_scenes_processed?
           XxxRename.logger.info "#{"[DATASTORE REFRESH COMPLETE]".colorize(:green)} #{self.class.site_client_name}"
+          update_metadata(metadata.mark_complete)
           true
         elsif oldest_processable_date?
           XxxRename.logger.info "#{"[OLDEST PROCESSABLE MOVIE REACHED]".colorize(:green)} #{self.class.site_client_name}"
+          update_metadata(metadata.mark_complete)
           true
         else
           false
@@ -116,7 +136,7 @@ module XxxRename
             h[:date_released] = movie_hash[:date]
             scene_path = scene_doc.css(".scene-title").map { |x| x["href"] }.first
             h[:scene_link] = URI.join(self.class.base_uri, scene_path).to_s
-            h[:scene_cover] = scene_doc.css(".scene-preview-container img").attr("src").value
+            h[:scene_cover] = scene_cover(scene_doc) if scene_cover(scene_doc)
             h[:movie] = movie_hash
           end
 
@@ -136,6 +156,10 @@ module XxxRename
         doc.xpath('//div[@id="scenes"]//div[@class="scene-details"]').presence ||
           doc.xpath('//div[@id="scenes"]//div[@class="grid-item"]').presence ||
           []
+      end
+
+      def scene_cover(doc)
+        doc.css(".scene-preview-container img")&.attr("src")&.value
       end
 
       def movie_hash(doc, path)

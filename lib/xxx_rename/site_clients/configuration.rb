@@ -28,15 +28,15 @@ module XxxRename
               end
           end
 
-          # @return [Hash]
+          # @return [XxxRename::Data::SiteClientMetaData]
           def metadata
             site_client_datastore.metadata
           end
 
-          # @param [Hash] opts
-          # @return [Hash]
-          def update_metadata(**opts)
-            site_client_datastore.update_metadata(opts)
+          # @param [XxxRename::Data::SiteClientMetaData] metadata
+          # @return [XxxRename::Data::SiteClientMetaData]
+          def update_metadata(metadata)
+            site_client_datastore.update_metadata(metadata)
           end
         end
       end
