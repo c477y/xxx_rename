@@ -30,7 +30,9 @@ module XxxRename
       end
 
       def datastore_refresh_required?
-        if config.force_refresh_datastore
+        if oldest_processable_date? || all_scenes_processed?
+          false
+        elsif config.force_refresh_datastore
           XxxRename.logger.info "#{"[FORCE REFRESH]".colorize(:green)} #{self.class.name}"
           true
         elsif site_client_datastore.empty?
@@ -103,10 +105,12 @@ module XxxRename
         if all_scenes_processed?
           XxxRename.logger.info "#{"[DATASTORE REFRESH COMPLETE]".colorize(:green)} #{self.class.site_client_name}"
           update_metadata(metadata.mark_complete)
+          @all_scenes_processed = true
           true
         elsif oldest_processable_date?
           XxxRename.logger.info "#{"[OLDEST PROCESSABLE MOVIE REACHED]".colorize(:green)} #{self.class.site_client_name}"
           update_metadata(metadata.mark_complete)
+          @all_scenes_processed = true
           true
         else
           false
