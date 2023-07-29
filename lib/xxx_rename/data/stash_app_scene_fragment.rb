@@ -7,20 +7,6 @@ module XxxRename
       attribute? :gender, Types::String.optional
     end
 
-    # noinspection RubyMismatchedArgumentType
-    class StashPerformerFragmentData < Base
-      attribute :performer, StashPerformerData
-    end
-
-    class StashUrlsData < Base
-      attribute :url, Types::String
-      attribute :type, Types::String
-    end
-
-    class StashImagesData < Base
-      attribute :url, Types::String
-    end
-
     class StashStudioData < Base
       attribute :name, Types::String
     end
@@ -40,11 +26,11 @@ module XxxRename
       attribute? :director, Types::String
       # duration: not supported
       attribute? :date, Types::String
-      attribute? :urls, Types::Array.of(StashUrlsData).default([].freeze)
-      attribute? :images, Types::Array.of(StashImagesData).default([].freeze)
+      attribute? :url, Types::String
+      attribute? :image, Types::String
       # noinspection RubyMismatchedArgumentType
       attribute :studio, StashStudioData
-      attribute :performers, Types::Array.of(StashPerformerFragmentData).default([].freeze)
+      attribute :performers, Types::Array.of(StashPerformerData).default([].freeze)
       # fingerprints: not supported
 
       # @param [XxxRename::Data::SceneData] scene_data
@@ -57,14 +43,14 @@ module XxxRename
         hash[:details] = scene_data.description if scene_data.description
         hash[:director] = scene_data.director if scene_data.director
         hash[:date] = scene_data.date_released.iso8601(3) if scene_data.date_released
-        hash[:urls] = [{ url: scene_data.scene_link }] if scene_data.scene_link
-        hash[:images] = [{ url: scene_data.scene_cover }] if scene_data.scene_cover
+        hash[:url] = scene_data.scene_link if scene_data.scene_link
+        hash[:image] = scene_data.scene_cover if scene_data.scene_cover
         hash[:studio] = { name: scene_data.collection } if scene_data.collection.presence
         performers = if scene_data.female_actors.empty?
-                       scene_data.actors.map { |actor| { performer: { name: actor } } }
+                       scene_data.actors.map { |actor| { name: actor } }
                      else
-                       scene_data.female_actors.map { |actor| { performer: { name: actor, gender: "FEMALE" } } } +
-                         scene_data.male_actors.map { |actor| { performer: { name: actor, gender: "MALE" } } }
+                       scene_data.female_actors.map { |actor| { name: actor, gender: "FEMALE" } } +
+                         scene_data.male_actors.map { |actor| { name: actor, gender: "MALE" } }
                      end
         hash[:performers] = performers
 

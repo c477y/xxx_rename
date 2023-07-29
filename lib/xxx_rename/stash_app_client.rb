@@ -12,9 +12,11 @@ module XxxRename
 
     def scene_by_fragment
       scene_data = lookup(scene_input)
-      return if scene_data.nil?
-
-      print Data::StashAppSceneFragment.create_from_scene_data(scene_data).to_json
+      if scene_data.nil?
+        puts nil.to_json
+      else
+        print Data::StashAppSceneFragment.create_from_scene_data(scene_data).to_json
+      end
     end
 
     private
@@ -37,12 +39,25 @@ module XxxRename
     # @param [String] abs_path
     # @return [Data::SceneData, nil]
     def lookup_using_absolute_path?(abs_path)
-      config.scene_datastore.find_by_abs_path?(abs_path)
+      scene_data = config.scene_datastore.find_by_abs_path?(abs_path)
+      if scene_data.nil?
+        XxxRename.logger.debug "[NO SCENE DATA lookup_using_absolute_path?] #{abs_path}"
+        nil
+      else
+        scene_data
+      end
     end
 
     # @return [Data::SceneData, nil]
     def lookup_with_filename?(filename)
-      config.scene_datastore.find_by_base_filename?(filename)
+      scene_data = config.scene_datastore.find_by_base_filename?(filename)&.first
+
+      if scene_data.nil?
+        XxxRename.logger.debug "[NO SCENE DATA lookup_with_filename?] #{filename}"
+        nil
+      else
+        scene_data
+      end
     end
 
     #
@@ -68,7 +83,7 @@ module XxxRename
     # @return [Data::StashAppSceneFragment]
     def scene_input
       query = $stdin.gets
-      XxxRename.logger.info query
+      XxxRename.logger.debug query
       Data::StashAppSceneInput.new(JSON.parse(query))
     end
   end

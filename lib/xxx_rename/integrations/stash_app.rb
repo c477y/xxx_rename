@@ -77,17 +77,20 @@ module XxxRename
       end
 
       def fetch_scene(path)
+        XxxRename.logger.debug "#{self.class.name}#fetch_scene #{path}"
         response = handle_response! { self.class.post(GRAPHQL_ENDPOINT, body: fetch_scene_body(path)) }
         scenes = response.dig("data", "findScenes", "scenes")
         scenes.length == 1 ? scenes.first : nil
       end
 
       def fetch_scene_by_id(id)
+        XxxRename.logger.debug "#{self.class.name}#fetch_scene_by_id #{id}"
         response = handle_response! { self.class.post(GRAPHQL_ENDPOINT, body: fetch_scene_by_id_body(id)) }
         response.dig("data", "findScene")
       end
 
       def fetch_scene_paths_by_id(id)
+        XxxRename.logger.debug "#{self.class.name}#fetch_scene_paths_by_id #{id}"
         response = fetch_scene_by_id(id)
         response["files"].map { |x| x["path"] }
       end
