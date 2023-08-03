@@ -60,6 +60,11 @@ module XxxRename
       def slug(str)
         str.to_s.downcase.gsub(" ", "-").gsub(/[^\w-]/, "")
       end
+
+      def doc(path)
+        res = handle_response!(return_raw: true) { self.class.get(path) }
+        Nokogiri::HTML res.parsed_response
+      end
     end
   end
 end

@@ -10,7 +10,7 @@ module XxxRename
       attribute? :url, Types::String
       attribute :front_image, Types::String
       attribute? :back_image, Types::String
-      attribute? :studio, Types::String
+      attribute :studio, Types::String
       attribute? :synopsis, Types::String
     end
 

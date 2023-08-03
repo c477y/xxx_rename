@@ -27,8 +27,9 @@ module XxxRename
         attribute :output_format,         Types::Array.of(Types::String)
       end
 
-      attribute :site do
+      attribute :site do # rubocop:disable Metrics/BlockLength
         attribute? :adult_time,            Data::AdultTimeConfig
+        attribute? :arch_angel,            Data::ArchAngelConfig
         attribute? :babes,                 Data::MgPremiumConfig
         attribute? :blacked,               Data::VixenMediaConfig
         attribute? :blacked_raw,           Data::VixenMediaConfig

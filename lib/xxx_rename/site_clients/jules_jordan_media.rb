@@ -185,11 +185,6 @@ module XxxRename
         [url, name]
       end
 
-      def doc(endpoint)
-        res = handle_response!(return_raw: true) { self.class.get(endpoint) }
-        Nokogiri::HTML res.parsed_response
-      end
-
       def processed_movies
         @processed_movies ||= {}
       end

@@ -30,7 +30,7 @@ describe XxxRename::SiteClients::ElegantAngel do
       context "when site client has all the latest scenes" do
         before do
           allow(config.actor_helper).to receive(:auto_fetch!).and_return(nil)
-          expect(site_client).to(receive(:movie_links).with(1).twice.and_wrap_original { |m, *args| [m.call(*args).first] })
+          expect(site_client).to(receive(:movie_links).with(1).and_wrap_original { |m, *args| [m.call(*args).first] })
           expect(site_client).to(receive(:movie_links).with(2).and_wrap_original { |_m, *_args| [] })
 
           site_client.refresh_datastore(1)
@@ -188,7 +188,7 @@ describe XxxRename::SiteClients::ElegantAngel do
           it "processes no movies", :aggregate_failures do
             expect { site_client.search(file) }.to raise_error(XxxRename::SiteClients::Errors::NoMatchError)
             expect(site_client.site_client_datastore.count).to eq(0)
-            expect(site_client.all_scenes_processed?).to be false
+            expect(site_client.all_scenes_processed?).to be true
             expect(site_client.oldest_processable_date?).to be true
           end
         end

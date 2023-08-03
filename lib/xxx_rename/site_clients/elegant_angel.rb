@@ -73,16 +73,10 @@ module XxxRename
         msg = "requires both movie title(%collection) and scene title(%title)"
         raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_METADATA, msg) if match.nil?
 
-        raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_METADATA, msg) unless match.collection.presence && match.title.presence
+        result = query_helper.find(match)
+        raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_RESULT, match.key) if result.nil?
 
-        index_key = site_client_datastore.generate_lookup_key(match.collection, match.title)
-        scene_data_key = site_client_datastore.find_by_key?(index_key)
-        raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_RESULT, index_key) if scene_data_key.nil?
-
-        scene_data = site_client_datastore.find_by_key?(scene_data_key)
-        raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_RESULT, scene_data_key) if scene_data.nil?
-
-        scene_data
+        result
       end
 
       def all_scenes_processed
@@ -188,11 +182,6 @@ module XxxRename
       rescue ArgumentError => e
         XxxRename.logger.error "[DATE PARSING ERROR] #{e.message}"
         nil
-      end
-
-      def doc(path)
-        res = handle_response!(return_raw: true) { self.class.get(path) }
-        Nokogiri::HTML res.parsed_response
       end
     end
   end
