@@ -188,9 +188,9 @@ module XxxRename
         next unless key?("site.stash.username") && key?("site.stash.password")
 
         presence_arr = [values["site.stash.username"], values["site.stash.password"]].map(&:to_s).map(&:presence)
-        if presence_arr.all?(NIL)
+        if presence_arr.all?(nil)
           true
-        elsif presence_arr.none?(NIL)
+        elsif presence_arr.none?(nil)
           true
         else
           key(:stash_credentials).failure("provide both username and password if you want to use login credentials")

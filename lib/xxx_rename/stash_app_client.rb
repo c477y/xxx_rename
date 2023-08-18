@@ -13,7 +13,7 @@ module XxxRename
     def scene_by_fragment
       scene_data = lookup(scene_input)
       if scene_data.nil?
-        puts nil.to_json
+        puts nil&.to_json
       else
         print Data::StashAppSceneFragment.create_from_scene_data(scene_data).to_json
       end
