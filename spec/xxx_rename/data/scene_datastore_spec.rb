@@ -79,7 +79,7 @@ describe XxxRename::Data::SceneDatastoreQuery do
           expect(store["#{ctag1}$#{id1}"]).to eq(key1)
           # expect(store[data_store.generate_lookup_key(ctag1, title1)]).to eq(key1)
           expect(store[data_store.generate_lookup_key(collection1, title1)]).to eq(key1)
-          # expect(store[data_store.generate_lookup_key(title1, [female_actor1, male_actor1].join("|"))]).to eq(Set.new([key1]))
+          expect(store[data_store.generate_lookup_key(title1, [female_actor1, male_actor1].join("|"))]).to eq(Set.new([key1]))
         end
       end
     end
@@ -371,23 +371,6 @@ describe XxxRename::Data::SceneDatastoreQuery do
         end
       end
     end
-
-    context "scene title , actors index has more than one scene" do
-      let(:index_key) { data_store.generate_lookup_key(title1, [female_actor1, male_actor1].join("|")) }
-      before do
-        store.transaction do
-          store[index_key] ||= Set.new
-          store[index_key].add("abc")
-        end
-      end
-
-      it "only removes the key of the destroyed scene" do
-        data_store.destroy(scene1, filename1_path, filename1_old)
-        store.transaction(true) do
-          expect(store[index_key]).to eq(Set.new(["abc"]))
-        end
-      end
-    end
   end
 
   describe ".valid?" do
@@ -459,25 +442,25 @@ describe XxxRename::Data::SceneDatastoreQuery do
         end
       end
 
-      # context "missing title/actors index" do
-      #   let(:index_key) { data_store.generate_lookup_key(title1, scene1.actors.sort.join("|")) }
-      #
-      #   before { store.transaction { store.delete(index_key) } }
-      #
-      #   it "returns missing keys" do
-      #     expect(errors.missing_keys).to eq([:title_actors_index])
-      #   end
-      # end
+      context "missing title/actors index" do
+        let(:index_key) { data_store.generate_lookup_key(title1, scene1.actors.sort.join("|")) }
 
-      # context "conflicting title/actors index" do
-      #   let(:index_key) { data_store.generate_lookup_key(title1, scene1.actors.sort.join("|")) }
-      #
-      #   before { store.transaction { store[index_key] = Set.new(["abc"]) } }
-      #
-      #   it "returns conflicting keys" do
-      #     expect(errors.conflicting_indexes).to eq(title_actors_index: Set.new(["abc"]))
-      #   end
-      # end
+        before { store.transaction { store.delete(index_key) } }
+
+        it "returns missing keys" do
+          expect(errors.missing_keys).to eq([:title_actors_index])
+        end
+      end
+
+      context "conflicting title/actors index" do
+        let(:index_key) { data_store.generate_lookup_key(title1, scene1.actors.sort.join("|")) }
+
+        before { store.transaction { store[index_key] = Set.new(["abc"]) } }
+
+        it "returns conflicting keys" do
+          expect(errors.conflicting_indexes).to eq(title_actors_index: Set.new(["abc"]))
+        end
+      end
 
       context "missing file path" do
         let(:index_key) { data_store.generate_lookup_key(XxxRename::Data::REGISTERED_FILE_PATHS_PREFIX, filename1_path) }

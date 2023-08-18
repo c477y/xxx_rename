@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "xxx_rename/data/data_store_query_helper"
+
 module XxxRename
   module SiteClients
     module Configuration
@@ -26,6 +28,10 @@ module XxxRename
                 store = Data::SceneDatastore.new(path, qualified_name).store
                 Data::SceneDatastoreQuery.new(store, config.mutex)
               end
+          end
+
+          def query_helper
+            @query_helper ||= Data::DataStoreQueryHelper.new(site_client_datastore)
           end
 
           # @return [XxxRename::Data::SiteClientMetaData]

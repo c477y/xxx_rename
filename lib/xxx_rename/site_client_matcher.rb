@@ -201,6 +201,9 @@ module XxxRename
       when :adult_time
         require "xxx_rename/site_clients/adult_time"
         XxxRename::SiteClients::AdultTime.new(config)
+      when :arch_angel
+        require "xxx_rename/site_clients/arch_angel_video"
+        XxxRename::SiteClients::ArchAngelVideo.new(config)
       when :babes
         require "xxx_rename/site_clients/babes"
         XxxRename::SiteClients::Babes.new(config)

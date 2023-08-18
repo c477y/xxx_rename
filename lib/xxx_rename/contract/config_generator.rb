@@ -83,6 +83,8 @@ module XxxRename
           "site" =>
             { "adult_time" =>
                 { "output_format" => [], "file_source_format" => [], "collection_tag" => "AT" },
+              "arch_angel" =>
+                { "output_format" => [], "file_source_format" => [], "collection_tag" => "AA" },
               "babes" =>
                 { "output_format" => [], "file_source_format" => [], "collection_tag" => "BA" },
               "blacked" =>

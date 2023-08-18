@@ -27,6 +27,11 @@ module XxxRename
       attributes_from Data::SimpleSiteConfig
     end
 
+    class ArchAngelConfig < Base
+      attributes_from Data::SimpleSiteConfig
+      attributes_from Data::DatabaseConfig
+    end
+
     class ElegantAngelConfig < Base
       attributes_from Data::SimpleSiteConfig
       attributes_from Data::DatabaseConfig

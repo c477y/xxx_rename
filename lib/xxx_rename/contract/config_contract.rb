@@ -61,6 +61,7 @@ module XxxRename
 
         required(:site).hash do
           optional(:adult_time).hash(SITE_CONFIG)
+          optional(:arch_angel).hash(SITE_CONFIG)
           optional(:babes).hash(SITE_CONFIG)
           optional(:blacked).hash(SITE_CONFIG)
           optional(:blacked_raw).hash(SITE_CONFIG)
@@ -107,6 +108,7 @@ module XxxRename
       # Validate output format
       rule("global.output_format") { validate_format!(key, value) }
       rule("site.adult_time.output_format") { validate_format!(key, value) }
+      rule("site.arch_angel.output_format") { validate_format!(key, value) }
       rule("site.babes.output_format") { validate_format!(key, value) }
       rule("site.blacked.output_format") { validate_format!(key, value) }
       rule("site.blacked_raw.output_format") { validate_format!(key, value) }
@@ -132,6 +134,7 @@ module XxxRename
       rule("site.zero_tolerance.output_format") { validate_format!(key, value) }
 
       rule("site.adult_time.file_source_format") { validate_source_format!(key, value) }
+      rule("site.arch_angel.file_source_format") { validate_source_format!(key, value) }
       rule("site.babes.file_source_format") { validate_source_format!(key, value) }
       rule("site.blacked.file_source_format") { validate_source_format!(key, value) }
       rule("site.blacked_raw.file_source_format") { validate_source_format!(key, value) }
@@ -156,6 +159,7 @@ module XxxRename
       rule("site.x_empire.file_source_format") { validate_source_format!(key, value) }
       rule("site.zero_tolerance.file_source_format") { validate_source_format!(key, value) }
       rule("site.adult_time.file_source_format",
+           "site.arch_angel.file_source_format",
            "site.babes.file_source_format",
            "site.blacked.file_source_format",
            "site.blacked_raw.file_source_format",

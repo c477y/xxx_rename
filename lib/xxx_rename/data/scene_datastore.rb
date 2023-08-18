@@ -64,16 +64,17 @@ module XxxRename
       # 3. title && actors
       #
       # @param [String] title
-      # @param [Array[String]] actors
       # @param [String] collection_tag
       # @param [String] id
-      def find(id: nil, collection_tag: nil, title: nil, actors: nil)
-        param = { id: id, collection_tag: collection_tag, title: title, actors: actors }.reject { |_k, v| v.nil? }
+      # @param [Array{String}, nil] actors
+      # @param [String, nil] collection
+      def find(id: nil, collection_tag: nil, title: nil, actors: nil, collection: nil)
+        param = { id: id, collection_tag: collection_tag, title: title, actors: actors, collection: collection }.reject { |_k, v| v.nil? }
         benchmark("find #{param}") do
-          validate_type_params!(id: id, collection_tag: collection_tag, title: title, actors: actors)
+          validate_type_params!(id: id, collection_tag: collection_tag, title: title, actors: actors, collection: collection)
           semaphore.synchronize do
             store.transaction(read_only: true) do
-              keys = fetch_keys?(id: id, collection_tag: collection_tag, title: title, actors: actors)
+              keys = fetch_keys?(id: id, collection_tag: collection_tag, title: title, actors: actors, collection: collection)
               keys.map do |key|
                 store[key]
               end.compact
@@ -177,7 +178,7 @@ module XxxRename
         benchmark("empty?") do
           semaphore.synchronize do
             store.transaction(true) do
-              store.roots.length.zero?
+              store.roots.empty?
             end
           end
         end
@@ -206,7 +207,6 @@ module XxxRename
 
       # @param [XxxRename::Data::SiteClientMetaData] metadata
       def update_metadata(metadata)
-        # binding.pry
         if metadata.class.name != Data::SiteClientMetaData.name
           raise ArgumentError, "expected metadata of type #{Data::SiteClientMetaData.name}, but received #{metadata.class.name}"
         end
@@ -233,8 +233,8 @@ module XxxRename
           expected_filename_key: nil
         }
 
-        semaphore.synchronize do
-          store.transaction(true) do
+        semaphore.synchronize do # rubocop:disable Metrics/BlockLength
+          store.transaction(true) do # rubocop:disable Metrics/BlockLength
             key = scene_data.key
             scene = store[key]
             errors[:scene_saved] = false if scene.nil?
@@ -255,11 +255,11 @@ module XxxRename
               errors[:conflicting_indexes][:collection_title_index] = collection_title_index_value
             end
 
-            # title_actor_index_value = store[generate_lookup_key(scene_data.title, scene_data.actors.sort.join("|"))]
-            # errors[:missing_keys] << :title_actors_index if title_actor_index_value.nil? || title_actor_index_value.empty?
-            # if title_actor_index_value && !title_actor_index_value.empty? && !title_actor_index_value.include?(key)
-            #   errors[:conflicting_indexes][:title_actors_index] = title_actor_index_value
-            # end
+            title_actor_index_value = store[generate_lookup_key(scene_data.title, scene_data.actors.sort.join("|"))]
+            errors[:missing_keys] << :title_actors_index if title_actor_index_value.nil? || title_actor_index_value.empty?
+            if title_actor_index_value && !title_actor_index_value.empty? && !title_actor_index_value.include?(key)
+              errors[:conflicting_indexes][:title_actors_index] = title_actor_index_value
+            end
 
             if filepath
               filename_value = store[generate_lookup_key(REGISTERED_FILE_PATHS_PREFIX, filepath)]
@@ -288,8 +288,8 @@ module XxxRename
         true
       end
 
-      def validate_type_params!(id:, collection_tag:, title:, actors:)
-        raise ArgumentError, "no key provided for lookup" if [id, collection_tag, title, actors].none?
+      def validate_type_params!(id:, collection_tag:, title:, actors:, collection:)
+        raise ArgumentError, "no key provided for lookup" if [id, collection_tag, title, actors, collection].none?
 
         raise TypeError, "actors: wrong argument type #{actors.class} (expected Array)" if actors && !(actors.is_a? Array)
       end
@@ -339,18 +339,35 @@ module XxxRename
       # Always call from a synchronized mutex and within a transaction
       #
       # @param [String] id
-      # @param [Array[String]] collection_tag
+      # @param [Array{String}] collection_tag
       # @param [String] title
       # @param [String] actors
+      # @param [String] collection
       # @return [Array[String]]
-      def fetch_keys?(id:, collection_tag:, title:, actors:)
+      def fetch_keys?(id:, collection_tag:, title:, actors:, collection:)
         if collection_tag && id
-          [store[generate_lookup_key(collection_tag, id)]]
-        elsif collection_tag && title
-          [store[generate_lookup_key(collection_tag, title)]]
+          key = generate_lookup_key(collection_tag, id)
+          XxxRename.logger.debug "[INDEX LOOKUP collection_tag,id] #{key}"
+          resp = [store.fetch(key, nil)].compact
+          XxxRename.logger.debug "[INDEX LOOKUP RESULT] #{resp}"
+          resp
+        # elsif collection_tag && title
+        #   [store[generate_lookup_key(collection_tag, title)]]
         elsif title && actors
-          store.fetch(generate_lookup_key(title, actors.sort.join("|")), []).to_a
+          key = generate_lookup_key(title, actors.sort.join("|"))
+          XxxRename.logger.debug "[INDEX LOOKUP title,actors] #{key}"
+          resp = store.fetch(key, Set.new).to_a
+          XxxRename.logger.debug "[INDEX LOOKUP RESULT] #{resp}"
+          resp
+        elsif collection && title
+          key = generate_lookup_key(collection, title)
+          XxxRename.logger.debug "[INDEX LOOKUP collection,title] #{key}"
+          resp = [store.fetch(key, nil)].compact
+          XxxRename.logger.debug "[INDEX LOOKUP RESULT] #{resp}"
+          resp
         else
+          query = { id: id, collection_tag: collection_tag, title: title, actors: actors, collection: collection }
+          XxxRename.logger.debug "[INDEX LOOKUP NO SUPPORTED INDEX] #{query}"
           []
         end
       end
@@ -362,7 +379,7 @@ module XxxRename
       # 1. collection_tag -> id -> key // id index
       # ~~2. collection_tag -> title -> key // title index~~
       # 3. collection -> title -> key // title index
-      # ~~4. title + actors -> [keys] // title,actors index~~
+      # 4. title + actors -> key // title,actors index
       # ** collection_tag -> title & title + actors are not created
       # for performance reasons. They can be supported later if
       # the need arises
@@ -372,7 +389,7 @@ module XxxRename
         create_id_index(key, scene_data)
         # create_title_index(key, scene_data)
         create_collection_title_index(key, scene_data)
-        # create_title_actors_index(key, scene_data)
+        create_title_actors_index(key, scene_data)
       end
 
       # collection_tag -> id -> key // id index
@@ -398,15 +415,15 @@ module XxxRename
         store[index_key] = key
       end
 
-      # # title + actors -> [keys] // title,actors index
-      # # @param [String] key
-      # # @param [XxxRename::Data::SceneData] scene_data
-      # def create_title_actors_index(key, scene_data)
-      #   index_key = generate_lookup_key(scene_data.title, scene_data.actors.sort.join("|"))
-      #
-      #   store[index_key] ||= Set.new
-      #   store[index_key].add(key)
-      # end
+      # title + actors -> [keys] // title,actors index
+      # @param [String] key
+      # @param [XxxRename::Data::SceneData] scene_data
+      def create_title_actors_index(key, scene_data)
+        index_key = generate_lookup_key(scene_data.title, scene_data.actors.sort.join("|"))
+
+        store[index_key] ||= Set.new
+        store[index_key].add(key)
+      end
 
       # @param [String] key
       # @param [XxxRename::Data::SceneData] scene_data
@@ -415,7 +432,7 @@ module XxxRename
         destroy_id_index(scene_data)
         # destroy_title_index(scene_data)
         destroy_collection_title_index(key, scene_data)
-        # destroy_title_actors_index(key, scene_data)
+        destroy_title_actors_index(key, scene_data)
         destroy_registered_filenames(filenames)
       end
 
@@ -431,16 +448,16 @@ module XxxRename
       #   store.delete(index_key)
       # end
 
-      # def destroy_title_actors_index(key, scene_data)
-      #   index_key = generate_lookup_key(scene_data.title, scene_data.actors.sort.join("|"))
-      #
-      #   index_value = store[index_key]
-      #   if index_value && index_value.length > 1
-      #     index_value.delete(key)
-      #   else
-      #     store.delete(index_key)
-      #   end
-      # end
+      def destroy_title_actors_index(key, scene_data)
+        index_key = generate_lookup_key(scene_data.title, scene_data.actors.sort.join("|"))
+
+        index_value = store[index_key]
+        if index_value && index_value.length > 1
+          index_value.delete(key)
+        else
+          store.delete(index_key)
+        end
+      end
 
       def destroy_collection_title_index(_key, scene_data)
         index_key = generate_lookup_key(scene_data.collection, scene_data.title)

@@ -129,7 +129,7 @@ describe XxxRename::SiteClients::StashDb do
       end
     end
 
-    let(:filename) { "Victoria Lobov - My Friends Hot Mom" }
+    let(:filename) { "Victoria Lobov, Johnny The Kid - My Friends Hot Mom" }
 
     context "when stash db matches a scene" do
       let(:api_token) do
