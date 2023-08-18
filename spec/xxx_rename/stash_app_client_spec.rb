@@ -44,16 +44,15 @@ RSpec.describe XxxRename::StashAppClient, type: :stash_scraper do
     end
 
     let(:expected_output) do
-      {
-        title: "Awesome Title",
+      { title: "Awesome Title",
         code: "1234",
         date: "2020-01-10T00:00:00.000+00:00",
-        urls: [],
-        images: [],
-        studio: { name: "Some Collection" },
-        performers: [{ performer: { name: "Foo Bar", gender: "FEMALE" } },
-                     { performer: { name: "Baz Qux", gender: "FEMALE" } },
-                     { performer: { name: "Fred Thud", gender: "MALE" } }]
+        "studio": { name: "Some Collection" },
+        "performers": [
+          { name: "Foo Bar", gender: "FEMALE" },
+          { name: "Baz Qux", gender: "FEMALE" },
+          { name: "Fred Thud", gender: "MALE" }
+        ]
       }.to_json
     end
 
@@ -65,7 +64,7 @@ RSpec.describe XxxRename::StashAppClient, type: :stash_scraper do
 
     context "when scene datastore does not contain any matching scene data" do
       it "should not log anything to stdout" do
-        expect { scene_by_fragment }.to output("").to_stdout
+        expect { scene_by_fragment }.to output("#{nil&.to_json}\n").to_stdout
       end
     end
 

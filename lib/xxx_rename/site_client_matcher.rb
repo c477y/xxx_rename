@@ -192,7 +192,7 @@ module XxxRename
       rescue Errors::ParsingError
         matches << false
       end
-      matches.any?(TRUE)
+      matches.any?(true)
     end
 
     # rubocop:disable Metrics/CyclomaticComplexity
