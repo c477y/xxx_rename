@@ -71,7 +71,6 @@ RSpec.describe XxxRename::Data::DataStoreQueryHelper do
         let(:absolute_path_file1) { File.expand_path(File.join("test_folder", file)) }
         let(:absolute_path_file2) { File.expand_path(File.join("test_folder", "nested_folder", file)) }
 
-
         let(:basename) { file }
         let(:absolute_path) { nil }
         let(:scene_data) { stub_scene_data }

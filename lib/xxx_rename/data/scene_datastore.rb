@@ -178,7 +178,7 @@ module XxxRename
         benchmark("empty?") do
           semaphore.synchronize do
             store.transaction(true) do
-              store.roots.length.zero?
+              store.roots.empty?
             end
           end
         end
@@ -233,8 +233,8 @@ module XxxRename
           expected_filename_key: nil
         }
 
-        semaphore.synchronize do
-          store.transaction(true) do
+        semaphore.synchronize do # rubocop:disable Metrics/BlockLength
+          store.transaction(true) do # rubocop:disable Metrics/BlockLength
             key = scene_data.key
             scene = store[key]
             errors[:scene_saved] = false if scene.nil?
@@ -348,7 +348,7 @@ module XxxRename
         if collection_tag && id
           key = generate_lookup_key(collection_tag, id)
           XxxRename.logger.debug "[INDEX LOOKUP collection_tag,id] #{key}"
-          resp = store.fetch(key, []).to_a
+          resp = [store.fetch(key, nil)].compact
           XxxRename.logger.debug "[INDEX LOOKUP RESULT] #{resp}"
           resp
         # elsif collection_tag && title
@@ -356,13 +356,13 @@ module XxxRename
         elsif title && actors
           key = generate_lookup_key(title, actors.sort.join("|"))
           XxxRename.logger.debug "[INDEX LOOKUP title,actors] #{key}"
-          resp = store.fetch(key, []).to_a
+          resp = store.fetch(key, Set.new).to_a
           XxxRename.logger.debug "[INDEX LOOKUP RESULT] #{resp}"
           resp
         elsif collection && title
           key = generate_lookup_key(collection, title)
           XxxRename.logger.debug "[INDEX LOOKUP collection,title] #{key}"
-          resp = store.fetch(key, []).to_a
+          resp = [store.fetch(key, nil)].compact
           XxxRename.logger.debug "[INDEX LOOKUP RESULT] #{resp}"
           resp
         else

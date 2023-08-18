@@ -74,7 +74,7 @@ describe XxxRename::Search do
       let(:expected_validity_errors) do
         {
           conflicting_indexes: {},
-          missing_keys: %i[id_index collection_title_index path],
+          missing_keys: %i[id_index collection_title_index title_actors_index path],
           scene_saved: false
         }
       end

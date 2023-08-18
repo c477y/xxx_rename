@@ -96,7 +96,7 @@ module XxxRename
     option :actions,       alias: :a, type: :string,  default:  [],    desc: "action to perform on a successful match",
                            enum: %w[sync_to_stash log_rename_op], repeatable: true
     option :force_refresh,            type: :boolean, default:  false, desc: "force match scenes from original sites"
-    option :checkpoint,               type: :string,  required: false, desc: "skip all iterations until check-pointed file is matched"
+    option :checkpoint,               type: :string,  required: false, desc: "skip all iterations until check-pointed file is matched", hide: true
     def generate(object)
       XxxRename.logger(**{ "mode" => Log::CLI_LOGGING, "verbose" => options["verbose"] })
       config = Contract::ConfigGenerator.new(options).generate!

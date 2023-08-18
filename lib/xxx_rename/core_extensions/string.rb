@@ -15,6 +15,18 @@ module XxxRename
         gsub(/[\s\W_]/, "").downcase
       end
 
+      def n_substring?(str)
+        normalize.include?(str.normalize)
+      end
+
+      def n_substring_either?(str)
+        normalize.include?(str.normalize) || str.normalize.include?(normalize)
+      end
+
+      def n_match?(str)
+        normalize == str.normalize
+      end
+
       # @return [String]
       def titleize_custom
         re = /([A-Z]\d[A-Z]|[A-Z][a-zA-Z])/
