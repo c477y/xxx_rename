@@ -126,7 +126,7 @@ module XxxRename
           next if scene_unavailable?(scene_doc)
 
           hash = {}.tap do |h|
-            h[:actors] = scene_doc.css(".scene-performer-names a").map { |x| x.text&.strip }
+            h[:actors] = scene_doc.css(".scene-performer-names a").map { |x| x.text&.strip }.sort
             h.merge!(actors_hash(h[:actors]))
             h[:collection] = movie_hash[:name]
             h[:collection_tag] = site_config.collection_tag

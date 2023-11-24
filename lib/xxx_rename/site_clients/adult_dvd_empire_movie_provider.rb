@@ -56,7 +56,7 @@ module XxxRename
 
       # @param [Nokogiri::HTML4::Document] doc
       def name(doc)
-        doc.css(".movie-page__heading__title").text.strip
+        doc.css(".movie-page__heading__title").children.first&.text&.strip
       end
 
       # @param [Nokogiri::HTML4::Document] doc

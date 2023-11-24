@@ -24,6 +24,21 @@ module XxxRename
         exotic4k: "https://exotic4k.com"
       }.freeze
 
+      COLLECTION_MAPPER = {
+        nannyspy: "Nanny Spy",
+        spyfam: "Spyfam",
+        holed: "Holed",
+        lubed: "Lubed",
+        myveryfirsttime: "My Very First Time",
+        tiny4k: "Tiny4k",
+        povd: "PovD",
+        fantasyhd: "FantasyHD",
+        castingcouchx: "Casting Couch X",
+        puremature: "Puremature",
+        passionhd: "PassionHD",
+        exotic4k: "Exotic 4K"
+      }.freeze
+
       site_client_name :whale_media
 
       # @param [String] filename
@@ -38,27 +53,29 @@ module XxxRename
         end
 
         url = make_url(match)
-        fetch_details_from_html(url)
+        collection = COLLECTION_MAPPER.fetch(match[:collection], "Whale Media")
+        fetch_details_from_html(url, collection)
       end
 
       private
 
       # @param [String] url
       # @return [Hash, NilClass]
-      def fetch_details_from_html(url)
+      def fetch_details_from_html(url, collection)
         XxxRename.logger.debug "Scraping data from #{url.to_s.colorize(:blue)}"
         web_resp = HTTParty.get(url, follow_redirects: false)
         raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_RESULT, url) unless web_resp.code == 200
 
         search_string = url.split("/").last
-        parse_scene_details(web_resp.body, search_string)
+        parse_scene_details(web_resp.body, search_string, collection)
       end
 
       # @param [Nokogiri::HTML::Document] body
       # @param [String] search_string
+      # @param [String] collection
       # @return [Hash, NilClass]
       # noinspection RubyMismatchedReturnType
-      def parse_scene_details(body, search_string)
+      def parse_scene_details(body, search_string, collection)
         doc = Nokogiri::HTML(body)
         normalised_title = title(doc)
                            .downcase
@@ -71,7 +88,7 @@ module XxxRename
           female_actors: female_actors(doc),
           male_actors: [],
           actors: female_actors(doc),
-          collection: collection(doc),
+          collection: collection,
           collection_tag: site_config.collection_tag,
           title: title(doc),
           id: search_string.gsub(normalised_title, "") # TODO: This doesn't work some times
@@ -81,19 +98,13 @@ module XxxRename
       # @param [Nokogiri::XML::NodeSet] doc
       # @return [String]
       def title(doc)
-        doc.css(".t2019-stitle").text.strip
+        doc.css(".scene-info div").first.css("h1").text.strip
       end
 
       # @param [Nokogiri::XML::NodeSet] doc
       # @return [Array[String]]
       def female_actors(doc)
-        doc.css("#t2019-models").css(".badge").map { |x| x.text.strip }.sort
-      end
-
-      # @param [Nokogiri::XML::NodeSet] doc
-      # @return [String]
-      def collection(doc)
-        doc.css("#navigation").css(".my-0").css("a").map { |x| x["alt"] }.first
+        doc.css(".scene-info .link-list-with-commas a").map { |x| x.text.strip }.sort
       end
 
       # @param [XxxRename::SiteClients::QueryGenerator::Base::SearchParameters] match

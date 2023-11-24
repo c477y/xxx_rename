@@ -109,8 +109,8 @@ describe XxxRename::SiteClients::ElegantAngel do
         XxxRename::Data::SceneData.new(
           {
             male_actors: [],
-            actors: ["Chastity Lynn", "Ana Foxxx"],
-            female_actors: ["Chastity Lynn", "Ana Foxxx"],
+            actors: ["Ana Foxxx", "Chastity Lynn"],
+            female_actors: ["Ana Foxxx", "Chastity Lynn"],
             collection: "Oiled Up 2",
             collection_tag: "EL",
             title: "Scene 2",
@@ -134,8 +134,8 @@ describe XxxRename::SiteClients::ElegantAngel do
         XxxRename::Data::SceneData.new(
           {
             male_actors: [],
-            female_actors: ["Charley Chase", "Tori Black", "Alexis Texas"],
-            actors: ["Charley Chase", "Tori Black", "Alexis Texas"],
+            female_actors: ["Alexis Texas", "Charley Chase", "Tori Black"],
+            actors: ["Alexis Texas", "Charley Chase", "Tori Black"],
             collection: "Tori Black Is Pretty Filthy 2",
             collection_tag: "EL",
             title: "Three hot girls rock the boat",

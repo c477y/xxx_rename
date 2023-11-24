@@ -15,7 +15,7 @@ RSpec.describe XxxRename::SiteClients::AdultDvdEmpireMovieProvider do
       let(:movie_name) { "Lorem Ipsum" }
       let(:studio) { "NO" }
 
-      it "returns the expected movie hash" do
+      it "returns nil" do
         expect(fetch).to eq(nil)
       end
     end
