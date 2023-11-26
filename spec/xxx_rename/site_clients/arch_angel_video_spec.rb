@@ -30,7 +30,7 @@ RSpec.describe XxxRename::SiteClients::ArchAngelVideo do
           collection: "Arch Angel",
           collection_tag: "AA",
           title: "Brooklyn Chase Hot Bigtits Babe Fucked",
-          date_released: Time.parse("2015-10-05 23:00:00 UTC"),
+          date_released: Time.parse("2015-10-06 00:00:00"),
           description: "Brooklyn Chase showing off her massive mounds in a bikini outdoors and in before " \
                          "having them sucked on and her pussy eaten. Brooklyn sucks cock then goes for a hardcore " \
                          "ride and is banged good with her huge boobs bouncing all over. Dude titty fucks those " \

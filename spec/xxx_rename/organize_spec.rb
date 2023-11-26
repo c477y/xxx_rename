@@ -114,6 +114,27 @@ describe XxxRename::Organize do
           expect(File.exist?(File.join(destination_dir, "Foo Bar", "file1.mp4"))).to be_truthy
           expect(File.exist?(File.join(destination_dir, "Lorem ipsum", "file2.mp4"))).to be_truthy
         end
+
+        context "scene datastore update" do
+          before { organize }
+
+          let(:new_file1_path) { File.expand_path(File.join(destination_dir, "Foo Bar", "file1.mp4")) }
+          let(:new_file2_path) { File.expand_path(File.join(destination_dir, "Lorem ipsum", "file2.mp4")) }
+
+          it "updates the scene datastore", :aggregate_failures do
+            # old paths are set to nil
+            expect(config.scene_datastore.find_by_abs_path?(File.expand_path(file1))).to be_nil
+            expect(config.scene_datastore.find_by_abs_path?(File.expand_path(file2))).to be_nil
+
+            # new paths are set
+            expect(config.scene_datastore.find_by_abs_path?(new_file1_path)).to eq(stub_scene_data)
+            expect(config.scene_datastore.find_by_abs_path?(new_file2_path)).to eq(stub_scene_data2)
+
+            # find by basename should still work
+            expect(config.scene_datastore.find_by_base_filename?(File.basename(file1))).to eq([stub_scene_data])
+            expect(config.scene_datastore.find_by_base_filename?(File.basename(file2))).to eq([stub_scene_data2])
+          end
+        end
       end
     end
 
@@ -136,6 +157,15 @@ describe XxxRename::Organize do
 
           expect(File.exist?(File.join(destination_dir, "Foo Bar", "file1.mp4"))).to be_falsey
           expect(File.exist?(File.join(destination_dir, "Lorem ipsum", "file2.mp4"))).to be_falsey
+        end
+
+        context "scene datastore update" do
+          before { organize }
+
+          it "does not update the scene datastore", :aggregate_failures do
+            expect(config.scene_datastore.find_by_abs_path?(File.expand_path(file1))).to eq(stub_scene_data)
+            expect(config.scene_datastore.find_by_abs_path?(File.expand_path(file2))).to eq(stub_scene_data2)
+          end
         end
       end
     end

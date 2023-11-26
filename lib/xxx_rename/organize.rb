@@ -128,6 +128,16 @@ module XxxRename
 
       FileUtils.mkdir_p(destination, verbose: verbose, noop: dry_run) unless Dir.exist?(destination)
       FileUtils.mv(source, destination, verbose: verbose, noop: dry_run)
+      update_scene_path(file, source, destination) unless dry_run
+    end
+
+    def update_scene_path(file, source, destination)
+      scene_data = config.scene_datastore.find_by_abs_path?(source).presence
+      return if scene_data.nil?
+
+      XxxRename.logger.debug "[UPDATING SCENE PATH] #{file} #{source} -> #{destination}"
+      new_abs_path = File.join(destination, file)
+      config.scene_datastore.register_file(scene_data, new_abs_path, old_filename: source)
     end
 
     def scanner

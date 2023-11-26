@@ -125,14 +125,14 @@ module XxxRename
           semaphore.synchronize do
             store.transaction do
               key = scene_data.key
-              register_absolute_path!(store, key, filename)
-              register_file_basename!(store, key, filename)
 
               if old_filename
                 delete_absolute_path!(store, old_filename)
-                delete_file_basename!(store, old_filename)
+                delete_file_basename!(store, old_filename, key)
               end
 
+              register_absolute_path!(store, key, filename)
+              register_file_basename!(store, key, filename)
               true
             end
           end
@@ -323,15 +323,11 @@ module XxxRename
 
       # @param [PStore] store
       # @param [String] path
-      def delete_file_basename!(store, path)
+      def delete_file_basename!(store, path, scene_key)
         index_key = generate_lookup_key(REGISTERED_FILE_BASENAME_PATH_PREFIX, File.basename(path))
         return unless store[index_key]
 
-        if store[index_key].length == 1
-          store.delete(index_key)
-        else
-          store[index_key].delete(index_key)
-        end
+        store[index_key].delete(scene_key)
       end
 
       #
