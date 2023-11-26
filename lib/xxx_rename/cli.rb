@@ -1,16 +1,20 @@
 # frozen_string_literal: true
 
 require "thor"
+require "xxx_rename/utils"
 
 module XxxRename
   class StashAppSubCommand < Thor
+    extend Utils
+
     require "json"
     require "xxx_rename/stash_app_client"
 
     desc "scene_by_fragment", "For use through StashApp scraping only"
     option :config, alias: :c, type: :string, required: false, desc: "path to config file"
+
     def scene_by_fragment
-      XxxRename.logger(**{ "mode" => Log::STASHAPP_LOGGING, "verbose" => options["verbose"] })
+      XxxRename.logger(**{ "mode" => Log::STASHAPP_LOGGING, "verbose" => resolve_log_level(options["verbose"]) })
       XxxRename.logger.info "Initialising logger in #{Log::STASHAPP_LOGGING} mode"
       config = Contract::ConfigGenerator.new(options).generate!
       StashAppClient.new(config).scene_by_fragment
@@ -44,16 +48,19 @@ module XxxRename
       x_empire
       zero_tolerance
     ].freeze
+    extend Utils
 
     def self.exit_on_failure?
       true
     end
 
     desc "version", "Print the CLI version"
+
     def version
       require_relative "version"
       puts "v#{XxxRename::VERSION}"
     end
+
     map %w[--version -v] => :version
 
     long_desc <<-LONGDESC
@@ -87,18 +94,19 @@ module XxxRename
     $ xxx_rename generate . --actions=log_rename_op
     LONGDESC
     desc "generate FILE|FOLDER", "Rename a file or all file(s) inside a given directory"
-    option :config,        alias: :c, type: :string,  required: false, desc: "path to config file"
-    option :verbose,       alias: :v, type: :boolean, default:  false, desc: "enable verbose logging"
-    option :override_site, alias: :s, type: :string,  required: false, desc: "force use an override site",
+    option :config, alias: :c, type: :string, required: false, desc: "path to config file"
+    option :verbose, alias: :v, type: :boolean, default: false, desc: "enable verbose logging"
+    option :override_site, alias: :s, type: :string, required: false, desc: "force use an override site",
                            enum: SUPPORTED_SITES
-    option :nested,                   type: :boolean, default:  false, desc: "recursively search for all files in the given directory"
-    option :force_refresh_datastore,  type: :boolean, default:  false, desc: "force site client to fetch all scenes, if implemented"
-    option :actions,       alias: :a, type: :string,  default:  [],    desc: "action to perform on a successful match",
-                           enum: %w[sync_to_stash log_rename_op], repeatable: true
-    option :force_refresh,            type: :boolean, default:  false, desc: "force match scenes from original sites"
-    option :checkpoint,               type: :string,  required: false, desc: "skip all iterations until check-pointed file is matched", hide: true
+    option :nested, type: :boolean, default: false, desc: "recursively search for all files in the given directory"
+    option :force_refresh_datastore, type: :boolean, default: false, desc: "force site client to fetch all scenes, if implemented"
+    option :actions, alias: :a, type: :string, default: [], desc: "action to perform on a successful match",
+                     enum: %w[sync_to_stash log_rename_op], repeatable: true
+    option :force_refresh, type: :boolean, default: false, desc: "force match scenes from original sites"
+    option :checkpoint, type: :string, required: false, desc: "skip all iterations until check-pointed file is matched", hide: true
+
     def generate(object)
-      XxxRename.logger(**{ "mode" => Log::CLI_LOGGING, "verbose" => options["verbose"] })
+      XxxRename.logger(**{ "mode" => Log::CLI_LOGGING, "verbose" => resolve_log_level(options["verbose"]) })
       config = Contract::ConfigGenerator.new(options).generate!
       client = Client.new(config,
                           verbose: options["verbose"],
@@ -181,8 +189,9 @@ module XxxRename
     option :config, alias: :c, type: :string, required: false, desc: "path to config file"
     option :version, type: :string, default: "latest", desc: "Name of migration file to apply"
     option :verbose, alias: :v, type: :boolean, default: false, desc: "enable verbose logging"
+
     def migrate
-      XxxRename.logger(**{ "mode" => Log::CLI_LOGGING, "verbose" => options["verbose"] })
+      XxxRename.logger(**{ "mode" => Log::CLI_LOGGING, "verbose" => resolve_log_level(options["verbose"]) })
       config = Contract::ConfigGenerator.new(options.slice("config")).generate!
       MigrationClient.new(config, options["version"]).apply
     rescue Interrupt
@@ -208,8 +217,9 @@ module XxxRename
     option :config, alias: :c, type: :string, required: false, desc: "path to config file"
     option :version, type: :string, default: "latest", desc: "Name of migration file to apply"
     option :verbose, alias: :v, type: :boolean, default: false, desc: "enable verbose logging"
+
     def rollback
-      XxxRename.logger(**{ "mode" => Log::CLI_LOGGING, "verbose" => options["verbose"] })
+      XxxRename.logger(**{ "mode" => Log::CLI_LOGGING, "verbose" => resolve_log_level(options["verbose"]) })
       config = Contract::ConfigGenerator.new(options.slice("config")).generate!
       MigrationClient.new(config, options["version"]).rollback
     rescue Interrupt
@@ -223,6 +233,45 @@ module XxxRename
       XxxRename.logger.fatal "#{e.class} #{e.message}".colorize(:red)
       e.backtrace&.each { |x| XxxRename.logger.fatal x }
       exit 1
+    end
+
+    desc "organize", "Organize files into directories based on actor names"
+    long_desc <<~LONGDESC
+      Organize files into directories based on actor names. The CLI will scan all files in the source directory and
+      move them to the destination directory based on the female actor name. It tries to get the female actor names by
+      two ways:
+      1. Looking up the file in the scene datastore. So you should run the `generate` command before running this task.
+      2. If the file has no data in the datastore, and you have passed the --force flag, the CLI will use a brute force
+          method to detect the actor name. This relies on the actor names to be present in the actor datastore. So there
+          may be some misses.
+
+      !! Take caution before running this command as it can be destructive. Always run the command in dry run mode(default)
+      and verify the output to be sure. If you are happy with the operations, run the command again and pass the
+      --dry_run flag as false (either --dry-run=false or --no-dry_run).
+
+      Example
+      # Move the files
+      $ xxx_rename organize --source_dir /path/to/source --destination_dir /path/to/destination --no-dry-run
+    LONGDESC
+    option :config, alias: :c, type: :string, desc: "path to config file"
+    option :verbose, alias: :v, type: :boolean, default: false, desc: "enable verbose logging"
+    option :dry_run, type: :boolean, default: true, desc: "do not move any files"
+    option :force, type: :boolean, default: false, desc: "brute force way to detect actors using the filename"
+    option :source_dir, type: :string, required: false, desc: "path to source directory. defaults to current directory"
+    option :destination_dir, type: :string, required: true, desc: "path to destination directory"
+    option :minimum_scenes_threshold, type: :numeric, default: 5,
+                                      desc: "minimum number of scenes an actor should have to be considered for a directory"
+    def organize
+      require "xxx_rename/organize"
+      XxxRename.logger(**{ "mode" => Log::CLI_LOGGING, "verbose" => resolve_log_level(options["verbose"]) })
+      config = Contract::ConfigGenerator.new(options.slice("config")).generate!
+      source_dir = options["source_dir"] || Dir.pwd
+      organizer = Organize.new(config,
+                               source_dir: source_dir,
+                               destination_dir: options["destination_dir"],
+                               force: options["force"])
+      organizer.gather_stats
+      organizer.organize(options["dry_run"], options["minimum_scenes_threshold"])
     end
 
     desc "stashapp SUBCOMMAND", "Lookup a scene through StashApp"
