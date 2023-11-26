@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require "simplecov"
-SimpleCov.start
-
 if ENV["CI"] == "true"
   require "codecov"
+  require "simplecov"
+
+  SimpleCov.start
   SimpleCov.formatter = SimpleCov::Formatter::Codecov
 end
 
@@ -39,6 +39,8 @@ RSpec.configure do |config|
   # Disable RSpec exposing methods globally on `Module` and `main`
   config.disable_monkey_patching!
 
+  config.include FileHelpers
+
   # Use describe instead of RSpec.describe
   config.expose_dsl_globally = true
 
@@ -55,20 +57,24 @@ RSpec.configure do |config|
   end
 
   config.before(:each, type: :stash_scraper) do
-    XxxRename.logger(**{ "mode" => XxxRename::Log::STASHAPP_LOGGING, "verbose" => true })
+    XxxRename.logger(**{ "mode" => XxxRename::Log::STASHAPP_LOGGING, "verbose" => ENV.fetch("LOG_LEVEL", "INFO") })
   end
 
   config.before(:each, type: :cli_mode) do
-    XxxRename.logger(**{ "mode" => XxxRename::Log::CLI_LOGGING, "verbose" => true })
+    XxxRename.logger(**{ "mode" => XxxRename::Log::CLI_LOGGING, "verbose" => ENV.fetch("LOG_LEVEL", "INFO") })
   end
 
   config.before(:all, type: :cli_mode) do
+    next unless ENV.fetch("SUPPRESS_LOG", nil).to_s.upcase == "TRUE"
+
     # suppress logs when running in cli mode
     $stderr = File.open(File::NULL, "w")
     $stdout = File.open(File::NULL, "w")
   end
 
   config.after(:all, type: :cli_mode) do
+    next unless ENV.fetch("SUPPRESS_LOG", nil).to_s.upcase == "TRUE"
+
     $stderr = original_stderr
     $stdout = original_stdout
   end
