@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "net/protocol"
+require "openssl"
 
 module XxxRename
   module Utils
@@ -28,6 +29,7 @@ module XxxRename
     RETRIABLE_ERRORS = [
       Net::OpenTimeout,
       Net::ReadTimeout,
+      OpenSSL::SSL::SSLError,
       SiteClients::Errors::TooManyRequestsError
     ].freeze
 
@@ -76,6 +78,12 @@ module XxxRename
       endpoint = "#{response.request.base_uri}#{response.request.path}"
       klass.new(endpoint: endpoint, code: response.code,
                 body: response.parsed_response, headers: response.headers)
+    end
+
+    def resolve_log_level(level)
+      return "DEBUG" if level.is_a?(Boolean)
+
+      ENV.fetch("LOG_LEVEL", "INFO")
     end
   end
 end

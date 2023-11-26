@@ -9,9 +9,9 @@ module XxxRename
     CLI_LOGGING = "CLI"
     STASHAPP_LOGGING = "STASHAPP"
 
-    def initialize(mode, verbose)
+    def initialize(mode, level)
       case mode
-      when CLI_LOGGING      then cli_logger(verbose)
+      when CLI_LOGGING      then cli_logger(level)
       when STASHAPP_LOGGING then stashapp_logger
       else                  raise Errors::FatalError, "xxx_rename initialised with invalid mode #{mode}"
       end
@@ -19,9 +19,9 @@ module XxxRename
 
     private
 
-    def cli_logger(verbose)
+    def cli_logger(level)
       @logger = Logger.new($stdout)
-      @logger.level = verbose ? "DEBUG" : "INFO"
+      @logger.level = level
       @logger.formatter = proc do |severity, datetime, _progname, msg|
         date_format = datetime.strftime("%H:%M:%S")
         case severity
