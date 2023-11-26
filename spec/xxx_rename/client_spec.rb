@@ -23,7 +23,7 @@ describe XxxRename::Client do
           collection_tag: "EA",
           title: "Stunning Curves, Scene #02",
           id: "73343",
-          date_released: Time.parse("2015-04-14 00:00:00 +0100")
+          date_released: Time.parse("2015-04-14 00:00:00 +0000")
         )
       end
 
