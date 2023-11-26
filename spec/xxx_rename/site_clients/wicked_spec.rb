@@ -24,7 +24,7 @@ describe XxxRename::SiteClients::Wicked do
         scene_cover: "https://transform.gammacdn.com/77344/77344_01/previews/2/371/top_1_resized/77344_01_01.jpg",
         movie: {
           name: "A Daughters Deception",
-          date: Time.parse("2019-08-06 00:00:00 +0100"),
+          date: Time.parse("2019-08-06 00:00:00"),
           url: "https://www.wicked.com/en/movie/A-Daughters-Deception/77344",
           front_image: "https://transform.gammacdn.com/movies/77344/77344_a_daughters_deception_front_400x625.jpg?width=900&height=1272&format=webp",
           back_image: "https://transform.gammacdn.com/movies/77344/77344_a_daughters_deception_back_400x625.jpg?width=900&height=1272&format=webp",

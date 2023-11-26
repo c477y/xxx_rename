@@ -15,6 +15,31 @@ module XxxRename
         gsub(/[\s\W_]/, "").downcase
       end
 
+      #
+      # Attempt to denormalize a normalized string using a source string
+      # @param [String] source_str
+      # @return [String, Nil]
+      def denormalize(source_str)
+        res = ""
+        normalized_str_idx = 0
+        source_str.each_char do |source_char|
+          break if normalized_str_idx >= length
+
+          if source_char.casecmp?(self[normalized_str_idx])
+            res += source_char
+            normalized_str_idx += 1
+          elsif source_char.match?(/[\s\W_]/) && !res.empty?
+            res += source_char
+          elsif !source_char.match?(/[\s\W_]/)
+            res = ""
+            normalized_str_idx = 0
+          else
+            next
+          end
+        end
+        res.presence
+      end
+
       def n_substring?(str)
         normalize.include?(str.normalize)
       end

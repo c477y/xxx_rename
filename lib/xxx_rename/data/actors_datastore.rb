@@ -15,7 +15,7 @@ module XxxRename
 
       def initialize(dir, name = ACTORS_DATASTORE_DEFAULT_STORE_FILE)
         path = File.join(dir, name)
-        XxxRename.logger.info "#{"[DATASTORE INIT]".colorize(:green)} #{path} #{name}"
+        XxxRename.logger.debug "#{"[DATASTORE INIT]".colorize(:green)} #{path} #{name}"
 
         @store = PStore.new path
       end
