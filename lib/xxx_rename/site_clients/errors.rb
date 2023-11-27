@@ -53,12 +53,14 @@ module XxxRename
 
         def dump_error
           File.open(File.join($pwd, "error_dump.txt"), "a") do |dump| # rubocop:disable Style/GlobalVars
-            dump << "--------ERROR BEGIN--------\n#{message}\n"
-            dump << "--------ENTITY--------\n#{@entity}\n"
-            dump << "--------REQUEST--------\n#{@request_options}\n"
-            dump << "--------CODE--------\n#{@response_code}\n"
-            dump << "--------BODY--------\n#{@response_body}\n"
-            dump << "--------ERROR END--------\n\n\n"
+            id = SecureRandom.uuid
+            dump << "#{id} START ERROR LOG\n"
+            dump << "#{id} ERROR MESSAGE:    #{message}\n"
+            dump << "#{id} REQUEST HEADERS:  #{@entity}\n"
+            dump << "#{id} REQUEST BODY:     #{@request_options}\n"
+            dump << "#{id} RESPONSE CODE:    #{@response_code}\n"
+            dump << "#{id} RESPONSE BODY:    #{@response_body}\n"
+            dump << "#{id} END ERROR LOG\n"
           end
         end
       end

@@ -1,12 +1,5 @@
 # frozen_string_literal: true
 
-require "pstore"
-require "benchmark"
-require "pathname"
-
-require "xxx_rename/data/query_interface"
-require "xxx_rename/data/site_client_meta_data"
-
 module XxxRename
   module Data
     DEFAULT_STORE_FILE = "xxx_rename_datastore.store"

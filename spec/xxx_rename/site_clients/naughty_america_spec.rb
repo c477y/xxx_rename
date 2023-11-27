@@ -1,10 +1,8 @@
 # frozen_string_literal: true
 
 require "rspec"
-require "xxx_rename/site_clients/naughty_america"
 
 describe XxxRename::SiteClients::NaughtyAmerica do
-  before { WebMock.allow_net_connect! }
 end
 
 describe XxxRename::SiteClients::NaughtyAmerica::NaughtyAmericaScene do

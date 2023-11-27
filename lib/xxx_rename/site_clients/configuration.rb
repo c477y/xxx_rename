@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "xxx_rename/data/data_store_query_helper"
-
 module XxxRename
   module SiteClients
     module Configuration

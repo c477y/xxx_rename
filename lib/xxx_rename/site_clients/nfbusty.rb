@@ -1,30 +1,26 @@
 # frozen_string_literal: true
 
-require "nokogiri"
-require "xxx_rename"
-
 module XxxRename
   module SiteClients
     class Nfbusty < Base
-      include HTTParty
-
-      base_uri "https://nfbusty.com"
       site_client_name :nf_busty
 
-      SCENE_TITLE_REGEX = /^(?<scene_title>^.*)\s-\sS\d*:E\d*$/x.freeze
-      PAGE_COUNTER_REGEX = /(?<first>\d+)\sof\s(?<last>\d+)/x.freeze
-      FILE_REGEX = /^nfbusty_(?<scene_title>\w*)_\d+\.\w+$/x.freeze
+      SCENE_TITLE_REGEX = /^(?<scene_title>^.*)\s-\sS\d*:E\d*$/x
+      PAGE_COUNTER_REGEX = /(?<first>\d+)\sof\s(?<last>\d+)/x
+      FILE_REGEX = /^nfbusty_(?<scene_title>\w*)_\d+\.\w+$/x
 
-      def search(filename)
+      base_uri "https://nfbusty.com"
+
+      # @param [String] filename
+      # @param [Data::ParsedSceneData] parsed_scene_data
+      # @param [Boolean] _unprocessed
+      def search(filename, parsed_scene_data:, _unprocessed:)
         if response.empty?
           XxxRename.logger.info "NFBusty extracts all the scenes before matching. This process may take some time.".colorize(:red)
           fetch_all_scenes
         end
 
-        scene_match = filename.match(FILE_REGEX)
-        raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_METADATA, filename) if scene_match.nil?
-
-        title = scene_match[:scene_title].normalize
+        title = parsed_scene_data.title.normalize
         @response[title] || raise(Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_RESULT, filename))
       end
 

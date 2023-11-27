@@ -1,15 +1,8 @@
 # frozen_string_literal: true
 
-require "xxx_rename/data/stash_app_scene_fragment"
-
 module XxxRename
   # noinspection RubyMismatchedReturnType
   class StashAppClient
-    # @param [Data::Config] config
-    def initialize(config)
-      @config = config
-    end
-
     def scene_by_fragment
       scene_data = lookup(scene_input)
       if scene_data.nil?
@@ -21,8 +14,11 @@ module XxxRename
 
     private
 
-    attr_reader :config
+    def config
+      XxxRename.config
+    end
 
+    # @return [Data::StashAppSceneFragment]
     # @param [Data::StashAppSceneFragment] scene
     # @return [Data::SceneData, nil]
     def lookup(scene)

@@ -202,7 +202,7 @@ module XxxRename
       private
 
       INVALID_PREFIX_MSG = "should only contain A-Z a-z 0-9 [ ] _ -"
-      INVALID_PREFIX_CHARACTERS = /[^\w\[\]-]/.freeze
+      INVALID_PREFIX_CHARACTERS = /[^\w\[\]-]/
 
       def prefix_valid?(prefix)
         !INVALID_PREFIX_CHARACTERS.match?(prefix)

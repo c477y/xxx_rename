@@ -1,37 +1,29 @@
 # frozen_string_literal: true
 
-require "xxx_rename/site_clients/query_generator/stash_db"
-
 module XxxRename
   module SiteClients
     class StashDb < Base
-      include HTTParty
-      include Utils
-
-      base_uri "https://stashdb.org"
-      headers "Content-Type" => "application/json"
-
       site_client_name :stash
+      base_uri "https://stashdb.org"
 
       LOGIN_ENDPOINT = "/login"
       GRAPHQL_ENDPOINT = "/graphql"
 
       attr_reader :username, :password
 
-      def initialize(config)
+      def initialize
         @cookie_set = false
         @api_key_set = false
-        super(config)
+        super
       end
 
-      # @param [String] filename
-      # @return [XxxRename::Data::SceneData, nil]
-      # noinspection RubyMismatchedReturnType
-      def search(filename)
+      # @param [String] _filename
+      # @param [Data::ParsedSceneData] parsed_scene_data
+      # @param [Hash] opts
+      # @option opts [Boolean] :unprocessed
+      def search(_filename, parsed_scene_data:, **opts)
         setup_credentials! if login_required?
-
-        match = search_query(filename)
-        scene_id = find_matching_scene_id!(match)
+        scene_id = find_matching_scene_id!(parsed_scene_data)
         scene_details(scene_id)
       end
 
@@ -40,7 +32,9 @@ module XxxRename
           login_using_credentials(site_config.username, site_config.password)
         elsif api_key_provided?
           register_api_key(site_config.api_token)
-          validate_credentials!
+          version = validate_credentials!
+          XxxRename.logger.trace "[STASH DB /graphql] version #{version}"
+          version
         else
           raise Errors::InvalidCredentialsError, self.class.name
         end
@@ -107,46 +101,45 @@ module XxxRename
         graphql_fetch_scene_details(scene_id)
       end
 
-      def find_matching_scene_id!(scene_data)
-        if scene_data.actors.present?
-          resp = search_with_title_and_actors(scene_data, 10)
-          return resp["id"] if resp.present?
+      def find_matching_scene_id!(parsed_scene_data)
+        if parsed_scene_data.actors.present?
+          resp = search_with_title_and_actors(parsed_scene_data, 10)
+          return resp.id if resp.present?
         end
 
-        resp = search_with_title(scene_data, 10)
-        return resp["id"] if resp.present?
+        resp = search_with_title(parsed_scene_data, 10)
+        return resp.id if resp.present?
 
-        raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_RESULT, scene_data.title)
+        raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_RESULT, parsed_scene_data.title)
       end
 
       def search_with_title(scene_data, limit)
         term = scene_data.title
-        search_results = graphql_search(term, limit)
-        search_results.select do |x|
-          match?(x["title"], scene_data.title) || match?(x.dig("studio", "name"), scene_data.title)
-        end.first
+        results = graphql_search(term, limit)
+        match_scene_data_with_results(scene_data, results)
       end
 
       def search_with_title_and_actors(scene_data, limit)
-        actors = (scene_data.female_actors + scene_data.actors).compact.uniq!
+        actors = (scene_data.female_actors + scene_data.actors).compact.uniq
         term = "#{actors.join(", ")} #{scene_data.title}"
-        search_results = graphql_search(term, limit)
-        search_results.select do |x|
-          cond1 = match?(x["title"], scene_data.title) || match?(x.dig("studio", "name"), scene_data.title)
-          cond2 = actors_included?(x, actors)
-          cond1 && cond2
-        end.first
+        results = graphql_search(term, limit)
+        match_scene_data_with_results(scene_data, results)
       end
 
-      # @param [String] filename
-      # @return [XxxRename::SiteClients::QueryGenerator::Base::SearchParameters]
-      # @raise XxxRename::Errors::NoMatchError
-      def search_query(filename)
-        resp = SiteClients::QueryGenerator::StashDb.generate(filename, source_format)
+      def match_scene_data_with_results(scene_data, results)
+        search_results = results.map do |scene|
+          hash = {}
+          hash[:female_actors] = female_actors(scene)
+          hash[:male_actors] = male_actors(scene)
+          hash[:actors] = female_actors(scene) + male_actors(scene)
+          hash[:collection] = scene.dig("studio", "name")
+          hash[:title] = scene["title"]
+          hash[:id] = scene["id"]
+          hash[:date_released] = date_released?(scene["release_date"]) if date_released?(scene["release_date"])
+          Data::SceneData.new(hash)
+        end
 
-        raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_METADATA, filename) if resp.nil?
-
-        resp
+        search_results.find { |x| x.match?(scene_data) }
       end
 
       # @param [String] term
@@ -160,7 +153,9 @@ module XxxRename
           raise Errors::SearchError.new(term, opts)
         end
 
-        resp.parsed_response.dig("data", "searchScene") || []
+        rows = resp.parsed_response.dig("data", "searchScene") || []
+        XxxRename.logger.debug "[STASH DB SEARCH /graphql] Term: \"#{term}\" Rows: \"#{rows.length}\""
+        rows
       end
 
       def graphql_fetch_scene_details(scene_id)

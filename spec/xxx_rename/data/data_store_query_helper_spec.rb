@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 require "rspec"
-require "xxx_rename/data/data_store_query_helper"
-require "xxx_rename/data/scene_datastore"
 
 RSpec.describe XxxRename::Data::DataStoreQueryHelper do
   describe ".find" do

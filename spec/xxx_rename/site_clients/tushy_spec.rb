@@ -1,22 +1,23 @@
 # frozen_string_literal: true
 
 require "rspec"
-require "xxx_rename/site_clients/tushy"
 
 describe XxxRename::SiteClients::Tushy do
-  include_context "config provider" do
-    let(:override_config) do
-      {
-        "site" => {
-          "tushy" => {
-            "file_source_format" => ["[Tushy] %female_actors - %title"]
-          }
+  include_context "config provider"
+  include_context "actor-helper stubber"
+
+  subject { described_class.new }
+
+  let(:override_config) do
+    {
+      "site" => {
+        "tushy" => {
+          "file_source_format" => ["[Tushy] %female_actors - %title"]
         }
       }
-    end
+    }
   end
 
-  let(:opts) { {} }
   let(:scene_data) do
     XxxRename::Data::SceneData.new(
       female_actors: ["Azul Hermosa"],
@@ -29,23 +30,28 @@ describe XxxRename::SiteClients::Tushy do
       date_released: Time.parse("2022-12-18 18:30:00")
     )
   end
-  let(:input_filename) { "[Tushy] Azul Hermosa - Seal The Deal" }
 
-  before do
-    @vixen = SiteClientStubs::VixenMedia.new(:tushy_search_ok)
-    @brazzers = SiteClientStubs::Brazzers.new(:actor_search)
-    WebMock.disable_net_connect!(allow: "https://www.brazzers.com")
-  end
-
-  after do
-    @vixen.cleanup
-    @brazzers.cleanup
-    WebMock.reset!
-  end
-
-  context "given a file with custom format" do
-    it_behaves_like "a scene mapper" do
-      let(:filename) { input_filename }
+  context "processed file" do
+    let(:filename) { "[Tushy] Azul Hermosa - Seal The Deal" }
+    let(:parsed_scene_data) do
+      XxxRename::Data::ParsedSceneData.new(
+        female_actors: ["Azul Hermosa"],
+        male_actors: [],
+        actors: ["Azul Hermosa"],
+        collection: "TUSHY",
+        title: "Seal The Deal"
+      )
     end
+    let(:unprocessed) { false }
+
+    before do
+      stub_actor(config, "Azul Hermosa", "female")
+      stub_actor(config, "Mick Blue", "male")
+      VCR.use_cassette("tushy/seal_the_deal#processed#success") do
+        @result = subject.search(filename, parsed_scene_data: parsed_scene_data, unprocessed: unprocessed)
+      end
+    end
+
+    it { expect(@result).to match(scene_data) }
   end
 end

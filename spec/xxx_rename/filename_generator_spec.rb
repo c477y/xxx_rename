@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "rspec"
-require "xxx_rename/filename_generator"
 
 describe XxxRename::FilenameGenerator do
   let(:ext_name) { ".mp4" }

@@ -2,10 +2,6 @@
 
 require "base64"
 
-require "xxx_rename/errors"
-require "xxx_rename/integrations/base"
-require "xxx_rename/file_utilities"
-
 module XxxRename
   module Integrations
     class StashAPIError < StandardError
@@ -25,18 +21,23 @@ module XxxRename
       end
     end
 
-    class StashApp < Base
+    class StashApp
       include FileUtilities
+
+      # FIXME
+      base_uri XxxRename.config.stash_app.url
+      default_options.update verify: false
 
       GRAPHQL_ENDPOINT = "/graphql"
 
-      def initialize(config)
-        super(config)
-        raise Errors::FatalError, "Stash App requires 'url'. Check your configuration." unless config.stash_app.url.presence
+      def initialize
+        return unless XxxRename.config.stash_app.url.present?
 
-        self.class.default_options.update(verify: false)
-        self.class.base_uri(config.stash_app.url)
-        self.class.headers("Content-Type" => "application/json")
+        raise Errors::FatalError, "Stash App requires 'url'. Check your configuration."
+      end
+
+      def config
+        XxxRename.config
       end
 
       def setup_credentials!
@@ -58,7 +59,9 @@ module XxxRename
       def create_movie(scene_data, studio_id, retried = false)
         return if scene_data.movie.nil?
 
-        response = handle_response! { self.class.post(GRAPHQL_ENDPOINT, body: create_movie_body(scene_data.movie, studio_id)) }
+        response = handle_response! do
+          self.class.post(GRAPHQL_ENDPOINT, body: create_movie_body(scene_data.movie, studio_id))
+        end
         raise StashAPIError, response["errors"] if response["errors"]
 
         response.dig("data", "movieCreate")
@@ -68,7 +71,7 @@ module XxxRename
 
         # as of current implementation, movie creation fails if the image url is invalid
         # retry again and don't set the back image. consecutive failures will be raised
-        XxxRename.logger.error "[STASH APP MOVIE CREATION RETRY] without back image"
+        XxxRename.logger.error "[STASH APP RETRY MOVIE CREATION] without back image"
         hash = scene_data.to_h.tap do |h|
           h[:movie] = h[:movie].tap { |m_h| m_h.delete(:back_image) }
         end

@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require "xxx_rename/site_clients/algolia_v2"
-require "xxx_rename/site_clients/query_generator/base"
-
 module XxxRename
   module SiteClients
     class ZeroTolerance < AlgoliaV2
@@ -13,17 +10,16 @@ module XxxRename
 
       CDN_BASE_URL = "https://transform.gammacdn.com"
 
-      def initialize(config)
+      def initialize
         @site_url = "https://www.zerotolerancefilms.com"
-        super(config)
+        super
       end
 
-      def search(filename)
-        match = SiteClients::QueryGenerator::Base.generic_generate(filename, source_format)
-        raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_METADATA, filename) unless match&.title&.presence
-
-        search_results = search_scene_using_title(match.title)
-        find_matched_scene!(search_results, match)
+      # @param [String] filename
+      # @param [Data::ParsedSceneData] parsed_scene_data
+      def search(filename, parsed_scene_data:, unprocessed:)
+        search_results = search_scene_using_title(parsed_scene_data.title)
+        find_matched_scene!(search_results, parsed_scene_data)
       end
 
       private

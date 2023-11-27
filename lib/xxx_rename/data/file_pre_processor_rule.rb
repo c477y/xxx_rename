@@ -26,6 +26,7 @@ module XxxRename
         # We don't expect this to raise any RegexpError
         re = Regexp.new(regex)
         file.gsub(re, with)
+        file.strip
       end
     end
   end

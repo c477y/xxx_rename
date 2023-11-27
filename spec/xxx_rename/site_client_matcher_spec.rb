@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "rspec"
-require "xxx_rename/site_client_matcher"
 
 describe XxxRename::SiteClientMatcher do
   let(:examples) { JSON.parse(File.read("spec/fixtures/file_rename_examples.json")) }

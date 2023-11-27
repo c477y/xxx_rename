@@ -1,0 +1,55 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://www.vixen.com/graphql
+    body:
+      encoding: UTF-8
+      string: '{"operationName":"getVideo","variables":{"videoId":"102217","site":"CHANNELS"},"query":"query
+        getVideo($videoId: ID, $site: Site) {\n  findOneVideo(input: { videoId: $videoId,
+        site: $site }) {\n    id: uuid\n    videoId\n    title\n    releaseDate\n    modelsSlugged:
+        models {\n      name\n    }\n  }\n}\n"}'
+    headers:
+      Accept:
+      - application/json
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Dnt:
+      - '1'
+      User-Agent:
+      - Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Transfer-Encoding:
+      - chunked
+      Connection:
+      - keep-alive
+      Access-Control-Allow-Origin:
+      - "*"
+      Cache-Control:
+      - max-age=30, public
+      Vary:
+      - Accept-Encoding
+      X-Correlation-Id:
+      - e9dab442-3ab7-4e44-ac43-9f57308ba9f3
+      Alt-Svc:
+      - h3=":443"; ma=86400
+    body:
+      encoding: ASCII-8BIT
+      base64_string: |
+        eyJkYXRhIjp7ImZpbmRPbmVWaWRlbyI6eyJpZCI6ImNoYW5uZWxzOm91ci1z
+        dW1tZXItb2YtbG92ZS0zIiwidmlkZW9JZCI6IjEwMjIxNyIsInRpdGxlIjoi
+        T3VyIFN1bW1lciBPZiBMb3ZlIDMiLCJyZWxlYXNlRGF0ZSI6IjIwMjAtMDIt
+        MjNUMDA6MDA6MDAuMDAwWiIsIm1vZGVsc1NsdWdnZWQiOlt7Im5hbWUiOiJT
+        aWVubmEgRGF5In1dfX19Cg==
+  recorded_at: Mon, 06 May 2024 20:16:19 GMT
+recorded_with: VCR 6.2.0

@@ -10,15 +10,17 @@ module XxxRename
 
     EVIL_ANGEL_ORIGINAL_FILE_PATTERN = /
           ^                          # Start of filename
-          (?<title>[a-zA-z0-9-]+)   # Name of movie
+          (?<title>[a-zA-z0-9-]+)    # Name of movie
           _s(?<index>\d{1,2})        # Scene index e.g. s01
           _                          # Underscore
           (?<actors>[a-zA-Z_]+)      # Actors in format ActorName,ActorName
           _\d{3,4}p                  # Scene Resolution
           \.\w+                      # File extension
           $                          # End of filename
-          /x.freeze
+          /x
 
+    # This regex is flaky and might miss files that are actually downloaded
+    # from goodporn.to
     GOODPORN_ORIGINAL_FILE_FORMAT =
       /
       ^                          # Start of filename
@@ -28,7 +30,7 @@ module XxxRename
       (_(480|720|1080)p)?        # Scene Resolution
       \.\w+                      # File extension
       $                          # End of filename
-      /x.freeze
+      /x
 
     MG_PREMIUM_ORIGINAL_FILE_FORMAT =
       /
@@ -38,17 +40,17 @@ module XxxRename
       \d{3,4}p                                      # Resolution
       \.\w{3,4}                                     # File extension
       $                                             # End of filename
-      /x.freeze
+      /x
 
     NAUGHTY_AMERICA_ORIGINAL_FILE_REGEX =
       /
-      ^                            # Start of filename
-      (?<compressed_scene>[a-z1]+) # Scene Title
-      _                            # Underscore
-      \d+\w+?                      # Resolution
-      \.\w{0,4}                    # File extension
-      $                            # End of filename
-      /x.freeze
+      ^                 # Start of filename
+      (?<title>[a-z1]+) # Scene Title
+      _                 # Underscore
+      \d+\w+?           # Resolution
+      \.\w{0,4}         # File extension
+      $                 # End of filename
+      /x
 
     NF_BUSTY_ORIGINAL_FILE_REGEX =
       /
@@ -59,25 +61,25 @@ module XxxRename
       \d{3,4}                      # Resolution
       \.\w{0,4}                    # File extension
       $                            # End of filename
-      /x.freeze
+      /x
 
     # These regexes match the files downloaded originally from Vixen Media sites
     VIXEN_MEDIA_SITES = %w[DEEPER VIXEN BLACKEDRAW BLACKED TUSHYRAW TUSHY CHANNELS SLAYED].join("|")
-    VIXEN_MEDIA_ORIGINAL_FILE_REGEX_1 = /(?<collection>(#{VIXEN_MEDIA_SITES}))_(?<id>\d*)_\d{3,4}P/x.freeze
-    VIXEN_MEDIA_ORIGINAL_FILE_REGEX_2 = /(?<collection>(#{VIXEN_MEDIA_SITES}))_(?<id>\d{6})-.*_\d{3,4}P/x.freeze
+    VIXEN_MEDIA_ORIGINAL_FILE_REGEX_1 = /(?<collection>(#{VIXEN_MEDIA_SITES}))_(?<id>\d*)_\d{3,4}P/x
+    VIXEN_MEDIA_ORIGINAL_FILE_REGEX_2 = /(?<collection>(#{VIXEN_MEDIA_SITES}))_(?<id>\d{6})-.*_\d{3,4}P/x
 
     # rubocop:disable Lint/MixedRegexpCaptureTypes
     WHALE_ORIGINAL_FILE_PATTERN =
       /
       ^                            # Start of filename
-      (?<site>(nannyspy|spyfam|holed|lubed|myveryfirsttime|tiny4k|povd|fantasyhd|castingcouchx|puremature|passionhd|exotic4k)) # Sitename
+      (?<collection>(nannyspy|spyfam|holed|lubed|myveryfirsttime|tiny4k|povd|fantasyhd|castingcouchx|puremature|passionhd|exotic4k)) # Sitename
       -                            # Hyphen
-      (?<title>[a-z0-9-]+)        # Scene Title (might contain random id strings)
+      (?<title>[a-z0-9-]+)         # Scene Title (might contain random id strings)
       -                            # Hyphen separator for resolution
       \d{3,4}                      # Resolution
       \.\w+                        # File extension
       $                            # End of filename
-      /x.freeze
+      /x
     # rubocop:enable Lint/MixedRegexpCaptureTypes
   end
 

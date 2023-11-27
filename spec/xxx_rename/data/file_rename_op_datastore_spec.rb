@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 require "rspec"
-require "xxx_rename/data/file_rename_op_datastore"
-require "xxx_rename/data/file_rename_op"
 
 describe XxxRename::Data::FileRenameOpDatastore do
   include_context "config provider"

@@ -2,10 +2,6 @@
 
 require "yaml/store"
 
-require "xxx_rename/data/query_interface"
-require "xxx_rename/contract/file_rename_op_contract"
-require "xxx_rename/data/file_rename_op"
-
 module XxxRename
   module Data
     OUTPUT_KEY = "___RENAME_ACTIONS___"
@@ -24,7 +20,7 @@ module XxxRename
 
         path = File.join(dir, OUTPUT, file)
         @store = YAML::Store.new path
-        XxxRename.logger.info "Output will be recorded in #{file}"
+        XxxRename.logger.info "[OUTPUT FILE CREATED] #{file}"
       end
     end
 

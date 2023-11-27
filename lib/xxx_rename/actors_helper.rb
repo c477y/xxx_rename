@@ -31,7 +31,7 @@ module XxxRename
     def auto_fetch(actor)
       auto_fetch!(actor)
     rescue Errors::UnprocessedEntity => e
-      XxxRename.logger.warn "Unable to fetch details for #{e.message}"
+      XxxRename.logger.warn "[ACTOR DETAIL FETCH ERROR] #{e.message}"
       nil
     end
 
@@ -57,7 +57,7 @@ module XxxRename
         details = client.actor_details(actor)
         next if details.nil?
 
-        XxxRename.logger.debug "#{client.class.name.split("::").last} matched actor #{actor} as #{details["gender"]}"
+        XxxRename.logger.debug "[ACTOR MATCH] #{client.class.name.split("::").last} matched actor #{actor} as #{details["gender"]}"
 
         details["gender"] = details["gender"].normalize
         return details
@@ -73,8 +73,6 @@ module XxxRename
       [
         matcher.initialise_site_client(:stash),
         matcher.initialise_site_client(:brazzers),
-        matcher.initialise_site_client(:wicked),
-        matcher.initialise_site_client(:reality_kings),
         matcher.initialise_site_client(:evil_angel)
       ].compact # remove any disabled site clients
     end

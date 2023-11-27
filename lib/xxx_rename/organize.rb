@@ -1,23 +1,18 @@
 # frozen_string_literal: true
 
-require "active_support/core_ext/module/delegation"
-require "xxx_rename/data/stats_hash"
-
 module XxxRename
   class Organize
     include FileUtilities
 
-    delegate :actors_datastore, :scene_datastore, to: :@config
+    delegate :actors_datastore, :scene_datastore, to: :config
 
-    attr_reader :config, :dry_run, :force, :source_dir, :destination_dir
+    attr_reader :dry_run, :force, :source_dir, :destination_dir
 
-    # @param [Data::Config] config
     # @param [Boolean] force
     # @param [String] source_dir
     # @param [String] destination_dir
     # @raise ArgumentError if directory does not exist
-    def initialize(config, source_dir:, destination_dir:, force: false)
-      @config = config
+    def initialize(source_dir:, destination_dir:, force: false)
       @source_dir = validate_path!(source_dir)
       @destination_dir = validate_path!(destination_dir)
       @force = force
@@ -65,6 +60,10 @@ module XxxRename
     end
 
     private
+
+    def config
+      XxxRename.config
+    end
 
     def match_actor(file)
       abs_path = File.expand_path(file)

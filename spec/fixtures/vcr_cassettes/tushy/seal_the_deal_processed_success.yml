@@ -1,0 +1,72 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://www.tushy.com/graphql
+    body:
+      encoding: UTF-8
+      string: '{"operationName":"getSearchResults","variables":{"query":"Seal The
+        Deal Azul Hermosa","site":"TUSHY","first":5},"query":"query getSearchResults($query:
+        String!, $site: Site!, $first: Int) {\n  searchVideos(input: { query: $query,
+        site: $site, first: $first }) {\n    edges {\n      node {\n        videoId\n        title\n        releaseDate\n        modelsSlugged:
+        models {\n          name\n        }\n      }\n    }\n  }\n}\n"}'
+    headers:
+      Accept:
+      - application/json
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Dnt:
+      - '1'
+      User-Agent:
+      - Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Transfer-Encoding:
+      - chunked
+      Connection:
+      - keep-alive
+      Access-Control-Allow-Origin:
+      - "*"
+      Cache-Control:
+      - no-store
+      Vary:
+      - Accept-Encoding
+      X-Correlation-Id:
+      - ab7b8c9f-bd99-47eb-b791-aa5927df57aa
+      Alt-Svc:
+      - h3=":443"; ma=86400
+    body:
+      encoding: ASCII-8BIT
+      base64_string: |
+        eyJkYXRhIjp7InNlYXJjaFZpZGVvcyI6eyJlZGdlcyI6W3sibm9kZSI6eyJ2
+        aWRlb0lkIjoiMTAzOTM4IiwidGl0bGUiOiJTZWFsIFRoZSBEZWFsIFBhcnQg
+        MiIsInJlbGVhc2VEYXRlIjoiMjAyMy0wNC0xNlQxNzozMDowMC4wMDBaIiwi
+        bW9kZWxzU2x1Z2dlZCI6W3sibmFtZSI6IkF6dWwgSGVybW9zYSJ9LHsibmFt
+        ZSI6Ik9saXZlciBGbHlubiJ9XX19LHsibm9kZSI6eyJ2aWRlb0lkIjoiMTAz
+        NzY1IiwidGl0bGUiOiJTZWFsIFRoZSBEZWFsIiwicmVsZWFzZURhdGUiOiIy
+        MDIyLTEyLTE4VDE4OjMwOjAwLjAwMFoiLCJtb2RlbHNTbHVnZ2VkIjpbeyJu
+        YW1lIjoiQXp1bCBIZXJtb3NhIn0seyJuYW1lIjoiTWljayBCbHVlIn1dfX0s
+        eyJub2RlIjp7InZpZGVvSWQiOiIxMDEyODYiLCJ0aXRsZSI6IkNsb3Npbmcg
+        VGhlIERlYWwiLCJyZWxlYXNlRGF0ZSI6IjIwMTktMDgtMjRUMTc6MzA6MDAu
+        MDAwWiIsIm1vZGVsc1NsdWdnZWQiOlt7Im5hbWUiOiJKYWRlIE5pbGUifSx7
+        Im5hbWUiOiJLYWkgVGF5bG9yIn1dfX0seyJub2RlIjp7InZpZGVvSWQiOiIx
+        MDAxMTYiLCJ0aXRsZSI6IkkgRnVja2VkIG15IEZyaWVuZCdzIFNpc3RlciBp
+        biB0aGUgQXNzIiwicmVsZWFzZURhdGUiOiIyMDE1LTA4LTAzVDE3OjMwOjAw
+        LjAwMFoiLCJtb2RlbHNTbHVnZ2VkIjpbeyJuYW1lIjoiQWxleGEgTm92YSJ9
+        LHsibmFtZSI6IkNocmlzIFN0cm9rZXMifV19fSx7Im5vZGUiOnsidmlkZW9J
+        ZCI6IjEwNDQ2MyIsInRpdGxlIjoiQmxvbmRlIE1JTEYgQ2hhcmxpZSBGdWxm
+        aWxscyBIZXIgSW5zYXRpYWJsZSBEUCBEZXNpcmUiLCJyZWxlYXNlRGF0ZSI6
+        IjIwMjQtMDMtMzFUMTc6MzA6MDAuMDAwWiIsIm1vZGVsc1NsdWdnZWQiOlt7
+        Im5hbWUiOiJDaGFybGllIEZvcmRlIn0seyJuYW1lIjoiQ2hyaXN0aWFuIENs
+        YXkifSx7Im5hbWUiOiJGaWxvdSBGaXR0In1dfX1dfX19Cg==
+  recorded_at: Mon, 06 May 2024 20:23:26 GMT
+recorded_with: VCR 6.2.0

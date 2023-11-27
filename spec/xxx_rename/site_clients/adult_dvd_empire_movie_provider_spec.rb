@@ -1,22 +1,23 @@
 # frozen_string_literal: true
 
 require "rspec"
-require "xxx_rename/site_clients/adult_dvd_empire_movie_provider"
 
 RSpec.describe XxxRename::SiteClients::AdultDvdEmpireMovieProvider do
-  subject(:provider) { described_class.new(movie_name: movie_name, studio: studio) }
+  subject { described_class.new(movie_name: movie_name, studio: studio) }
 
   describe ".fetch" do
-    WebMock.disable_net_connect!(allow: "https://www.adultdvdempire.com")
-
-    let(:fetch) { provider.fetch }
-
     context "when movie match is unsuccessful" do
       let(:movie_name) { "Lorem Ipsum" }
       let(:studio) { "NO" }
 
+      before do
+        VCR.use_cassette("adult_dvd_empire/lorem_ipsum") do
+          @result = subject.fetch
+        end
+      end
+
       it "returns nil" do
-        expect(fetch).to eq(nil)
+        expect(@result).to eq(nil)
       end
     end
 
@@ -32,9 +33,13 @@ RSpec.describe XxxRename::SiteClients::AdultDvdEmpireMovieProvider do
           studio: "ArchAngel" }
       end
 
-      it "returns the expected movie hash" do
-        expect(fetch.to_hash).to eq(expected_response.to_hash)
+      before do
+        VCR.use_cassette("adult_dvd_empire/beautiful_tits_vol_8") do
+          @result = subject.fetch
+        end
       end
+
+      it { expect(@result.to_hash).to eq(expected_response.to_hash) }
     end
 
     context "when movie match is successful: scenario 2" do
@@ -54,9 +59,13 @@ RSpec.describe XxxRename::SiteClients::AdultDvdEmpireMovieProvider do
                     "Beautiful Tits is the creamy coating they get at the end of each scene!" }
       end
 
-      it "returns the expected movie hash" do
-        expect(fetch.to_hash).to eq(expected_response.to_hash)
+      before do
+        VCR.use_cassette("adult_dvd_empire/beautiful_tits_vol_4") do
+          @result = subject.fetch
+        end
       end
+
+      it { expect(@result.to_hash).to eq(expected_response.to_hash) }
     end
   end
 end

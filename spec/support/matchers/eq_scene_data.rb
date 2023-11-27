@@ -35,3 +35,21 @@ RSpec::Matchers.define :eq_scene_data do |expected|
     compare(expected, actual)
   end
 end
+
+RSpec::Matchers.define :match_scene_data do |expected|
+  match do |actual|
+    unless expected.instance_of?(XxxRename::Data::SceneData)
+      raise ArgumentError, "wrong argument type for expected (given #{expected.class}, expected XxxRename::Data::SceneData"
+    end
+
+    unless actual.instance_of?(XxxRename::Data::SceneData)
+      raise ArgumentError, "wrong argument type for actual (given #{actual.class}, expected XxxRename::Data::SceneData"
+    end
+
+    expect(actual.to_h).to include(expected.to_h)
+  end
+
+  failure_message do |actual|
+    expect(actual.to_h).to include(expected.to_h)
+  end
+end

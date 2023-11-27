@@ -21,7 +21,20 @@ module XxxRename
       end
     end
 
-    class ParsingError < StandardError; end
+    class ParsingError < StandardError
+      attr_reader :str, :regex
+
+      def initialize(str, regex)
+        @str = str
+        @regex = regex
+        super(message)
+      end
+
+      def message
+        "String \"#{str}\" does not match regex /#{regex}/"
+      end
+    end
+
     class FatalError < StandardError; end
     class UnprocessedEntity < StandardError; end
   end

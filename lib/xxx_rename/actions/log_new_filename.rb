@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "xxx_rename/actions/base_action"
-
 module XxxRename
   module Actions
     class LogNewFilename < BaseAction
@@ -13,13 +11,13 @@ module XxxRename
           *output_patterns(search_result.site_client)
         )
 
-        XxxRename.logger.info "[RENAME OPERATION]".colorize(:blue)
+        XxxRename.logger.info "[RENAME OPERATION]"
         XxxRename.logger.info "\t#{"ORIGINAL:".colorize(:light_magenta)} #{file}"
         XxxRename.logger.info "\t#{"NEW:     ".colorize(:green)} #{new_filename}"
 
         config.output_recorder.create!(search_result.scene_data, file, new_filename, Dir.pwd)
       rescue FilenameGenerationError => e
-        XxxRename.logger.error "#{"[RENAME OPERATION ERROR]".colorize(:red)} #{e.message}"
+        XxxRename.logger.error "[RENAME OPERATION ERROR] #{e.message}"
         nil
       rescue Contract::FileRenameOpValidationFailure => e
         XxxRename.logger.error "[RENAME OPERATION VALIDATION ERROR] #{e.message}"

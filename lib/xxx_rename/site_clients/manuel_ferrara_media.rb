@@ -1,12 +1,5 @@
 # frozen_string_literal: true
 
-require "nokogiri"
-
-require "xxx_rename/site_clients/base"
-require "xxx_rename/site_clients/jules_jordan_media"
-require "xxx_rename/file_utilities"
-require "xxx_rename/constants"
-
 module XxxRename
   module SiteClients
     # julesjordan.com went through a site revamp. At the time of writing

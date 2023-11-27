@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require "xxx_rename/site_clients/jules_jordan_media"
-require "xxx_rename/site_clients/query_generator/base"
-
 module XxxRename
   module SiteClients
     class JulesJordan < JulesJordanMedia
@@ -12,10 +9,11 @@ module XxxRename
 
       COLLECTION = "Jules Jordan"
 
-      def search(filename)
+      # @param [String] _filename
+      # @param [Data::ParsedSceneData] parsed_scene_data
+      def search(_filename, parsed_scene_data:, **opts)
         refresh_datastore(1) if datastore_refresh_required?
-        match = SiteClients::QueryGenerator::Base.generic_generate(filename, source_format)
-        lookup_in_datastore!(match)
+        lookup_in_datastore!(parsed_scene_data)
       end
     end
   end

@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module XxxRename
+  # noinspection RubyClassVariableUsageInspection
+  # rubocop:disable Style/ClassVars TODO: Find an alternative approach to not use class variables
   class ProcessedFile
     @@prefix_regex_maps = {}
 
@@ -8,21 +10,6 @@ module XxxRename
     OPTIONAL_CHARS = "[\\w\\s\\-_,'\"]*"
     IDENTIFIER = "(\\d+|[a-z\\-\\_]+)"
     OPTIONAL_IDENTIFIER = "(\\d*|[a-z\\-\\_]*)"
-
-    PROCESSED_FILE_REGEX = /
-    (?<title>#{CHARS})                                     # Scene Title
-    ((\[(?<collection_tag>\w+)\])(?<collection>#{CHARS}))? # [CL] Collection (Optional)
-    (\[F\](?<female_actors>#{CHARS}))                      # Female Actors
-    (\[M\](?<male_actors>#{CHARS}))?                       # Male Actors (Optional)
-    /x.freeze
-
-    FEMALE_FIRST_ID_FILE_REGEX = /
-    (?<female_actors>#{CHARS})                             # Female Actors
-    (\[T\](?<title>#{CHARS}))                              # [T] Title
-    (\[M\](?<male_actors>#{CHARS}))?                       # Male Actors (Optional)
-    ((\[(?<collection_tag>\w+)\])(?<collection>#{CHARS}))  # [CL] Collection
-    (\[ID\](?<id>#{CHARS}))?                               # [ID] ID (Optional)
-    /x.freeze
 
     # rubocop:disable Layout/HashAlignment
     TOKEN_REGEX_MAP = {
@@ -33,8 +20,8 @@ module XxxRename
       "%collection"               => "(?<collection>#{CHARS})",
       "%collection_op"            => "(?<collection>#{OPTIONAL_CHARS}?)",
       "%collection_tag_1"         => "(?<collection_tag>\\w)",
-      "%collection_tag_2"         => "(?<collection_tag>\\w{,2})",
-      "%collection_tag_3"         => "(?<collection_tag>\\w{,3})",
+      "%collection_tag_2"         => "(?<collection_tag>\\w{1,2})",
+      "%collection_tag_3"         => "(?<collection_tag>\\w{1,3})",
 
       # Actors (Words separated by spaces, hyphen(-), underscore(_))
       # Multiple actors(female, male or actors) can be parsed with a single tag
@@ -61,10 +48,12 @@ module XxxRename
 
       # Date
       "%yyyy_mm_dd"               => "(?<year>\\d{4})_(?<month>\\d{1,2})_(?<day>\\d{1,2})",
+      "%yyyy/mm/dd"               => "(?<year>\\d{4})/(?<month>\\d{1,2})/(?<day>\\d{1,2})",
+      "%yyyy-mm-dd"               => "(?<year>\\d{4})-(?<month>\\d{1,2})-(?<day>\\d{1,2})",
       "%dd"                       => "(?<day>\\d{1,2})",
       "%mm"                       => "(?<month>\\d{1,2})",
       "%yyyy"                     => "(?<year>\\d{4})",
-      "%yy"                       => "(?<year>\\d{2,4})"
+      "%yy"                       => "(?<year>\\d{2})"
     }.freeze
     # rubocop:enable Layout/HashAlignment
 
@@ -90,33 +79,23 @@ module XxxRename
     attr_reader :file
 
     # @param [String] file File to match
-    # @return [Data::SceneData]
-    def self.parse(file)
-      resp = new(file).match_file(PROCESSED_FILE_REGEX, FEMALE_FIRST_ID_FILE_REGEX)
-      raise Errors::ParsingError, "does not match any registered patterns" if resp.nil?
-
-      resp
-    end
-
-    # @param [String] file File to match
     # @param [String] pattern A regular expression to match the file
-    # @return [Data::SceneData]
+    # @return [Data::ParsedSceneData]
     def self.strpfile(file, pattern)
       object = new(file)
       regex = object.make_regex!(pattern)
 
       resp = object.match_file(regex)
-      raise Errors::ParsingError, "does not match given pattern" if resp.nil?
+      raise Errors::ParsingError.new(file, regex) if resp.nil?
 
       resp
     end
 
     # @param [String] file Name of file
     def initialize(file)
-      XxxRename.config.file_pre_process.map do |processor|
-        file = processor.replace(file)
-      end
-      @file = file.strip
+      @file = file
+
+      XxxRename.config.file_pre_process.each { |processor| @file = processor.replace(@file) }
     end
 
     # @param [String] pattern
@@ -125,12 +104,11 @@ module XxxRename
       tokens = pattern.scan(token_regex)
       validate_tokens!(tokens)
 
-      regex = "^#{Regexp.quote(pattern)}"
+      regex = Regexp.quote(pattern).to_s
       tokens.each do |m|
         regex = regex.gsub(m, TOKEN_REGEX_MAP[m]) if TOKEN_REGEX_MAP.key?(m)
         regex = regex.gsub(m, @@prefix_regex_maps[m]) if @@prefix_regex_maps.key?(m)
       end
-      regex += "$"
       Regexp.new regex
     end
 
@@ -141,30 +119,25 @@ module XxxRename
 
     # noinspection RubyMismatchedReturnType
     # @return [Data::SceneData]
-    def process_regex!(regex) # rubocop:disable Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity
+    def process_regex!(regex) # rubocop:disable Metrics/CyclomaticComplexity
       file_without_ext = File.basename(file, File.extname(file))
       match = file_without_ext.match(regex)
       return if match.nil?
 
       match_hash = match.named_captures.tap do |h|
-        h["female_actors"] = clean_actor_str(h["female_actors"]) || []
-        h["male_actors"]   = clean_actor_str(h["male_actors"]) || []
-        h["actors"] = begin
-          if h["actors"]
-            clean_actor_str(h["actors"])
-          else
-            h["female_actors"] + h["male_actors"]
-          end
-        end
-        h["collection"] = clean_s(h["collection"]) || ""
-        h["collection_tag"] = clean_s(h["collection_tag"]) || ""
-        h["title"] = clean_s(h["title"]) || ""
-        h["id"] = clean_s(h["id"]) if clean_s(h["id"])
-        date_released = date_released(h["year"], h["month"], h["day"])
-        h["date_released"] = date_released if date_released
+        h["female_actors"]  = clean_actor_str(h["female_actors"])
+        h["male_actors"]    = clean_actor_str(h["male_actors"])
+        h["actors"]         =
+          h["actors"].present? ? clean_actor_str(h["actors"]) : h["female_actors"] + h["male_actors"]
+        h["collection"]     = h["collection"] if h["collection"].present?
+        h["collection_tag"] = h["collection_tag"] if h["collection_tag"].present?
+        h["title"]          = h["title"] if h["title"].present?
+        h["id"]             = h["id"] if h["id"].present?
+        h["date_released"]  = date_released(h["year"], h["month"], h["day"]) if date_released(h["year"], h["month"],
+                                                                                              h["day"])
       end
 
-      Data::SceneData.new(match_hash)
+      Data::ParsedSceneData.new(match_hash)
     end
 
     private
@@ -182,20 +155,19 @@ module XxxRename
     # @return [Nil, Time]
     def date_released(year, month, day)
       Time.new(year, month, day) if year && month && day
+    rescue ArgumentError => e
+      XxxRename.logger.warn "[TIME PARSE ERROR] input: year: #{year}, month: #{month}, day: #{day}, error: #{e.message}"
+      nil
     end
 
     # @param [String] str A String extracted from the regex match
     # @return [Array[String]]
     def clean_actor_str(str)
-      return nil if str.nil?
+      return [] unless str.presence
 
       str.split(",").map(&:strip).map(&:presence).sort.compact
     end
-
-    def clean_s(str)
-      return nil if str.nil? || !str.presence
-
-      str.strip
-    end
   end
 end
+
+# rubocop:enable Style/ClassVars

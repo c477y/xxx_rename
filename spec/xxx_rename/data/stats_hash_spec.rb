@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "rspec"
-require "xxx_rename/data/stats_hash"
 
 describe XxxRename::Data::StatsHash do
   subject(:stats) { described_class.new }

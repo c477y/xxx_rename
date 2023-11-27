@@ -1,9 +1,5 @@
 # frozen_string_literal: true
 
-require "xxx_rename/constants"
-require "xxx_rename/data/file_pre_processor_rule"
-require "fileutils"
-
 module XxxRename
   module Contract
     class ConfigGenerator

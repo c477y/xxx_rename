@@ -1,11 +1,5 @@
 # frozen_string_literal: true
 
-require "pstore"
-require "benchmark"
-require "pathname"
-
-require "xxx_rename/data/query_interface"
-
 module XxxRename
   module Data
     ACTORS_DATASTORE_DEFAULT_STORE_FILE = "xxx_rename_actors_datastore.store"
@@ -15,7 +9,7 @@ module XxxRename
 
       def initialize(dir, name = ACTORS_DATASTORE_DEFAULT_STORE_FILE)
         path = File.join(dir, name)
-        XxxRename.logger.debug "#{"[DATASTORE INIT]".colorize(:green)} #{path} #{name}"
+        XxxRename.logger.debug "[DATASTORE INIT] #{path} #{name}"
 
         @store = PStore.new path
       end

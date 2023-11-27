@@ -1,9 +1,6 @@
 # frozen_string_literal: true
 
 require "rspec"
-require "xxx_rename/data/scene_datastore"
-require "xxx_rename/data/site_client_meta_data"
-require "xxx_rename/data/scene_data"
 
 describe XxxRename::Data::SceneDatastoreQuery do
   include_context "config provider"

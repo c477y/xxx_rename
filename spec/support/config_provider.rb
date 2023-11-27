@@ -2,7 +2,6 @@
 
 require "rspec"
 require "deep_merge/rails_compat"
-require "xxx_rename/contract/config_generator"
 
 shared_context "config provider" do
   # Input: Pass some keys in this hash to override default keys
@@ -13,16 +12,11 @@ shared_context "config provider" do
   let(:config) { XxxRename::Contract::ConfigGenerator.new({ "config" => config_file }).generate! }
 
   ## Setup
-
   before(:example) do
-    allow_any_instance_of(XxxRename::SystemConstants).to receive(:home_dir).and_return("test_folder")
-    FileUtils.mkpath(File.join("test_folder", ".config", "xxx_rename", "generated", "output"))
+    allow_any_instance_of(XxxRename::SystemConstants).to receive(:home_dir).and_return(".")
+    FileUtils.mkpath(File.join(".config", "xxx_rename", "generated", "output"))
     write_config_file
     config if eager_load
-  end
-
-  after(:example) do
-    FileUtils.rm_r "test_folder"
   end
 
   def default_config
@@ -35,6 +29,6 @@ shared_context "config provider" do
   end
 
   def config_file
-    @config_file ||= File.join("test_folder", ".config", "xxx_rename", "config.yml")
+    @config_file ||= File.join(".config", "xxx_rename", "config.yml")
   end
 end

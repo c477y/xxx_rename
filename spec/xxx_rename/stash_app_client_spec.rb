@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "rspec"
-require "xxx_rename/stash_app_client"
 
 RSpec.describe XxxRename::StashAppClient, type: :stash_scraper do
   include_context "config provider" do
@@ -52,8 +51,7 @@ RSpec.describe XxxRename::StashAppClient, type: :stash_scraper do
           { name: "Foo Bar", gender: "FEMALE" },
           { name: "Baz Qux", gender: "FEMALE" },
           { name: "Fred Thud", gender: "MALE" }
-        ]
-      }.to_json
+        ] }.to_json
     end
 
     before do

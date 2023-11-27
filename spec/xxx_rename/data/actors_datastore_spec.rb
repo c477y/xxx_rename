@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "rspec"
-require "xxx_rename/data/actors_datastore"
 
 RSpec.describe XxxRename::Data::ActorsDatastoreQuery do
   include_context "config provider"

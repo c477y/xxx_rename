@@ -1,11 +1,8 @@
 # frozen_string_literal: true
 
-require "xxx_rename/site_clients/query_generator/mg_premium"
-
 module XxxRename
   module SiteClients
-    class MGPremium < Base
-      include HTTParty
+    class MgPremium < Base
       include Utils
 
       base_uri "https://site-api.project1service.com"
@@ -13,27 +10,21 @@ module XxxRename
       SEARCH_ENDPOINT = "/v2/releases"
       ACTOR_ENDPOINT = "/v1/actors"
 
-      # @param [XxxRename::Data::Config] config
       # @param [String] site_url
-      def initialize(config, site_url:)
+      def initialize(site_url:)
         @site_url = site_url
-        super(config)
+        super()
       end
 
       # @param [String] filename
-      # @return [Hash{Symbol->Array | String | Time}, nil] A Hash containing details extracted from the file.
-      # @param [Hash] opts
-      # @option opts [Boolean] recursive If needed to search for a file recursively
-      def search(filename, **opts)
-        str = search_scene_title(filename)
-        raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_METADATA, filename) if str.nil?
-
+      # @param [Data::ParsedSceneData] parsed_scene_data
+      # @param [Boolean] unprocessed
+      def search(filename, parsed_scene_data:, unprocessed:)
+        str = search_string!(filename, parsed_scene_data, unprocessed)
         @normalized_scene_name = str.normalize
 
         scene_resp = api_search(str)
         return scene_resp[@normalized_scene_name] unless scene_resp[@normalized_scene_name].nil?
-
-        raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_RESULT, str) unless opts[:recursive]
 
         scene_resp = recursive_search(str)
         scene_resp || raise(Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_RESULT, str))
@@ -49,12 +40,26 @@ module XxxRename
 
       private
 
+      def search_string!(filename, parsed_scene_data, unprocessed)
+        if unprocessed
+          scene_title = File.basename(filename, ".*")
+                            .split("_")
+                            .first&.split("-")
+          stub = adjust_apostrophe(scene_title)
+          raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_METADATA, filename) unless stub.present?
+
+          stub
+        else
+          parsed_scene_data.title.downcase
+        end
+      end
+
       # @param [String] search_string Search parameter
       # @return [Hash{Symbol->Array | String | Time}, nil]
       def recursive_search(search_string)
         while search_string.length >= 3
           search_string = reduce_search_string(search_string)
-          XxxRename.logger.debug "Trying with #{search_string.to_s.colorize(:blue)}"
+          XxxRename.logger.trace "Trying with #{search_string.to_s.colorize(:blue)}"
           scene = api_search(search_string)
           return scene[@normalized_scene_name] unless scene[@normalized_scene_name].nil?
         end
@@ -73,8 +78,8 @@ module XxxRename
           if parsed_response.is_a?(Array) && banned_search?(parsed_response.first["errors"])
             reduced_search_string = reduce_search_string(search_string)
             XxxRename.logger.debug "Got banned search error with search string" \
-                  "#{search_string.to_s.colorize(:red)}. Trying with" \
-                  "#{reduced_search_string.to_s.colorize(:red)}\n"
+                                     "#{search_string.to_s.colorize(:red)}. Trying with" \
+                                     "#{reduced_search_string.to_s.colorize(:red)}\n"
             api_search(reduced_search_string)
           else
             obj = {
@@ -245,13 +250,6 @@ module XxxRename
 
       def scene_link(scene)
         "#{@site_url}/video/#{scene_id(scene)}/#{slug(scene["title"])}"
-      end
-
-      def search_scene_title(filename)
-        # TODO: Allow client to use section of parameters rather than just the scene title
-        resp = SiteClients::QueryGenerator::MgPremium.generate(filename, source_format)
-
-        resp&.title&.downcase
       end
     end
   end

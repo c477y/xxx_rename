@@ -1,0 +1,258 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://stashdb.org/graphql
+    body:
+      encoding: UTF-8
+      string: '{"operationName":"Version","query":"query Version {\n  version {\n    version\n  }\n}\n"}'
+    headers:
+      Accept:
+      - application/json
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Dnt:
+      - '1'
+      User-Agent:
+      - Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Content-Length:
+      - '41'
+      Content-Type:
+      - application/json
+      Vary:
+      - Accept-Encoding
+      - Origin
+    body:
+      encoding: ASCII-8BIT
+      base64_string: 'eyJkYXRhIjp7InZlcnNpb24iOnsidmVyc2lvbiI6InYwLjUuMyJ9fX0=
+
+        '
+  recorded_at: Mon, 06 May 2024 21:13:39 GMT
+- request:
+    method: post
+    uri: https://stashdb.org/graphql
+    body:
+      encoding: UTF-8
+      string: '{"operationName":"SearchAll","variables":{"limit":10,"term":"Scarlett
+        Alexis, Christian Clay Bombshell Scarlett Gets Flawless Ass Filled Up"},"query":"query
+        SearchAll($term: String!, $limit: Int = 5) {\n  searchScene(term: $term, limit:
+        $limit) {\n    id\n    date\n    title\n    studio {\n      name\n    }\n    performers
+        {\n      as\n      performer {\n        id\n        name\n        gender\n        aliases\n      }\n    }\n  }\n}\n"}'
+    headers:
+      Accept:
+      - application/json
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Dnt:
+      - '1'
+      User-Agent:
+      - Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Content-Length:
+      - '828'
+      Content-Type:
+      - application/json
+      Vary:
+      - Accept-Encoding
+      - Origin
+    body:
+      encoding: ASCII-8BIT
+      base64_string: |
+        eyJkYXRhIjp7InNlYXJjaFNjZW5lIjpbeyJpZCI6IjRmMjQ4NDBmLTA4YmMt
+        NGY0OS04NzY5LWQ0YzRkYzQ5YWE2NSIsImRhdGUiOiIyMDI0LTA0LTMwIiwi
+        dGl0bGUiOiJCb21ic2hlbGwgU2NhcmxldHQgR2V0cyBGbGF3bGVzcyBBc3Mg
+        RmlsbGVkIFVwIiwic3R1ZGlvIjp7Im5hbWUiOiJUdXNoeSBSYXcifSwicGVy
+        Zm9ybWVycyI6W3siYXMiOm51bGwsInBlcmZvcm1lciI6eyJpZCI6IjI2Y2Rj
+        NzBjLWJhOTItNDAyOC1iY2FiLWQ1YTMyODAyZGIxOSIsIm5hbWUiOiJDaHJp
+        c3RpYW4gQ2xheSIsImdlbmRlciI6Ik1BTEUiLCJhbGlhc2VzIjpbIkNocmlz
+        IENsYXkiLCJDaHJpc3RpYW4iLCJDaHJpc3RpYW4gRGF2aWQiLCJDaHJpc3Rp
+        YW4gRGV2aWwiLCJDaHJpc3RpYW4gRHVybyIsIkNocmlzdGlhbiBOZXJpIiwi
+        Q3Jpc3RpYW4iLCJDcmlzdGlhbiBDbGF5IiwiQ3Jpc3RpYW4gRGF2aWQiLCJD
+        cmlzdGlhbiBEZSBWaWxsZSIsIkNyaXN0aWFuIERldmlsIiwiQ3Jpc3RpYW4g
+        RHVybyIsIkNyaXN0aWFuIEdyb3NzbyIsIkNyaXN0aWFuIEtlbGV2cmEiLCJD
+        cmlzdGlhbiBSdXNoIiwiQ3Jpc3RpYW5vIEZlcnJpIiwiRnJhbmNvIFBvbnRp
+        IiwiS3Jpc3RpYW4iLCJLcmlzdGlhbiBEZXZpbCIsIkxlb24gUm9kcmlndWV6
+        IiwiTWljaGVsZSBGb3J0dW5hIiwiU2FuY2lvIEwnT3JjbyJdfX0seyJhcyI6
+        bnVsbCwicGVyZm9ybWVyIjp7ImlkIjoiOWJkN2ZkMjEtM2RkNi00MmM3LWI0
+        MzAtMzVlNzViMTJmNTc0IiwibmFtZSI6IlNjYXJsZXR0IEFsZXhpcyIsImdl
+        bmRlciI6IkZFTUFMRSIsImFsaWFzZXMiOlsiQWxleGlzIiwiQXBocm9kaXRl
+        IFBhbmRlbW9zIl19fV19XX19
+  recorded_at: Mon, 06 May 2024 21:13:40 GMT
+- request:
+    method: post
+    uri: https://stashdb.org/graphql
+    body:
+      encoding: UTF-8
+      string: '{"operationName":"Scene","variables":{"id":"4f24840f-08bc-4f49-8769-d4c4dc49aa65"},"query":"query
+        Scene($id: ID!) {\n  findScene(id: $id) {\n    id\n    release_date\n    title\n    details\n    director\n    urls
+        {\n      url\n      site {\n        id\n        name\n        icon\n      }\n    }\n    images
+        {\n      id\n      url\n      width\n      height\n    }\n    studio {\n      id\n      name\n      parent
+        {\n        id\n        name\n      }\n    }\n    performers {\n      as\n      performer
+        {\n        id\n        name\n        disambiguation\n        deleted\n        gender\n        aliases\n      }\n    }\n    tags
+        {\n      id\n      name\n      description\n      aliases\n    }\n  }\n}\n"}'
+    headers:
+      Accept:
+      - application/json
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Dnt:
+      - '1'
+      User-Agent:
+      - Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Content-Type:
+      - application/json
+      Vary:
+      - Accept-Encoding
+      - Origin
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: ASCII-8BIT
+      base64_string: |
+        eyJkYXRhIjp7ImZpbmRTY2VuZSI6eyJpZCI6IjRmMjQ4NDBmLTA4YmMtNGY0
+        OS04NzY5LWQ0YzRkYzQ5YWE2NSIsInJlbGVhc2VfZGF0ZSI6IjIwMjQtMDQt
+        MzAiLCJ0aXRsZSI6IkJvbWJzaGVsbCBTY2FybGV0dCBHZXRzIEZsYXdsZXNz
+        IEFzcyBGaWxsZWQgVXAiLCJkZXRhaWxzIjoiQm9tYnNoZWxsIFNjYXJsZXR0
+        IGlzIGFsbCBmb3IgZXhjaXRpbmcgYWN0aXZpdGllcywgc2hlIGp1c3QgZG9l
+        c24ndCB3YW50IHRvIGxlYXZlIHRoZSBiZWQgdG8gaGF2ZSB0aGVtLiIsImRp
+        cmVjdG9yIjoiRGVyZWsgRG96ZXIiLCJ1cmxzIjpbeyJ1cmwiOiJodHRwczov
+        L3d3dy50dXNoeXJhdy5jb20vdmlkZW9zL2JvbWJzaGVsbC1zY2FybGV0dC1n
+        ZXRzLWZsYXdsZXNzLWFzcy1maWxsZWQtdXAiLCJzaXRlIjp7ImlkIjoiOTZk
+        NjhmZjYtY2QxOC00Mjc3LTg2MzMtNTExOWFiYmRiNjM1IiwibmFtZSI6IlN0
+        dWRpbyIsImljb24iOiJodHRwczovL3N0YXNoZGIub3JnL2ltYWdlL3NpdGUv
+        OTZkNjhmZjYtY2QxOC00Mjc3LTg2MzMtNTExOWFiYmRiNjM1In19XSwiaW1h
+        Z2VzIjpbeyJpZCI6IjY1NzdlZWM3LTY1MjMtNDU0NS04YjMxLTFhMjk4YjM1
+        YzI1NyIsInVybCI6Imh0dHBzOi8vY2RuLnN0YXNoZGIub3JnL2ltYWdlcy81
+        Mi81My81MjUzOGE2NWNlZmFiYjMwZDkxMGM1Yjc0NGFhYzhlOSIsIndpZHRo
+        IjoxOTIwLCJoZWlnaHQiOjEwODB9XSwic3R1ZGlvIjp7ImlkIjoiYmU0YmU0
+        NmYtNjkyZi00NTA5LWJhMjMtOTBhOTZhYmYwYjE2IiwibmFtZSI6IlR1c2h5
+        IFJhdyIsInBhcmVudCI6eyJpZCI6ImI2MmJjNDQ5LWMzZDktNDlmZi05YTE2
+        LThmNWIxYmZhMjBiOSIsIm5hbWUiOiJWaXhlbiBNZWRpYSBHcm91cCJ9fSwi
+        cGVyZm9ybWVycyI6W3siYXMiOm51bGwsInBlcmZvcm1lciI6eyJpZCI6IjI2
+        Y2RjNzBjLWJhOTItNDAyOC1iY2FiLWQ1YTMyODAyZGIxOSIsIm5hbWUiOiJD
+        aHJpc3RpYW4gQ2xheSIsImRpc2FtYmlndWF0aW9uIjpudWxsLCJkZWxldGVk
+        IjpmYWxzZSwiZ2VuZGVyIjoiTUFMRSIsImFsaWFzZXMiOlsiQ2hyaXMgQ2xh
+        eSIsIkNocmlzdGlhbiIsIkNocmlzdGlhbiBEYXZpZCIsIkNocmlzdGlhbiBE
+        ZXZpbCIsIkNocmlzdGlhbiBEdXJvIiwiQ2hyaXN0aWFuIE5lcmkiLCJDcmlz
+        dGlhbiIsIkNyaXN0aWFuIENsYXkiLCJDcmlzdGlhbiBEYXZpZCIsIkNyaXN0
+        aWFuIERlIFZpbGxlIiwiQ3Jpc3RpYW4gRGV2aWwiLCJDcmlzdGlhbiBEdXJv
+        IiwiQ3Jpc3RpYW4gR3Jvc3NvIiwiQ3Jpc3RpYW4gS2VsZXZyYSIsIkNyaXN0
+        aWFuIFJ1c2giLCJDcmlzdGlhbm8gRmVycmkiLCJGcmFuY28gUG9udGkiLCJL
+        cmlzdGlhbiIsIktyaXN0aWFuIERldmlsIiwiTGVvbiBSb2RyaWd1ZXoiLCJN
+        aWNoZWxlIEZvcnR1bmEiLCJTYW5jaW8gTCdPcmNvIl19fSx7ImFzIjpudWxs
+        LCJwZXJmb3JtZXIiOnsiaWQiOiI5YmQ3ZmQyMS0zZGQ2LTQyYzctYjQzMC0z
+        NWU3NWIxMmY1NzQiLCJuYW1lIjoiU2NhcmxldHQgQWxleGlzIiwiZGlzYW1i
+        aWd1YXRpb24iOm51bGwsImRlbGV0ZWQiOmZhbHNlLCJnZW5kZXIiOiJGRU1B
+        TEUiLCJhbGlhc2VzIjpbIkFsZXhpcyIsIkFwaHJvZGl0ZSBQYW5kZW1vcyJd
+        fX1dLCJ0YWdzIjpbeyJpZCI6IjMzMzdiZGZhLWNjMzQtNDQ5Zi04MDE5LWVk
+        YmEyYTIyNWJmNSIsIm5hbWUiOiJEb2dneSBTdHlsZSIsImRlc2NyaXB0aW9u
+        IjoiUGVuZXRyYXRpdmUgc2V4IHdpdGggcGVyZm9ybWVycyBvbiB0aGVpciBr
+        bmVlcyB3aGlsZSBmYWNpbmcgdGhlIHNhbWUgZGlyZWN0aW9uLiIsImFsaWFz
+        ZXMiOlsiQkcgRG9nZ3kgU3R5bGUiLCJEaWdneXN0eWxlIiwiRG9nZ2llIiwi
+        RG9nZ2llIFBvc2UiLCJEb2dnaWUgU3R5bGUiLCJEb2dnaWVzdHlsZSIsIkRv
+        Z2dzdHlsZSIsIkRvZ2dzeXR5bGUiLCJEb2dneSIsIkRvZ2d5IFBvc2UiLCJE
+        b2dneSBTdHlsZSBQb3NlIiwiRG9nZ3lzdHllIiwiRG9nZ3lzdHllbCIsIkRv
+        Z2d5c3R5bGUiLCJEb2dneXN0eWxlIFJlZ3VsYXIiLCJEb2dneXN0eWxlIFNl
+        eCIsIkRvZ2d5c3R5bGUsIiwiRG9nZ3lzeWxlIiwiRG9nZ3l0c3lsZSIsIkRv
+        Z2d5dHlsZSIsIkZyb21iZSIsIueKrOW8jyJdfSx7ImlkIjoiNDRiM2E0ZWIt
+        ZTVlNy00NTZmLWFlYzUtYWEzN2E4YmQzNjdhIiwibmFtZSI6IkFzaWFuIiwi
+        ZGVzY3JpcHRpb24iOiJQZXJmb3JtZXJzIHdpdGggYnJvYWRseSBlYXN0IEFz
+        aWFuIHJhY2lhbCBiYWNrZ3JvdW5kcywgcGFydGljdWxhcmx5IEphcGFuZXNl
+        LCBDaGluZXNlLCBLb3JlYW4sIGV0Yy4iLCJhbGlhc2VzIjpbIkFzaWFucyIs
+        IkVhc3QgQXNpYW4iLCJFdGhuaWNpdHkgLSBBc2lhbiIsIuS6muijlCJdfSx7
+        ImlkIjoiNjM5OWMwYjQtMzI3My00ZWZiLWI2ZGMtOTFiNDNlMjAxYzIxIiwi
+        bmFtZSI6IkJyb3duIEhhaXIiLCJkZXNjcmlwdGlvbiI6IlBlcmZvcm1lcnMg
+        d2l0aCBicm93bmlzaCBoYWlyIGNvbG9ycy4iLCJhbGlhc2VzIjpbIkJydW5l
+        dHRlIiwiQnJ1bmV0dGVzIiwiSGFpciAtIEJydW5ldHRlIiwiSGFpciBCcm93
+        biIsIuajleWPkSJdfSx7ImlkIjoiODFjODQzNzEtNTI3ZS00MmJhLTkxYjQt
+        YjVhZGJhYTNiMmJlIiwibmFtZSI6IlJpZGluZyIsImRlc2NyaXB0aW9uIjoi
+        UmVjZWl2aW5nIHBlcmZvcm1lciBvbiB0b3AgYW5kIHRocnVzdGluZyBmb3Ig
+        cGVuZXRyYXRpb24uIiwiYWxpYXNlcyI6WyJDb2NrIFJpZGVyIl19LHsiaWQi
+        OiI4Mzc5NGQ2Ny0wYWY1LTQ2YTgtOTYxNC1lZTFlZWMyZjYxZGMiLCJuYW1l
+        IjoiTGluZ2VyaWUiLCJkZXNjcmlwdGlvbiI6IldvbWVuJ3MgdW5kZXJ3ZWFy
+        IGFuZCBuaWdodGNsb3RoZXMgaW50ZW5kZWQgdG8gYmUgc2V4dWFsbHkgYXBw
+        ZWFsaW5nLiIsImFsaWFzZXMiOlsiU2V4eSB1bmRlcndlYXIiXX0seyJpZCI6
+        Ijg2NzgzYjk5LTNlNjAtNGJlMC05MDllLWQwMGFmZTY1YzllZiIsIm5hbWUi
+        OiJCbG93am9iIiwiZGVzY3JpcHRpb24iOiJPcmFsIHBlbmV0cmF0aXZlIHNl
+        eC4iLCJhbGlhc2VzIjpbIkJKIiwiQmVlaiIsIkJsb3ciLCJCbG93IEpvYiIs
+        IkJsb3cgSm9icyIsIkJsb3dpZSIsIkJsb3dqb2JzIiwiQ29jayBTdWNraW5n
+        IiwiRGljayBTdWNraW5nIiwiRmVsbGF0aW5nIiwiRmVsbGF0aW8iLCJHb2Ji
+        eSIsIkhlYWQiLCJIdW1tZXIiLCJLbm9iIEpvYiIsIm1hbWFkYSJdfSx7Imlk
+        IjoiOTdmMDdkOGEtOWZmMC00MmI3LTkzZjYtZjcwNWMwN2FlMzY1IiwibmFt
+        ZSI6IkN1bSBpbiBNb3V0aCIsImRlc2NyaXB0aW9uIjoiVmlzaWJseSBlamFj
+        dWxhdGluZyBpbnRvIGFub3RoZXIgcGVyZm9ybWVyJ3Mgb3BlbiBtb3V0aC4i
+        LCJhbGlhc2VzIjpbIkNJTSIsIkN1bSBJbnRvIE1vdXRoIiwiQ3VtIE1vdXRo
+        IiwiQ3VtIGluIE9wZW4gTW91dGgiLCJDdW1zaG90IChNb3V0aCkiLCJPcmFs
+        IEN1bXNob3QiLCJjdW0taW4tbW91dGgiLCLlsITlnKjlmLTph4wiXX0seyJp
+        ZCI6IjllNWQ3ZjA2LTIyZTEtNDU0NS04YmRjLWRmNGMxM2ZiNGQ4ZiIsIm5h
+        bWUiOiJSZXZlcnNlIENvd2dpcmwiLCJkZXNjcmlwdGlvbiI6IlBvc2l0aW9u
+        IHdoZXJlIG9uZSBwZXJmb3JtZXIga25lZWxzIGFib3ZlIGFub3RoZXIgcGVy
+        Zm9ybWVyIGR1cmluZyBwZW5ldHJhdGl2ZSBzZXgsIHdoaWxlIGZhY2luZyBh
+        d2F5IGZyb20gZWFjaCBvdGhlci4iLCJhbGlhc2VzIjpbIkNvd2dpcmwgLSBS
+        ZXZlcnNlIiwiQ293Z2lybCBSZXZlcnNlIiwiUkNHIiwiUmV2ZXJzZS1jb3dn
+        aXJsIiwiUm9kZW8iXX0seyJpZCI6ImI3MGM3OGI3LWEyNWEtNGM4Mi05OTI5
+        LTU5MWE1Nzk1YjU0ZCIsIm5hbWUiOiJBbmFsIiwiZGVzY3JpcHRpb24iOiJB
+        bmFsIHBlbmV0cmF0aXZlIHNleC4iLCJhbGlhc2VzIjpbIkFuYWwgU2V4Iiwi
+        QW5hbCBTbHV0IiwiQXNrIEZvciBBbmFsIiwiQXNzIEZ1Y2siLCJBc3MgRnVj
+        a2luZyIsIkFzcyBJcyBpbiBTZXNzaW9uIiwiQkcgQW5hbCIsIkJydXRhbCBB
+        bmFsIiwiaGFyZGNvcmUgYW5hbCBzZXgiLCLogpvpl6giXX0seyJpZCI6ImRm
+        OWNkNDMxLWNkNzItNDQ1NS04Nzk3LTlhNjdhNWI4Y2U0NSIsIm5hbWUiOiJP
+        aWwiLCJkZXNjcmlwdGlvbiI6IkZlYXR1cmVzIGF0IGxlYXN0IG9uZSBwZXJm
+        b3JtZXIgd2hvIGlzIGxpYmVyYWxseSBhcHBsaWVkIHdpdGggYm9keSBvaWwu
+        IiwiYWxpYXNlcyI6WyJCYWJ5IE9pbCIsIkJvZHkgT2lsIiwiQ29jb251dCBP
+        aWwiLCJNYXNzYWdlIE9pbCIsIk9pbCAvIExvdGlvbiIsIk9pbCBhbmQgQ3Jl
+        YW0iLCJPaWwgYW5kIE9yZ2FzbXMiLCJPaWxlZCIsIk9pbGVkIEJvZHkiLCJP
+        aWxlZCBCcmVhc3RzIiwiT2lsZWQgUHVzc3kiLCJPaWxlZCBVcCIsIk9pbGlu
+        ZyJdfSx7ImlkIjoiZjExN2YyYWUtNmFlNC00NTNlLWIxMzQtYWQ0NGIxZGJj
+        NDg0IiwibmFtZSI6IkNvd2dpcmwiLCJkZXNjcmlwdGlvbiI6IlBvc2l0aW9u
+        IHdoZXJlIG9uZSBwZXJmb3JtZXIga25lZWxzIGFib3ZlIGFub3RoZXIgcGVy
+        Zm9ybWVyIGR1cmluZyBwZW5ldHJhdGl2ZSBzZXgsIHdoaWxlIGZhY2luZyBl
+        YWNoIG90aGVyLiIsImFsaWFzZXMiOlsiQ28gR2lybCIsIkNvYWdpcmwiLCJD
+        b2UgR2lybCIsIkNvZ3dpcmwiLCJDb3JnaXJsIiwiQ293IiwiQ293IEdpcmwi
+        LCJDb3dnaXJsIFBvc2l0aW9uIl19LHsiaWQiOiJmZTdmNGQ0Ni05NjZlLTRh
+        MzYtYmY2YS02MWNjZjdkMzczNGQiLCJuYW1lIjoiQXNzIHRvIE1vdXRoIiwi
+        ZGVzY3JpcHRpb24iOiJPcmFsIHBlbmV0cmF0aW9uIGltbWVkaWF0ZWx5IGFm
+        dGVyIGFuYWwgc2V4LiIsImFsaWFzZXMiOlsiQTJNIiwiQVRNIiwiQXNzIDIg
+        TW91dGgiLCJBc3MgdG8gTW91dGggKEFUTSkiLCJBc3MyTW91dGgiLCJGcm9t
+        IEFzcyB0byBNb3V0aCIsImFzcy50by5tb3V0aCIsIuWFiOaTjeWxgeecvOWQ
+        juS4iuWYtCIsIuWFiOiCj+WxgeecvOWQjuS4iuWYtCIsIuWFiOiJueWxgeec
+        vOWQjuS4iuWYtCIsIuWFiOiNieWxgeecvOWQjuS4iuWYtCJdfSx7ImlkIjoi
+        ZmZkMmI0YzEtYWJhNi00ZGNhLTg0MGMtNTQwOGU5Mjg5YzhlIiwibmFtZSI6
+        Ik1pc3Npb25hcnkiLCJkZXNjcmlwdGlvbiI6IlBvc2l0aW9uIHdoZXJlIG9u
+        ZSBwZXJmb3JtZXIgcGVuZXRyYXRlcyBhbm90aGVyIGZyb20gYWJvdmUsIHdo
+        aWxlIGZhY2luZyBlYWNoIG90aGVyLiIsImFsaWFzZXMiOlsi5pS75LiK5Y+X
+        5LiLIiwi55S35LiK5aWz5LiLIl19XX19fQ==
+  recorded_at: Mon, 06 May 2024 21:13:40 GMT
+recorded_with: VCR 6.2.0

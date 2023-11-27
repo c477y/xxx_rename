@@ -1,26 +1,18 @@
 # frozen_string_literal: true
 
-require "httparty"
-require "nokogiri"
-require "xxx_rename/constants"
-require "xxx_rename/data/scene_data"
-
 module XxxRename
   module SiteClients
     class AdultDvdEmpireMovieProvider
-      include Utils
       include HTTParty
+      include Utils
 
       base_uri "https://www.adultdvdempire.com"
       DVD_SEARCH_ENDPOINT = "/dvd/search"
-      RELEASE_YEAR_REGEX = /\((?<year>\d{4})\)/x.freeze
+      RELEASE_YEAR_REGEX = /\((?<year>\d{4})\)/x
 
       def initialize(movie_name:, studio:)
         @movie_name = movie_name
         @studio = studio
-
-        self.class.logger(XxxRename.logger, :debug)
-        self.class.headers(Constants::DEFAULT_HEADERS)
       end
 
       def fetch
@@ -101,27 +93,35 @@ module XxxRename
       # @return [Nokogiri::HTML4::Document]
       def fetch_movie_doc(link)
         resp = handle_response!(return_raw: true) { self.class.get(link, headers: Constants::DEFAULT_HEADERS) }
-        Nokogiri::HTML resp.parsed_response
+        Nokogiri::HTML resp.body
       end
 
       # @return [Array<String>]
       def find_matching_movies
-        doc = search_results
-        links = doc.css(".product-details .item-title a")
-                   .select { |x| x.attr("title").strip.n_match?(movie_name) } # Select all movies with the matching name
-                   .map { |x| x.attr("href") } # Get the link of the movies
+        links = search_doc.css(".product-details a")
+                          .select { |x| title_match?(x.attr("title")) } # Select all movies with the matching name
+                          .map { |x| x.attr("href") } # Get the link of the movies
         XxxRename.logger.debug "[MOVIE RESULTS n=#{links.length}]\n#{links.join("\n")}"
         links
       end
 
+      def title_match?(site_title)
+        return if site_title.blank?
+
+        site_title.strip.n_match?(movie_name)
+      end
+
       # @return [Nokogiri::HTML4::Document]
-      def search_results
-        resp = handle_response!(return_raw: true) do
-          self.class.get(DVD_SEARCH_ENDPOINT,
-                         query: { q: movie_name, exactMatch: movie_name },
-                         headers: Constants::DEFAULT_HEADERS)
-        end
-        Nokogiri::HTML resp.parsed_response
+      def search_doc
+        @search_doc ||=
+          begin
+            resp = handle_response!(return_raw: true) do
+              self.class.get(DVD_SEARCH_ENDPOINT,
+                             query: { q: movie_name, exactMatch: movie_name },
+                             headers: Constants::DEFAULT_HEADERS)
+            end
+            Nokogiri::HTML resp.body
+          end
       end
     end
   end

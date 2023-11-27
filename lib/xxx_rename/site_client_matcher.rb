@@ -1,26 +1,30 @@
 # frozen_string_literal: true
 
-require "set"
-
-require "xxx_rename/site_clients/base"
-require "xxx_rename/site_clients/errors"
-
 module XxxRename
   class SiteClientMatcher
-    MatchResponse = Struct.new(:parsed_info, :site_client, :unprocessed, keyword_init: true)
-
-    # @param [XxxRename::Data::Config] config
-    def initialize(config, override_site: nil)
-      @config = config
-      @override_site = override_site
-    end
-
+    #
+    # Find a match for a file using three strategies
+    # 1. match a file by original file regex.
+    #    this will work for files downloaded from websites
+    # 2. match a file by formats provided in the config
+    #
     # @param [String] file
-    # @return [Array[MatchResponse]]
+    # @return [Array[Data::MatchResponse]]
     def match(file)
-      @match_response = []
-      find_matches(file)
-      @match_response
+      match_arr = match_unprocessed?(file).compact
+      unless match_arr.empty?
+        XxxRename.logger.trace "[MATCHED AS UNPROCESSED FILE] #{file}"
+        return match_arr
+      end
+
+      match_arr = match_with_source_file_format?(file).compact
+      unless match_arr.empty?
+        XxxRename.logger.trace "[MATCHED FILE USING SOURCE FILE FORMAT] #{file}"
+        return match_arr
+      end
+
+      XxxRename.logger.trace "[NO STRATEGIES MATCHED FILE TO SITE CLIENT] #{file}"
+      []
     end
 
     def fetch(key)
@@ -65,7 +69,7 @@ module XxxRename
       return site_clients[site] if site_clients.key?(site) && !site_clients[site].nil?
 
       if disabled_sites.member?(site)
-        XxxRename.logger.debug "#{site} is disabled"
+        XxxRename.logger.debug "[SITE CLIENT DISABLED] #{site}"
         return nil
       end
 
@@ -74,24 +78,34 @@ module XxxRename
 
     private
 
-    attr_reader :config, :override_site
-
-    #
-    # Find a match for a file using three strategies
-    # 1. match a file by original file regex.
-    #    this will work for files downloaded from websites
-    # 2. match a file with the legacy format used by
-    #    the app. this is defined in ProcessedFile by
-    #    PROCESSED_FILE_REGEX and FEMALE_FIRST_ID_FILE_REGEX
-    # 3. match a file by formats provided in the config
-    #
-    # @param [String] file
-    # @return [Boolean]
-    def find_matches(file)
-      match_unprocessed?(file) ||
-        match_with_legacy_formats?(file) ||
-        match_with_source_file_format?(file)
-    end
+    SYM_TO_SITE_CLIENT = {
+      adult_time: SiteClients::AdultTime,
+      arch_angel: SiteClients::ArchAngelVideo,
+      babes: SiteClients::Babes,
+      blacked: SiteClients::Blacked,
+      blacked_raw: SiteClients::BlackedRaw,
+      brazzers: SiteClients::Brazzers,
+      digital_playground: SiteClients::DigitalPlayground,
+      deeper: SiteClients::Deeper,
+      elegant_angel: SiteClients::ElegantAngel,
+      evil_angel: SiteClients::EvilAngel,
+      goodporn: SiteClients::Goodporn,
+      jules_jordan: SiteClients::JulesJordan,
+      manuel_ferrara: SiteClients::ManuelFerrara,
+      mofos: SiteClients::Mofos,
+      naughty_america: SiteClients::NaughtyAmerica,
+      nf_busty: SiteClients::Nfbusty,
+      reality_kings: SiteClients::RealityKings,
+      stash: SiteClients::StashDb,
+      tushy: SiteClients::Tushy,
+      tushy_raw: SiteClients::TushyRaw,
+      twistys: SiteClients::Twistys,
+      vixen: SiteClients::Vixen,
+      whale_media: SiteClients::Whale,
+      wicked: SiteClients::Wicked,
+      x_empire: SiteClients::XEmpire,
+      zero_tolerance: SiteClients::ZeroTolerance
+    }.freeze
 
     # @return [Nil, String]
     def override_sc_original_pattern
@@ -110,11 +124,20 @@ module XxxRename
         end
     end
 
-    def register_response(site_client_sym, match, unprocessed:)
+    # @param [Symbol] site_client_sym
+    # @param [Data::ParsedSceneData] parsed_scene_data
+    # @param [String] file
+    # @param [Boolean] unprocessed
+    # @return [Data::MatchResponse]
+    # noinspection RubyMismatchedReturnType
+    def register_response(site_client_sym, parsed_scene_data, file, unprocessed:)
       return if site_disabled?(site_client_sym)
 
       site_client = initialise_site_client(site_client_sym)
-      @match_response << MatchResponse.new(parsed_info: match, site_client: site_client, unprocessed: unprocessed)
+      Data::MatchResponse.new(parsed_scene_data: parsed_scene_data,
+                              site_client: site_client,
+                              unprocessed: unprocessed,
+                              filename: file)
     end
 
     def disabled_sites
@@ -123,6 +146,68 @@ module XxxRename
 
     def site_clients
       @site_clients ||= {}
+    end
+
+    # @param [String] file
+    # @return [Array<Data::MatchResponse>]
+    def match_unprocessed?(file)
+      original_file_regexes.each_pair do |regex, site_clients|
+        # Skip if override_site is set and the site is not included for the regex
+        next if override_site.present? && site_clients.exclude?(override_site.to_sym)
+
+        # Skip if there's no match
+        next unless (match = file.match(regex))
+
+        parsed_scene_data = parse_scene_data_from_original_file(match)
+        return site_clients.map do |site_client|
+          register_response(site_client, parsed_scene_data, file, unprocessed: true)
+        end
+      end
+
+      []
+    end
+
+    # @param [MatchData] match
+    # @return [Data::ParsedSceneData]
+    # noinspection RubyMismatchedArgumentType,RubyMismatchedReturnType
+    def parse_scene_data_from_original_file(match)
+      prepared_match = match.named_captures.tap do |h|
+        re = /[&_-]/
+        h["actors"] = h["actors"]&.split(re)
+        h["female_actors"] = h["female_actors"]&.split(re)
+        h["male_actors"] = h["male_actors"]&.split(re)
+      end
+
+      XxxRename.logger.ap prepared_match, :extra
+
+      Data::ParsedSceneData.new(prepared_match)
+    end
+
+    # @param [String] file
+    # @return [Array<Data::MatchResponse>]
+    def match_with_source_file_format?(file)
+      match_data_arr = []
+      source_file_patterns_to_site.each_pair do |format, site_client_sym|
+        match = ProcessedFile.strpfile(file, format)
+        XxxRename.logger.trace "[REGEX MATCH]\n" \
+                                 "\t FORMAT: #{format}\n" \
+                                 "\t #{match.to_compact_h}"
+
+        raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_METADATA, file) if match.blank?
+
+        match_data_arr << register_response(site_client_sym, match, file, unprocessed: false)
+      rescue Errors::ParsingError => e
+        XxxRename.logger.trace "[REGEX PARSING FAIL] #{e.message}"
+      end
+      match_data_arr
+    end
+
+    # @param [Symbol] site
+    # @return [XxxRename::SiteClients::Base]
+    def generate_class(site)
+      raise "undefined site: #{site}" if SYM_TO_SITE_CLIENT[site].nil?
+
+      SYM_TO_SITE_CLIENT[site].new
     end
 
     #
@@ -144,153 +229,25 @@ module XxxRename
           site_client_configs.each_pair do |site, site_config|
             site_config.file_source_format.map { |format| file_patterns[format] = site }
           end
+
+          XxxRename.logger.trace "[SOURCE FILE FORMAT(s) TO SITE CLIENT]"
+          XxxRename.logger.ap file_patterns, :extra
           file_patterns
         end
     end
 
-    # @param [String] file
-    # @return [Boolean]
-    def match_unprocessed?(file)
-      unless override_site.nil?
-        register_response(override_site, nil, unprocessed: true)
-        return true
-      end
-
-      original_file_regexes.each_pair do |regex, site_clients|
-        next unless (match = file.match(regex))
-
-        site_clients.map do |sc|
-          register_response(sc, match, unprocessed: true)
-        end
-        return true
-      end
-      false
-    end
-
-    # @param [String] file
-    # @return [Boolean] List of matching site clients
-    def match_with_legacy_formats?(file)
-      match = ProcessedFile.parse(file)
-      return false unless match.collection_tag.presence
-
-      site_client_sym = config.collection_tag_to_site_client[match.collection_tag]
-      return false if site_client_sym.nil?
-
-      register_response(site_client_sym, match, unprocessed: false) if override_site.nil? || override_site == client
-    rescue Errors::ParsingError
-      false
-    end
-
-    # @param [String] file
-    # @return [Boolean]
-    def match_with_source_file_format?(file)
-      matches = []
-      source_file_patterns_to_site.each_pair do |format, site_client_sym|
-        match = ProcessedFile.strpfile(file, format)
-        register_response(site_client_sym, match, unprocessed: false)
-        matches << true
-      rescue Errors::ParsingError
-        matches << false
-      end
-      matches.any?(true)
-    end
-
-    # rubocop:disable Metrics/CyclomaticComplexity
-    def generate_class(site)
-      case site.to_sym
-      when :adult_time
-        require "xxx_rename/site_clients/adult_time"
-        XxxRename::SiteClients::AdultTime.new(config)
-      when :arch_angel
-        require "xxx_rename/site_clients/arch_angel_video"
-        XxxRename::SiteClients::ArchAngelVideo.new(config)
-      when :babes
-        require "xxx_rename/site_clients/babes"
-        XxxRename::SiteClients::Babes.new(config)
-      when :blacked
-        require "xxx_rename/site_clients/blacked"
-        XxxRename::SiteClients::Blacked.new(config)
-      when :blacked_raw
-        require "xxx_rename/site_clients/blacked_raw"
-        XxxRename::SiteClients::BlackedRaw.new(config)
-      when :brazzers
-        require "xxx_rename/site_clients/brazzers"
-        XxxRename::SiteClients::Brazzers.new(config)
-      when :digital_playground
-        require "xxx_rename/site_clients/digital_playground"
-        XxxRename::SiteClients::DigitalPlayground.new(config)
-      when :deeper
-        require "xxx_rename/site_clients/deeper"
-        XxxRename::SiteClients::Deeper.new(config)
-      when :elegant_angel
-        require "xxx_rename/site_clients/elegant_angel"
-        XxxRename::SiteClients::ElegantAngel.new(config)
-      when :evil_angel
-        require "xxx_rename/site_clients/evil_angel"
-        XxxRename::SiteClients::EvilAngel.new(config)
-      when :goodporn
-        require "xxx_rename/site_clients/goodporn"
-        XxxRename::SiteClients::Goodporn.new(config)
-      when :jules_jordan
-        require "xxx_rename/site_clients/jules_jordan"
-        XxxRename::SiteClients::JulesJordan.new(config)
-      when :manuel_ferrara
-        require "xxx_rename/site_clients/manuel_ferrara"
-        XxxRename::SiteClients::ManuelFerrara.new(config)
-      when :mofos
-        require "xxx_rename/site_clients/mofos"
-        XxxRename::SiteClients::Mofos.new(config)
-      when :naughty_america
-        require "xxx_rename/site_clients/naughty_america"
-        XxxRename::SiteClients::NaughtyAmerica.new(config)
-      when :nf_busty
-        require "xxx_rename/site_clients/nfbusty"
-        XxxRename::SiteClients::Nfbusty.new(config)
-      when :reality_kings
-        require "xxx_rename/site_clients/reality_kings"
-        XxxRename::SiteClients::RealityKings.new(config)
-      when :stash
-        require "xxx_rename/site_clients/stash_db"
-        XxxRename::SiteClients::StashDb.new(config)
-      when :tushy
-        require "xxx_rename/site_clients/tushy"
-        XxxRename::SiteClients::Tushy.new(config)
-      when :tushy_raw
-        require "xxx_rename/site_clients/tushy_raw"
-        XxxRename::SiteClients::TushyRaw.new(config)
-      when :twistys
-        require "xxx_rename/site_clients/twistys"
-        XxxRename::SiteClients::Twistys.new(config)
-      when :vixen
-        require "xxx_rename/site_clients/vixen"
-        XxxRename::SiteClients::Vixen.new(config)
-      when :whale_media
-        require "xxx_rename/site_clients/whale"
-        XxxRename::SiteClients::Whale.new(config)
-      when :wicked
-        require "xxx_rename/site_clients/wicked"
-        XxxRename::SiteClients::Wicked.new(config)
-      when :x_empire
-        require "xxx_rename/site_clients/x_empire"
-        XxxRename::SiteClients::XEmpire.new(config)
-      when :zero_tolerance
-        require "xxx_rename/site_clients/zero_tolerance"
-        XxxRename::SiteClients::ZeroTolerance.new(config)
-      else
-        raise "undefined site: #{site}"
-      end
-    end
-    # rubocop:enable Metrics/CyclomaticComplexity
-
     def original_file_regexes
       @original_file_regexes ||= {}.tap do |h|
-        h[Constants::MG_PREMIUM_ORIGINAL_FILE_FORMAT] = %i[babes brazzers digital_playground mofos reality_kings twistys] # babes
+        h[Constants::MG_PREMIUM_ORIGINAL_FILE_FORMAT] =
+          %i[babes brazzers digital_playground mofos reality_kings twistys]
+        # babes; mg premium
         # brazzers; mg premium
         # digital playground; mg premium
-        h[Constants::EVIL_ANGEL_ORIGINAL_FILE_PATTERN] = [:evil_angel] # evil angel
+        h[Constants::EVIL_ANGEL_ORIGINAL_FILE_PATTERN] = %i[evil_angel x_empire wicked] # evil angel
         h[Constants::GOODPORN_ORIGINAL_FILE_FORMAT] = [:goodporn] # goodporn
         # mofos; mg premium
-        h[Constants::NAUGHTY_AMERICA_ORIGINAL_FILE_REGEX] = [:naughty_america] # naughty america
+        # NaughtyAmerica is disabled
+        # h[Constants::NAUGHTY_AMERICA_ORIGINAL_FILE_REGEX] = [:naughty_america] # naughty america
         h[Constants::NF_BUSTY_ORIGINAL_FILE_REGEX] = [:nf_busty] # nf busty
         # reality kings; mg premium
         # stash; ALWAYS OVERRIDE
@@ -298,8 +255,18 @@ module XxxRename
         h[Constants::VIXEN_MEDIA_ORIGINAL_FILE_REGEX_1] = [:vixen] # vixen
         h[Constants::VIXEN_MEDIA_ORIGINAL_FILE_REGEX_2] = [:vixen]
         h[Constants::WHALE_ORIGINAL_FILE_PATTERN] = [:whale_media] # whale
-        # wicked # ALWAYS OVERRIDE
+        # wicked; evil-angel
       end
+    end
+
+    # @return [Data::Config]
+    def config
+      XxxRename.config
+    end
+
+    # @return [String]
+    def override_site
+      config.override_site
     end
   end
 end

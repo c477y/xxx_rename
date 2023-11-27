@@ -1,17 +1,12 @@
 # frozen_string_literal: true
 
-require "nokogiri"
-require "pathname"
-require "xxx_rename/site_clients/query_generator/naughty_america"
-
 module XxxRename
   module SiteClients
     class NaughtyAmerica < Base
-      include HTTParty
-      base_uri "https://www.naughtyamerica.com"
-
       site_client_name :naughty_america
       ACTOR_ENDPOINT = "/pornstar"
+
+      base_uri "https://www.naughtyamerica.com"
 
       def search(filename)
         resp = SiteClients::QueryGenerator::NaughtyAmerica.generate(filename, source_format)

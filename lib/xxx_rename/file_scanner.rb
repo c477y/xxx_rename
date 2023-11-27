@@ -31,7 +31,7 @@ module XxxRename
     def process_directory(dir)
       Dir.chdir(dir) do
         # Process files in a given directory
-        XxxRename.logger.info "#{"[DIRECTORY SCAN]".colorize(:blue)} #{Dir.pwd}"
+        XxxRename.logger.info "[DIRECTORY SCAN] #{Dir.pwd}"
 
         Dir.glob(@extension).sort.each { |file| @block.call(file) }
 

@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 require "rspec"
-require "xxx_rename/contract/config_generator"
-require "xxx_rename/data/file_pre_processor_rule"
 
 RSpec.describe XxxRename::Contract::ConfigGenerator do
   describe(".generate!") do

@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require "xxx_rename/site_clients/algolia_v2"
-require "xxx_rename/site_clients/query_generator/base"
-
 module XxxRename
   module SiteClients
     class Wicked < AlgoliaV2
@@ -14,17 +11,16 @@ module XxxRename
 
       site_client_name :wicked
 
-      def initialize(config)
+      def initialize
         @site_url = "https://www.wicked.com"
-        super(config)
+        super
       end
 
-      def search(filename)
-        match = QueryGenerator::Base.generic_generate(filename, source_format)
-        title = match&.title.presence || filename.split("_").first&.titleize_custom
-
-        raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_METADATA, filename) unless title.presence
-
+      # @param [String] filename
+      # @param [Data::ParsedSceneData] parsed_scene_data
+      # @param [Boolean] unprocessed
+      def search(filename, parsed_scene_data:, unprocessed:)
+        title = unprocessed ? filename.split("_").first&.titleize_custom : parsed_scene_data.title
         resp = fetch_scenes_from_api(title)
         find_matched_scene!(resp, title)
       end

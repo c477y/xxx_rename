@@ -27,7 +27,7 @@ describe XxxRename::Client do
         )
       end
 
-      before(:each) { FileUtils.touch(File.join("test_folder", file)) }
+      before(:each) { FileUtils.touch(file) }
       let(:object) { File.join("test_folder", file) }
 
       before { client.matcher.initialise_site_client(:evil_angel) }

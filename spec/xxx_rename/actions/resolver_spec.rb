@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "rspec"
-require "xxx_rename/actions/resolver"
 
 describe XxxRename::Actions::Resolver do
   subject(:resolver) { described_class.new(config) }

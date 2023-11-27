@@ -1,17 +1,12 @@
 # frozen_string_literal: true
 
-require "xxx_rename/actions/base_action"
-require "xxx_rename/integrations/stash_app"
-
 module XxxRename
   module Actions
     class StashAppPostMovie < BaseAction
-      attr_reader :stash, :config
-
-      def initialize(config)
-        super(config)
-        @stash = Integrations::StashApp.new(config)
+      def initialize
+        @stash = Integrations::StashApp.new
         @stash.setup_credentials!
+        super
       end
 
       def perform(dir, file, search_result)
@@ -24,6 +19,8 @@ module XxxRename
       end
 
       private
+
+      attr_reader :stash
 
       def post_movie!(_dir, file, scene_data)
         scene = stash.fetch_scene(file)

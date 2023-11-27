@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 require "rspec"
-require "xxx_rename/actions/log_new_filename"
-require "xxx_rename/site_clients/brazzers"
 
 describe XxxRename::Actions::LogNewFilename do
   subject(:perform) { action.perform(dir, file, search_result) }
@@ -64,17 +62,17 @@ describe XxxRename::Actions::LogNewFilename do
     let(:pathname) { instance_double("Pathname") }
 
     before do
-      expect(Dir).to receive(:pwd).and_return("test_folder")
+      expect(Dir).to receive(:pwd).and_return(".")
       expect(Pathname).to receive(:new).and_return(pathname)
       expect(pathname).to receive(:absolute?).and_return(true)
-      FileUtils.touch(File.join("test_folder", file))
+      FileUtils.touch(file)
       perform
     end
 
     let(:expected_log) do
       XxxRename::Data::FileRenameOp.new(
         key: scene_data.key,
-        directory: "test_folder",
+        directory: ".",
         source_filename: file,
         output_filename: "9999 [T] scene-title.mp4",
         mtime: date

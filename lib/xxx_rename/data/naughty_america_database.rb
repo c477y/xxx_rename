@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "pstore"
-
 module XxxRename
   module Data
     class NaughtyAmericaDatabase
@@ -13,7 +11,7 @@ module XxxRename
         store_file = DEFAULT_STORE_FILE if store_file.nil?
 
         path = File.join(Dir.pwd, store_file)
-        XxxRename.logger.info "Initialising database in #{path}"
+        XxxRename.logger.info "[DATABASE INITIALISATION] #{path}"
 
         @store = PStore.new path
       end

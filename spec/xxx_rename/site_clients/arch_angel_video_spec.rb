@@ -1,12 +1,8 @@
 # frozen_string_literal: true
 
 require "rspec"
-require "xxx_rename/site_clients/arch_angel_video"
-require "xxx_rename/data/scene_data"
 
 RSpec.describe XxxRename::SiteClients::ArchAngelVideo do
-  WebMock.disable_net_connect!(allow: /tour.archangelworld.com/)
-
   subject(:site_client) { described_class.new(config) }
 
   include_context "config provider"
@@ -30,7 +26,7 @@ RSpec.describe XxxRename::SiteClients::ArchAngelVideo do
           collection: "Arch Angel",
           collection_tag: "AA",
           title: "Brooklyn Chase Hot Bigtits Babe Fucked",
-          date_released: Time.parse("2015-10-06 00:00:00"),
+          date_released: Time.parse("2015-10-06").utc,
           description: "Brooklyn Chase showing off her massive mounds in a bikini outdoors and in before " \
                          "having them sucked on and her pussy eaten. Brooklyn sucks cock then goes for a hardcore " \
                          "ride and is banged good with her huge boobs bouncing all over. Dude titty fucks those " \
@@ -117,8 +113,17 @@ RSpec.describe XxxRename::SiteClients::ArchAngelVideo do
 
   describe ".search" do
     include_context "hardcoded scene details"
+
+    let(:search) { site_client.search(file, parsed_scene_data: parsed_scene_data) }
     let(:file) { "Brooklyn Chase Hot Bigtits Babe Fucked [C] ArchAngel [A] Brooklyn Chase.mp4" }
     let(:pattern) { "%title [C] %collection [A] %actors" }
+    let(:parsed_scene_data) do
+      XxxRename::Data::ParsedSceneData.new(
+        actors: ["Brooklyn Chase"],
+        collection: "Arch Angel",
+        title: "Brooklyn Chase Hot Bigtits Babe Fucked"
+      )
+    end
 
     let(:override_config) do
       { "site" => { "arch_angel" => { "file_source_format" => [pattern] } } }
@@ -132,7 +137,7 @@ RSpec.describe XxxRename::SiteClients::ArchAngelVideo do
       end
 
       it "returns the correct scene data" do
-        expect(site_client.search(file)).to eq(expected_scene_data)
+        expect(search).to eq(expected_scene_data)
       end
     end
 
@@ -142,7 +147,7 @@ RSpec.describe XxxRename::SiteClients::ArchAngelVideo do
       end
 
       it "raises an error" do
-        expect { site_client.search(file) }.to raise_error(XxxRename::SiteClients::Errors::NoMatchError)
+        expect { search }.to raise_error(XxxRename::SiteClients::Errors::NoMatchError)
       end
     end
   end

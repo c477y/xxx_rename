@@ -1,25 +1,19 @@
 # frozen_string_literal: true
 
-require "xxx_rename/site_clients/query_generator/vixen"
-
 module XxxRename
   module SiteClients
     class VixenMedia < Base
-      include HTTParty
       include Utils
-
-      headers "content-type" => "application/json"
 
       GRAPHQL_ENDPOINT = "/graphql"
 
-      def search(filename)
-        match = SiteClients::QueryGenerator::Vixen.generate(filename, source_format)
-        raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_METADATA, filename) if match.nil?
-
-        if match.id && match.collection
-          get_video_by_id(match.id, match.collection)
-        elsif match.title && match.actors
-          get_video_by_metadata(match.title, match.actors)
+      # @param [String] filename
+      # @param [Data::ParsedSceneData] parsed_scene_data
+      def search(filename, parsed_scene_data:, **_opts)
+        if parsed_scene_data.id && parsed_scene_data.collection
+          get_video_by_id(parsed_scene_data.id, parsed_scene_data.collection)
+        elsif parsed_scene_data.title && parsed_scene_data.actors
+          get_video_by_metadata(parsed_scene_data.title, parsed_scene_data.actors)
         else
           raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_RESULT, filename)
         end

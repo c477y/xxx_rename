@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "rspec"
-require "xxx_rename/organize"
 
 describe XxxRename::Organize do
   describe "gather_stats" do

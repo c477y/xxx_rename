@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "rspec"
-require "xxx_rename/data/scene_data"
 
 shared_context "stubs provider" do
   let(:stub_scene_data) do

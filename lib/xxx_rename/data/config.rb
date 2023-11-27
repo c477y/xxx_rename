@@ -1,13 +1,26 @@
 # frozen_string_literal: true
 
-require "xxx_rename/data/scene_datastore"
-require "xxx_rename/data/actors_datastore"
-require "xxx_rename/data/file_pre_processor_rule"
-require "xxx_rename/site_client_matcher"
-
+# noinspection RubyMismatchedArgumentType
 module XxxRename
   module Data
     class Config < Base
+      class SiteConfig < Base
+        attribute :output_format, Types::Array.of(Types::String)
+        attribute :file_source_format, Types::Array.of(Types::String)
+        attribute :collection_tag, Types::String
+      end
+
+      class CredentialsConfig < Base
+        attribute? :username, Types::String.optional
+        attribute? :password, Types::String.optional
+        attribute? :cookie_file, Types::String.optional
+        attribute? :api_token, Types::String.optional
+      end
+
+      class DatabaseConfig < Base
+        attribute? :database, Types::String.optional
+      end
+
       def initialize(attributes)
         super
 
@@ -18,56 +31,81 @@ module XxxRename
         ProcessedFile.prefix_hash_set(prefix_hash)
       end
 
+      ACTIONS = Types::String.enum("sync_to_stash", "log_rename_op")
+
       attribute :global do
-        attribute :female_actors_prefix,  Types::String
-        attribute :male_actors_prefix,    Types::String
-        attribute :actors_prefix,         Types::String
-        attribute :title_prefix,          Types::String
-        attribute :id_prefix,             Types::String
-        attribute :output_format,         Types::Array.of(Types::String)
+        attribute :female_actors_prefix, Types::String
+        attribute :male_actors_prefix, Types::String
+        attribute :actors_prefix, Types::String
+        attribute :title_prefix, Types::String
+        attribute :id_prefix, Types::String
+        attribute :output_format, Types::Array.of(Types::String)
       end
 
       attribute :site do # rubocop:disable Metrics/BlockLength
-        attribute? :adult_time,            Data::AdultTimeConfig
-        attribute? :arch_angel,            Data::ArchAngelConfig
-        attribute? :babes,                 Data::MgPremiumConfig
-        attribute? :blacked,               Data::VixenMediaConfig
-        attribute? :blacked_raw,           Data::VixenMediaConfig
-        attribute? :brazzers,              Data::MgPremiumConfig
-        attribute? :deeper,                Data::VixenMediaConfig
-        attribute? :digital_playground,    Data::MgPremiumConfig
-        attribute? :elegant_angel,         Data::ElegantAngelConfig
-        attribute? :evil_angel,            Data::EvilAngelConfig
-        attribute? :goodporn,              Data::GoodpornConfig
-        attribute? :jules_jordan,          Data::JulesJordanMediaConfig
-        attribute? :manuel_ferrara,        Data::JulesJordanMediaConfig
-        attribute? :mofos,                 Data::MgPremiumConfig
-        attribute? :naughty_america,       Data::NaughtyAmericaConfig
-        attribute? :nf_busty,              Data::NfBustyConfig
-        attribute? :reality_kings,         Data::MgPremiumConfig
-        attribute? :stash,                 Data::StashDBConfig
-        attribute? :tushy,                 Data::VixenMediaConfig
-        attribute? :tushy_raw,             Data::VixenMediaConfig
-        attribute? :twistys,               Data::MgPremiumConfig
-        attribute? :vixen,                 Data::VixenMediaConfig
-        attribute? :whale_media,           Data::WhaleMediaConfig
-        attribute? :wicked,                Data::WickedConfig
-        attribute? :x_empire,              Data::XEmpireConfig
-        attribute? :zero_tolerance,        Data::ZeroToleranceConfig
+        attribute? :adult_time, SiteConfig
+        attribute? :arch_angel do
+          attributes_from SiteConfig
+          attributes_from DatabaseConfig
+        end
+        attribute? :babes, SiteConfig
+        attribute? :blacked, SiteConfig
+        attribute? :blacked_raw, SiteConfig
+        attribute? :brazzers, SiteConfig
+        attribute? :deeper, SiteConfig
+        attribute? :digital_playground, SiteConfig
+        attribute? :elegant_angel do
+          attributes_from SiteConfig
+          attributes_from DatabaseConfig
+        end
+        attribute? :evil_angel, SiteConfig
+        attribute? :goodporn, SiteConfig
+        attribute? :jules_jordan do
+          attributes_from SiteConfig
+          attributes_from DatabaseConfig
+          attributes_from CredentialsConfig
+        end
+        attribute? :manuel_ferrara do
+          attributes_from SiteConfig
+          attributes_from DatabaseConfig
+          attributes_from CredentialsConfig
+        end
+        attribute? :mofos, SiteConfig
+        attribute? :naughty_america do
+          attributes_from SiteConfig
+          attributes_from DatabaseConfig
+        end
+        attribute? :nf_busty do
+          attributes_from SiteConfig
+          attributes_from DatabaseConfig
+        end
+        attribute? :reality_kings, SiteConfig
+        attribute? :stash do
+          attributes_from SiteConfig
+          attributes_from CredentialsConfig
+        end
+        attribute? :tushy, SiteConfig
+        attribute? :tushy_raw, SiteConfig
+        attribute? :twistys, SiteConfig
+        attribute? :vixen, SiteConfig
+        attribute? :whale_media, SiteConfig
+        attribute? :wicked, SiteConfig
+        attribute? :x_empire, SiteConfig
+        attribute? :zero_tolerance, SiteConfig
       end
 
       attribute :stash_app do
-        attribute :url,                   Types::String.optional
-        attribute :api_token,             Types::String.optional
+        attribute :url, Types::String.optional
+        attribute :api_token, Types::String.optional
       end
 
-      attribute :file_pre_process,        Types::Array.of(FilePreProcessorRule)
-      attribute :generated_files_dir,     Types::String
+      attribute :file_pre_process, Types::Array.of(FilePreProcessorRule)
+      attribute :generated_files_dir, Types::String
       # CLI Flags
       attribute :force_refresh_datastore, Types::Bool
-      attribute :force_refresh,           Types::Bool
-      attribute :actions,                 Types::Array.of(Types::String)
-      attribute? :override_site,          Types::String
+      attribute :force_refresh, Types::Bool
+      attribute :actions, Types::Array.of(ACTIONS)
+      attribute? :override_site, Types::String
 
       # @return [Hash{Symbol->String}]
       def prefix_hash
@@ -132,7 +170,7 @@ module XxxRename
 
       # @return [XxxRename::SiteClientMatcher]
       def site_client_matcher
-        @site_client_matcher ||= SiteClientMatcher.new(self, override_site: override_site)
+        @site_client_matcher ||= SiteClientMatcher.new
       end
     end
   end

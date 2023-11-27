@@ -83,7 +83,7 @@ module XxxRename
 
         resp = nil
         time = Benchmark.measure { resp = yield }
-        XxxRename.logger.debug "#{"[BENCHMARK]".colorize(:cyan)} #{self.class.name}##{opr}: #{time.real.round(3)}s"
+        XxxRename.logger.extra "[BENCHMARK] #{self.class.name}##{opr}: #{time.real.round(3)}s"
         resp
       end
     end

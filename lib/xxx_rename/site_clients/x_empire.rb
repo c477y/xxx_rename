@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require "xxx_rename/site_clients/algolia_v2"
-require "xxx_rename/site_clients/query_generator/evil_angel"
-
 module XxxRename
   module SiteClients
     class XEmpire < AlgoliaV2
@@ -14,19 +11,27 @@ module XxxRename
 
       site_client_name :x_empire
 
-      def initialize(config)
+      def initialize
         @site_url = "https://www.hardx.com"
-        super(config)
+        super
       end
 
-      def search(filename)
-        match = SiteClients::QueryGenerator::EvilAngel.generate(filename, source_format)
-        raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_METADATA, filename) if match.nil?
+      # @param [String] _filename
+      # @param [Data::ParsedSceneData] parsed_scene_data
+      # @param [Boolean] unprocessed
+      def search(_filename, parsed_scene_data:, unprocessed:)
+        if unprocessed
+          parsed_scene_data = Data::ParsedSceneData.new(
+            actors: parsed_scene_data.actors.split("_"),
+            title: parsed_scene_data.title.titleize_custom,
+            index: parsed_scene_data.index
+          )
+        end
 
-        if match.processed
-          processed_scene_details(match)
+        if unprocessed
+          unprocessed_scene_details(parsed_scene_data)
         else
-          unprocessed_scene_details(match)
+          processed_scene_details(parsed_scene_data)
         end
       end
 

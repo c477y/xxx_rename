@@ -3,7 +3,6 @@
 module XxxRename
   module Data
     class StatsHash
-
       # Primary method to register a statistic
       # @param [Array<String>] actors
       # @param [String] file
@@ -43,10 +42,10 @@ module XxxRename
 
       def increment_actor(normalized_actor)
         normalized_actor_to_scene_counter[normalized_actor] = if normalized_actor_to_scene_counter.key?(normalized_actor)
-                                                     normalized_actor_to_scene_counter[normalized_actor] + 1
-                                                   else
-                                                     1
-                                                   end
+                                                                normalized_actor_to_scene_counter[normalized_actor] + 1
+                                                              else
+                                                                1
+                                                              end
       end
 
       def actor_name(normalized_actor)

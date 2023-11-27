@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "rspec"
-require "xxx_rename/migration_client"
 
 describe XxxRename::MigrationClient do
   include_context "config provider"

@@ -1,15 +1,8 @@
 # frozen_string_literal: true
 
-require "nokogiri"
-require "xxx_rename/constants"
-require "xxx_rename/data/site_client_meta_data"
-require "xxx_rename/site_clients/query_generator/base"
-
 module XxxRename
   module SiteClients
     class ArchAngelVideo < Base
-      include HTTParty
-
       site_client_name :arch_angel
 
       base_uri "https://tour.archangelworld.com"
@@ -19,10 +12,11 @@ module XxxRename
 
       MovieResult = Struct.new(:url, :details)
 
-      def search(filename)
+      # @param [String] _filename
+      # @param [Data::ParsedSceneData] parsed_scene_data
+      def search(_filename, parsed_scene_data:, **_opts)
         refresh_datastore(1) if datastore_refresh_required?
-        match = SiteClients::QueryGenerator::Base.generic_generate(filename, source_format)
-        lookup_in_datastore!(match)
+        lookup_in_datastore!(parsed_scene_data)
       end
 
       def datastore_refresh_required?
@@ -177,7 +171,7 @@ module XxxRename
           # Front Image
           movie_poster = movie_poster_link(movie_doc)
           if movie_poster.nil?
-            XxxRename.logger.warn "[NO POSTER IMAGE SCRAPED] #{key}"
+            XxxRename.logger.warn "[NO POSTER IMAGE SCRAPED] #{url}"
           else
             scene_movie_hash[:front_image] = movie_poster
           end
@@ -201,10 +195,10 @@ module XxxRename
 
       def lookup_in_datastore!(match)
         msg = "requires at-least movie-title(%collection) and scene title(%title) or scene title(%title) and actors(%female_actors or %actors)"
-        raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_METADATA, msg) if match.nil?
+        raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_METADATA, msg) if match.empty?
 
         result = query_helper.find(match)
-        raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_RESULT, match.key) if result.nil?
+        raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_RESULT, match.to_compact_h) if result.nil?
 
         result
       end

@@ -1,10 +1,6 @@
 # frozen_string_literal: true
 
 require "rspec"
-require "xxx_rename/site_clients/brazzers"
-require "xxx_rename/site_clients/evil_angel"
-require "xxx_rename/site_clients/reality_kings"
-require "xxx_rename/site_clients/wicked"
 
 describe XxxRename::ActorsHelper do
   include_context "config provider"

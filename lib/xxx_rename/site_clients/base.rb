@@ -1,33 +1,38 @@
 # frozen_string_literal: true
 
-require "httparty"
-require "xxx_rename/site_clients/configuration"
-require "xxx_rename/utils"
-
 module XxxRename
   module SiteClients
     class Base
+      include HTTParty
       include Utils
       include SiteClients::Configuration
 
-      attr_reader :source_format, :config
+      attr_reader :source_format
 
-      # @param [XxxRename::Data::Config] config
-      def initialize(config)
-        @actors_helper = config.actor_helper
-        @config = config
+      headers "Accept" => "application/json"
+      headers "Connection" => "keep-alive"
+      headers "Content-Type" => "application/json"
+      headers "DNT" => "1"
+      headers "User-Agent" => "Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0"
+
+      def initialize
         @source_format = site_config.file_source_format
-        return unless self.class.include?(HTTParty)
-
-        self.class.logger(XxxRename.logger, :debug)
-        self.class.headers(Constants::DEFAULT_HEADERS)
+        self.class.logger XxxRename.logger, :trace
       end
 
-      def search(_filename, **_opts)
+      def search(_filename, _parsed_scene_data:, _unprocessed:)
         raise "Not Implemented."
       end
 
+      def actor_helper
+        config.actor_helper
+      end
+
       private
+
+      def config
+        XxxRename.config
+      end
 
       def match?(str1, str2)
         str1.normalize == str2.normalize
@@ -38,9 +43,9 @@ module XxxRename
       end
 
       def actors_hash(actors)
-        actors.each { |x| @actors_helper.auto_fetch! x }
-        female_actors = actors.select { |x| @actors_helper.female? x }
-        male_actors = actors.select { |x| @actors_helper.male? x }
+        actors.each { |x| actor_helper.auto_fetch! x }
+        female_actors = actors.select { |x| actor_helper.female? x }
+        male_actors = actors.select { |x| actor_helper.male? x }
         resp = { female_actors: female_actors,
                  male_actors: male_actors,
                  actors: female_actors + male_actors }
@@ -49,7 +54,7 @@ module XxxRename
 
         resp
       rescue XxxRename::Errors::UnprocessedEntity => e
-        XxxRename.logger.warn "Unable to fetch details of actor #{e.message}"
+        XxxRename.logger.warn "[ACTOR DETAILS FETCH ERROR] #{e.message}"
         {
           female_actors: [],
           male_actors: [],
@@ -62,8 +67,10 @@ module XxxRename
       end
 
       def doc(path)
+        path = "/#{path}" unless path.start_with?("/")
+
         res = handle_response!(return_raw: true) { self.class.get(path) }
-        Nokogiri::HTML res.parsed_response
+        Nokogiri::HTML(res.body)
       end
     end
   end

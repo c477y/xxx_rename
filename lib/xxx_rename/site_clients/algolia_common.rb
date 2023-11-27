@@ -1,12 +1,9 @@
 # frozen_string_literal: true
 
-require "httparty"
-require "nokogiri"
-
 module XxxRename
   module SiteClients
     module AlgoliaCommon
-      CLIENT_KEY_JS_REGEX_1 = /var\sclient\s=\salgoliasearch\('(?<application_id>\w+)',\s'(?<api_key>[\w=]+)'\);/x.freeze
+      CLIENT_KEY_JS_REGEX_1 = /var\sclient\s=\salgoliasearch\('(?<application_id>\w+)',\s'(?<api_key>[\w=]+)'\);/x
       CLIENT_KEY_JS_REGEX_2 = /
       window\.env\s*=\s*{
         "api":{
@@ -14,7 +11,7 @@ module XxxRename
             "applicationID":"(?<application_id>\w+)",
             "apiKey":"(?<api_key>[\w=]+)"
           }
-        }/x.freeze
+        }/x
 
       ALGOLIA_RATE_LIMIT_MESSAGE = "Too many requests"
       ALGOLIA_RATE_LIMIT_STATUS = 429

@@ -1,24 +1,20 @@
 # frozen_string_literal: true
 
-require "nokogiri"
-require "xxx_rename/data/site_client_meta_data"
-require "xxx_rename/site_clients/query_generator/base"
-
 module XxxRename
   module SiteClients
     class ElegantAngel < Base
-      include HTTParty
-
       base_uri "https://www.elegantangel.com"
       site_client_name :elegant_angel
+
       OLDEST_PROCESSABLE_MOVIE_YEAR = 2004
       COLLECTION = "Elegant Angel"
       MOVIES_ENDPOINT = "/streaming-elegant-angel-dvds-on-video.html?page=$page$"
 
-      def search(filename)
+      # @param [String] _filename
+      # @param [Data::ParsedSceneData] parsed_scene_data
+      def search(_filename, parsed_scene_data:, **opts)
         refresh_datastore(1) if datastore_refresh_required?
-        match = SiteClients::QueryGenerator::Base.generic_generate(filename, source_format)
-        lookup_in_datastore!(match)
+        lookup_in_datastore!(parsed_scene_data)
       end
 
       def all_scenes_processed?
@@ -71,10 +67,10 @@ module XxxRename
 
       def lookup_in_datastore!(match)
         msg = "requires both movie title(%collection) and scene title(%title)"
-        raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_METADATA, msg) if match.nil?
+        raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_METADATA, msg) if match.empty?
 
         result = query_helper.find(match)
-        raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_RESULT, match.key) if result.nil?
+        raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_RESULT, match.to_compact_h) if result.nil?
 
         result
       end

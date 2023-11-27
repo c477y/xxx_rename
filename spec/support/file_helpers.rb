@@ -2,7 +2,7 @@
 
 module FileHelpers
   def create_dir(*paths)
-    path = File.join("test_folder", *paths)
+    path = File.join(*paths)
     FileUtils.mkdir_p(path)
     path
   end

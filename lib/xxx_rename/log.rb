@@ -3,6 +3,33 @@
 require "logger"
 
 module XxxRename
+  class CustomLogger < Logger
+    EXTRA = Logger::DEBUG - 2
+    TRACE = Logger::DEBUG - 1
+
+    SEV_LABEL = {
+      -2 => "EXTRA",
+      -1 => "TRACE",
+      0 => "DEBUG",
+      1 => "INFO",
+      2 => "WARN",
+      3 => "ERROR",
+      4 => "FATAL"
+    }.freeze
+
+    def format_severity(severity)
+      SEV_LABEL[severity] || "ANY"
+    end
+
+    def trace(message)
+      add(TRACE, message)
+    end
+
+    def extra(message)
+      add(EXTRA, message)
+    end
+  end
+
   class Log
     attr_accessor :logger
 
@@ -20,23 +47,33 @@ module XxxRename
     private
 
     def cli_logger(level)
-      @logger = Logger.new($stdout)
-      @logger.level = level
+      @logger = CustomLogger.new($stdout)
+      @logger.level = case level.upcase
+                      when "EXTRA" then CustomLogger::EXTRA
+                      when "TRACE" then CustomLogger::TRACE
+                      when "DEBUG" then CustomLogger::DEBUG
+                      when "INFO"  then CustomLogger::INFO
+                      when "WARN"  then CustomLogger::WARN
+                      when "ERROR" then CustomLogger::ERROR
+                      else raise "Invalid log level #{level}"
+                      end
       @logger.formatter = proc do |severity, datetime, _progname, msg|
         date_format = datetime.strftime("%H:%M:%S")
         case severity
-        when "INFO"  then "#{"[#{date_format}] [#{severity.ljust(5)}]".to_s.colorize(:blue)} #{msg}\n"
-        when "ERROR" then "#{"[#{date_format}] [#{severity.ljust(5)}]".to_s.colorize(:light_red)} #{msg}\n"
         when "FATAL" then "#{"[#{date_format}] [#{severity.ljust(5)}]".to_s.colorize(:red)} #{msg}\n"
+        when "ERROR" then "#{"[#{date_format}] [#{severity.ljust(5)}]".to_s.colorize(:light_red)} #{msg}\n"
         when "WARN"  then "#{"[#{date_format}] [#{severity.ljust(5)}]".to_s.colorize(:yellow)} #{msg}\n"
+        when "INFO"  then "#{"[#{date_format}] [#{severity.ljust(5)}]".to_s.colorize(:magenta)} #{msg}\n"
         when "DEBUG" then "#{"[#{date_format}] [#{severity.ljust(5)}]".to_s.colorize(:light_magenta)} #{msg}\n"
+        when "TRACE" then "#{"[#{date_format}] [#{severity.ljust(5)}]".to_s.colorize(:cyan)} #{msg}\n"
+        when "EXTRA" then "#{"[#{date_format}] [#{severity.ljust(5)}]".to_s.colorize(:light_cyan)} #{msg}\n"
         else "[#{date_format}] [#{severity.ljust(5)}] #{msg}\n"
         end
       end
     end
 
     def stashapp_logger
-      @logger = Logger.new($stderr)
+      @logger = CustomLogger.new($stderr)
       @logger.formatter = proc do |severity, _datetime, _progname, msg|
         case severity
         when "DEBUG" then make_log_text("d", msg)

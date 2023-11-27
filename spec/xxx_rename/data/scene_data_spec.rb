@@ -87,4 +87,136 @@ describe XxxRename::Data::SceneData do
       end
     end
   end
+
+  describe "match?" do
+    subject { scene1.match?(scene2) }
+
+    context "when scene2 is not of type SceneData" do
+      let(:scene1) { described_class.new(title: "title") }
+      let(:scene2) { "title" }
+
+      it { expect { subject }.to raise_error(ArgumentError, "expected other to respond to .to_h") }
+    end
+
+    context "when scene data only has title" do
+      let(:scene1) { described_class.new(title: title1) }
+      let(:scene2) { described_class.new(title: title2) }
+
+      context "when titles match" do
+        let(:title1) { "title" }
+        let(:title2) { "title" }
+
+        it { is_expected.to eq(true) }
+      end
+
+      context "when titles do not match" do
+        let(:title1) { "title" }
+        let(:title2) { "xyz" }
+
+        it { is_expected.to eq(false) }
+      end
+    end
+
+    context "when scene data has title and date" do
+      let(:scene1) { described_class.new(title: title1, date_released: date1) }
+      let(:scene2) { described_class.new(title: title2, date_released: date2) }
+
+      context "when titles and dates match" do
+        let(:title1) { "title" }
+        let(:title2) { "title" }
+        let(:date1) { Time.strptime("2013-12-08", "%Y-%m-%d") }
+        let(:date2) { Time.strptime("2013-12-08", "%Y-%m-%d") }
+
+        it { is_expected.to eq(true) }
+      end
+
+      context "when titles match but dates do not match" do
+        let(:title1) { "title" }
+        let(:title2) { "title" }
+        let(:date1) { Time.strptime("2013-12-08", "%Y-%m-%d") }
+        let(:date2) { Time.strptime("2013-12-07", "%Y-%m-%d") }
+
+        it { is_expected.to eq(false) }
+      end
+
+      context "when titles do not match but dates match" do
+        let(:title1) { "title" }
+        let(:title2) { "xyz" }
+        let(:date1) { Time.strptime("2013-12-08", "%Y-%m-%d") }
+        let(:date2) { Time.strptime("2013-12-08", "%Y-%m-%d") }
+
+        it { is_expected.to eq(false) }
+      end
+
+      context "when scene1 has a time but scene2 does not" do
+        let(:scene2) { described_class.new(title: title2) }
+
+        let(:title1) { "title" }
+        let(:title2) { "title" }
+        let(:date1) { Time.strptime("2013-12-08", "%Y-%m-%d") }
+        let(:date2) { nil }
+
+        it { is_expected.to eq(true) }
+      end
+    end
+
+    context "when scene data has title, actors and collection"  do
+      let(:scene1) { described_class.new(title: title1, actors: actors1, collection: collection1) }
+      let(:scene2) { described_class.new(title: title2, actors: actors2, collection: collection2) }
+
+      context "when titles, actors and collections match" do
+        let(:title1) { "title" }
+        let(:title2) { "title" }
+        let(:actors1) { %w[actor1 actor2] }
+        let(:actors2) { %w[actor1 actor2] }
+        let(:collection1) { "collection" }
+        let(:collection2) { "collection" }
+
+        it { is_expected.to eq(true) }
+      end
+
+      # collection match can cause false-negatives
+      # context "when titles, actors and collections do not match" do
+      #   let(:title1) { "title" }
+      #   let(:title2) { "title2" }
+      #   let(:actors1) { %w[actor1 actor2] }
+      #   let(:actors2) { %w[actor1 actor2] }
+      #   let(:collection1) { "collection" }
+      #   let(:collection2) { "collection" }
+      #
+      #   it { is_expected.to eq(false) }
+      # end
+    end
+
+    context "when scene data has title, actors, collection and date_released" do
+      let(:scene1) { described_class.new(title: title1, actors: actors1, collection: collection1, date_released: date1) }
+      let(:scene2) { described_class.new(title: title2, actors: actors2, collection: collection2, date_released: date2) }
+
+      context "when titles, actors, collections and dates match" do
+        let(:title1) { "title" }
+        let(:title2) { "title" }
+        let(:actors1) { %w[actor1 actor2] }
+        let(:actors2) { %w[actor1 actor2] }
+        let(:collection1) { "collection" }
+        let(:collection2) { "collection" }
+        let(:date1) { Time.strptime("2013-12-08", "%Y-%m-%d") }
+        let(:date2) { Time.strptime("2013-12-08", "%Y-%m-%d") }
+
+        it { is_expected.to eq(true) }
+      end
+
+      context "when none of the attributes match" do
+        let(:title1) { "title" }
+        let(:title2) { "title2" }
+        let(:actors1) { %w[actor1 actor2] }
+        let(:actors2) { %w[actor3 actor4] }
+        let(:collection1) { "collection1" }
+        let(:collection2) { "collection2" }
+        let(:date1) { Time.strptime("2013-12-08", "%Y-%m-%d") }
+        let(:date2) { Time.strptime("2013-12-07", "%Y-%m-%d") }
+
+        it { is_expected.to eq(false) }
+      end
+    end
+  end
 end

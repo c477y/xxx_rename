@@ -1,23 +1,16 @@
 # frozen_string_literal: true
 
-require "active_support/core_ext/object/try"
 require "yaml/store"
-
-require "xxx_rename/errors"
-require "xxx_rename/data/file_rename_op"
-require "xxx_rename/data/file_rename_op_datastore"
 
 module XxxRename
   class MigrationClient
-    MIGRATION_FORMAT = /output_(?<version>\d{12})/x.freeze
+    MIGRATION_FORMAT = /output_(?<version>\d{12})/x
 
-    attr_reader :config, :version
+    attr_reader :version
 
-    # @param [XxxRename::Data::Config] config
     # @param [String] version
-    def initialize(config, version)
+    def initialize(version)
       @version = version
-      @config = config
     end
 
     def version_file!
@@ -75,6 +68,10 @@ module XxxRename
     end
 
     private
+
+    def config
+      XxxRename.config
+    end
 
     def match_file!(all_output_files)
       if version.downcase == "latest"

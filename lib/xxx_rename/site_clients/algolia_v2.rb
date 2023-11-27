@@ -2,8 +2,6 @@
 
 require "algolia"
 
-require "xxx_rename/site_clients/algolia_common"
-
 module XxxRename
   module SiteClients
     class AlgoliaV2 < Base
@@ -12,7 +10,7 @@ module XxxRename
 
       def client(refresh: false)
         if refresh
-          XxxRename.logger.debug "Refreshing Algolia Token...".colorize(:blue)
+          XxxRename.logger.debug "[REFRESHING ALGOLIA TOKEN]"
 
           @client = nil
           @scenes_index = nil
@@ -20,7 +18,7 @@ module XxxRename
           @actor_index = nil
         end
 
-        @client = client! if @client.nil?
+        @client = create_client if @client.nil?
 
         @client
       end
@@ -47,7 +45,7 @@ module XxxRename
 
       private
 
-      def client!
+      def create_client
         Algolia::Search::Client.new(algolia_config, logger: XxxRename.logger)
       end
 
@@ -84,7 +82,8 @@ module XxxRename
         {
           attributesToRetrieve: %w[clip_id title actors release_date description
                                    network_name movie_id movie_title directors sitename pictures],
-          hitsPerPage: 50
+          hitsPerPage: 50,
+          attributesToHighlight: []
         }
       end
 

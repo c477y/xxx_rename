@@ -1,25 +1,16 @@
 # frozen_string_literal: true
 
-require "xxx_rename/contract/file_rename_op_contract"
-require "xxx_rename/data/file_rename_op_datastore"
-require "xxx_rename/site_client_matcher"
-require "xxx_rename/actions/resolver"
-
 module XxxRename
   class Client
     #
     # Rename file(s) in the current directory
     #
-    # @param [Data::Config] config
-    # @param [Boolean] verbose
     # @param [Boolean] nested
     # @param [String, Nil] checkpoint
-    def initialize(config, verbose:, nested: false, checkpoint: nil)
-      @config = config
+    def initialize(nested: false, checkpoint: nil)
       @nested = nested
       @checkpoint = checkpoint
       @checkpoint_reached = false
-      XxxRename.logger(verbose: verbose)
     end
 
     def generate(object, &block)
@@ -38,25 +29,21 @@ module XxxRename
       raise Errors::FatalError, "[UNKNOWN OBJECT #{object}] pass a valid file or directory"
     end
 
-    def matcher
-      config.site_client_matcher
-    end
-
     def resolver
-      @resolver ||= Actions::Resolver.new(config)
+      @resolver ||= Actions::Resolver.new
     end
 
     private
 
-    attr_reader :config, :nested, :object
+    attr_reader :nested, :object, :checkpoint, :checkpoint_reached
 
     def process_directory
       scanner.each do |file|
-        if @checkpoint
-          if @checkpoint != file && !@checkpoint_reached
+        if checkpoint
+          if checkpoint != file && !checkpoint_reached
             XxxRename.logger.debug "[SKIP CHECKPOINT] #{file}"
             next
-          elsif @checkpoint == file
+          elsif checkpoint == file
             XxxRename.logger.info "[REACHED CHECKPOINT] #{file}"
             @checkpoint_reached = true
           end
@@ -70,11 +57,11 @@ module XxxRename
       file = File.basename(file)
 
       Dir.chdir(path) do
-        XxxRename.logger.info "#{"[FILE SCAN]".colorize(:blue)} #{file}"
+        XxxRename.logger.info "[FILE SCAN] #{file}"
         search_engine.search(file) do |search_result|
           next if search_result&.empty?
 
-          config.actions.each do |action_str|
+          XxxRename.config.actions.each do |action_str|
             action = resolver.resolve!(action_str)
             action.perform(Dir.pwd, file, search_result)
           end
@@ -87,7 +74,7 @@ module XxxRename
     end
 
     def search_engine
-      @search_engine ||= Search.new(matcher, config.scene_datastore, config.force_refresh)
+      @search_engine ||= Search.new
     end
 
     def scanner

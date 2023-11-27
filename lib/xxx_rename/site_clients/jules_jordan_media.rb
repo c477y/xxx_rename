@@ -1,24 +1,15 @@
 # frozen_string_literal: true
 
-require "nokogiri"
-
-require "xxx_rename/site_clients/base"
-require "xxx_rename/file_utilities"
-require "xxx_rename/constants"
-
 module XxxRename
   module SiteClients
     class JulesJordanMedia < Base
       include FileUtilities
-      include HTTParty
-
-      headers Constants::DEFAULT_HEADERS
 
       SCENES_ENDPOINT_TRIAL = "/trial/categories/movies_$page$_d.html"
 
       def datastore_refresh_required?
         if config.force_refresh_datastore
-          XxxRename.logger.info "#{"[FORCE REFRESH]".colorize(:green)} #{self.class.name}"
+          XxxRename.logger.info "[FORCE REFRESH] #{self.class.name}"
           true
         else
           false
@@ -30,7 +21,7 @@ module XxxRename
 
         scenes = get_scenes_from_page(page)
         if scenes.empty?
-          XxxRename.logger.info "#{"[DATASTORE REFRESH COMPLETE]".colorize(:green)} #{self.class.site_client_name}"
+          XxxRename.logger.info "[DATASTORE REFRESH COMPLETE] #{self.class.site_client_name}"
           @all_scenes_processed = true
           return true
         end
@@ -47,7 +38,7 @@ module XxxRename
 
       def lookup_in_datastore!(match)
         msg = "requires both movie title(%collection) and scene title(%title)"
-        raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_METADATA, msg) if match.nil?
+        raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_METADATA, msg) if match.empty?
 
         raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_METADATA, msg) unless collection_key(match) && match.title.presence
 

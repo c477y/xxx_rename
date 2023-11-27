@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "rspec"
-require "xxx_rename/integrations/stash_app"
 
 describe XxxRename::Integrations::StashApp do
   let(:stash_url) { "http://localhost:9999" }

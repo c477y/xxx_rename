@@ -1,0 +1,23 @@
+#!/bin/bash
+
+set -e
+
+export DOCKER_CLI_HINTS=false
+
+XXX_RENAME_STASH_DB_API_KEY=${XXX_RENAME_STASH_DB_API_KEY:-api_key}
+XXX_RENAME_STASH_DB_USERNAME=${XXX_RENAME_STASH_DB_USERNAME:-foo}
+XXX_RENAME_STASH_DB_PASSWORD=${XXX_RENAME_STASH_DB_PASSWORD:-bar}
+LOG_LEVEL=${LOG_LEVEL:-trace}
+
+docker build --quiet -t xxx_rename:0 .
+
+docker run \
+  -e RACK_ENV=test \
+  -e XXX_RENAME_STASH_DB_API_KEY="$XXX_RENAME_STASH_DB_API_KEY" \
+  -e XXX_RENAME_STASH_DB_USERNAME="$XXX_RENAME_STASH_DB_USERNAME" \
+  -e XXX_RENAME_STASH_DB_PASSWORD="$XXX_RENAME_STASH_DB_PASSWORD" \
+  -e LOG_LEVEL="$LOG_LEVEL" \
+  -v "$(pwd)":/app \
+  -it \
+  xxx_rename:0 \
+  bundle exec rspec "$1"

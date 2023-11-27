@@ -168,78 +168,7 @@ describe XxxRename::ProcessedFile do
       let(:pattern) { "%title [%collection_tag_2] %collection [F] %female_actors" }
 
       it "should raise error" do
-        expect { parameter_reader }.to raise_error(XxxRename::Errors::ParsingError, /does not match given pattern/)
-      end
-    end
-  end
-
-  describe "#parse" do
-    subject(:parameter_reader) { described_class.parse(file_name) }
-
-    context "when passed a file name with single actors" do
-      let(:file_name) { "Making A Splash [C] Baby Got Boobs [F] Violet Starr [M] Isiah Maxwell.mp4" }
-      let(:female) { female1 }
-      let(:male) { male1 }
-      let(:actors) { (female1 + male1).flatten }
-
-      it_behaves_like "a valid file"
-    end
-
-    context "when passed a file name with multiple female actors" do
-      let(:file_name) { "Making A Splash [C] Baby Got Boobs [F] Giselle Palmer, Sheridan Love [M] Kyle Mason.mp4" }
-      let(:female) { ["Giselle Palmer", "Sheridan Love"] }
-      let(:male) { ["Kyle Mason"] }
-      let(:actors) { (female + male).flatten }
-
-      it_behaves_like "a valid file"
-    end
-
-    context "when passed a file name with title containing special characters" do
-      let(:file_name) do
-        "BRAZZERS LIVE 20 ALL-STARS [F] April O'Neil, Lexi Swallow, Madison Ivy, " \
-        "Rachel Roxxx, Samantha Saint [M] Marco Banderas, Ramon Nomar, Tommy Gunn.mp4"
-      end
-
-      let(:female) do
-        ["April O'Neil", "Lexi Swallow", "Madison Ivy", "Rachel Roxxx", "Samantha Saint"]
-      end
-      let(:male) { ["Marco Banderas", "Ramon Nomar", "Tommy Gunn"] }
-      let(:actors) { (female + male).flatten }
-      let(:title) { "BRAZZERS LIVE 20 ALL-STARS" }
-      let(:collection) { "" }
-      let(:collection_tag) { "" }
-
-      it_behaves_like "a valid file"
-    end
-
-    context "when passed a file name with no male actors" do
-      let(:file_name) { "Lapdancer's Last Laugh [C] Hot And Mean [F] Madison Ivy, Monique Alexander.mp4" }
-      let(:female) { ["Madison Ivy", "Monique Alexander"] }
-      let(:male) { [] }
-      let(:actors) { (female + male).flatten }
-      let(:title) { "Lapdancer's Last Laugh" }
-      let(:collection) { "Hot And Mean" }
-
-      it_behaves_like "a valid file"
-    end
-
-    context "when passed a file name with no collection" do
-      let(:file_name) { "My Hot Boss [F] Lena Paul [M] JMac.mp4" }
-      let(:female) { ["Lena Paul"] }
-      let(:male) { ["JMac"] }
-      let(:actors) { (female + male).flatten }
-      let(:title) { "My Hot Boss" }
-      let(:collection) { "" }
-      let(:collection_tag) { "" }
-
-      it_behaves_like "a valid file"
-    end
-
-    context "when passed an invalid file name" do
-      let(:file_name) { "baby-got-boobs-blindfolded-surprise-12-05-2007.mp4" }
-
-      it "returns correct attributes" do
-        expect { parameter_reader.match? }.to raise_error("does not match any registered patterns")
+        expect { parameter_reader }.to raise_error(XxxRename::Errors::ParsingError)
       end
     end
   end

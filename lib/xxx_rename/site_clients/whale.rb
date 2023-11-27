@@ -1,14 +1,8 @@
 # frozen_string_literal: true
 
-require "nokogiri"
-
-require "xxx_rename/site_clients/query_generator/whale"
-
 module XxxRename
   module SiteClients
     class Whale < Base
-      include HTTParty
-
       URL_MAPPER = {
         nannyspy: "https://nannyspy.com",
         spyfam: "https://spyfam.com",
@@ -41,19 +35,27 @@ module XxxRename
 
       site_client_name :whale_media
 
-      # @param [String] filename
-      # @return [Hash, NilClass]
-      def search(filename)
-        match = SiteClients::QueryGenerator::Whale.generate(filename, source_format)
-        raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_METADATA, filename) if match.nil?
-
-        unless URL_MAPPER.key?(match[:collection])
-          raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_CUSTOM,
-                                         "Unknown site collection #{match[:collection]}")
+      # @param [String] _filename
+      # @param [Data::ParsedSceneData] parsed_scene_data
+      # @param [Boolean] unprocessed
+      def search(_filename, parsed_scene_data:, unprocessed:)
+        if unprocessed
+          collection = parsed_scene_data.collection.to_sym
+          title = parsed_scene_data.title
+          id = nil
+        else
+          collection = parsed_scene_data.collection.normalize.to_sym
+          title = parsed_scene_data.title.downcase.gsub(/\s/, "-")
+          id = parsed_scene_data.id.to_s
         end
 
-        url = make_url(match)
-        collection = COLLECTION_MAPPER.fetch(match[:collection], "Whale Media")
+        unless URL_MAPPER.key?(collection)
+          raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_CUSTOM,
+                                         "Unknown site collection #{collection}")
+        end
+
+        url = make_url(collection, title, id)
+        collection = COLLECTION_MAPPER.fetch(collection, "Whale Media")
         fetch_details_from_html(url, collection)
       end
 
@@ -62,7 +64,7 @@ module XxxRename
       # @param [String] url
       # @return [Hash, NilClass]
       def fetch_details_from_html(url, collection)
-        XxxRename.logger.debug "Scraping data from #{url.to_s.colorize(:blue)}"
+        XxxRename.logger.debug "Scraping data from #{url}"
         web_resp = HTTParty.get(url, follow_redirects: false)
         raise Errors::NoMatchError.new(Errors::NoMatchError::ERR_NO_RESULT, url) unless web_resp.code == 200
 
@@ -107,13 +109,12 @@ module XxxRename
         doc.css(".scene-info .link-list-with-commas a").map { |x| x.text.strip }.sort
       end
 
-      # @param [XxxRename::SiteClients::QueryGenerator::Base::SearchParameters] match
       # @return [String]
-      def make_url(match)
+      def make_url(collection, title, id)
         File.join(
-          URL_MAPPER[match[:collection]],
+          URL_MAPPER[collection],
           "video",
-          match[:title] + match[:id].to_s
+          title + id.to_s
         )
       end
     end

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "xxx_rename/site_clients/vixen_media"
-
 module XxxRename
   module SiteClients
     class Blacked < VixenMedia

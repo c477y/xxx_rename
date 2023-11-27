@@ -1,3 +1,8 @@
+AllCops:
+  TargetRubyVersion: 3.1
+  NewCops: disable
+  SuggestExtensions: false
+
 Style/StringLiterals:
   Enabled: true
   EnforcedStyle: double_quotes
@@ -9,33 +14,28 @@ Style/StringLiteralsInInterpolation:
 Layout/LineLength:
   Max: 150
 
-Documentation:
+Style/Documentation:
   Enabled: false
-
-AllCops:
-  TargetRubyVersion: 2.7.0
-  SuggestExtensions: false
 
 Metrics/MethodLength:
-  Enabled: false
-
-Metrics/ParameterLists:
   Enabled: false
 
 Metrics/AbcSize:
   Enabled: false
 
+Metrics/ParameterLists:
+  Enabled: false
+
 Metrics/ClassLength:
   Enabled: false
 
-Style/OptionalBooleanParameter:
-  Enabled: false
-
-Style/ClassVars:
+Lint/UnusedMethodArgument:
   Enabled: false
 
 Metrics/BlockLength:
-  IgnoredMethods: [ 'describe', 'context' ]
   Exclude:
     - spec/**/*
-    - xxx_rename.gemspec
+    - xxx_download.gemspec
+
+Style/OptionalBooleanParameter:
+  Enabled: false

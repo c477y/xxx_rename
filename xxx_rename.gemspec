@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["c477y@pm.me"]
 
   spec.summary       = "Gem to rename files downloaded from porn sites"
-  spec.required_ruby_version = Gem::Requirement.new(">= 2.7.0")
+  spec.required_ruby_version = Gem::Requirement.new(">= 3.3.0")
 
   spec.metadata["allowed_push_host"] = "https://rubygems.org"
 
@@ -32,12 +32,5 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "nokogiri", "~> 1.12"
   spec.add_runtime_dependency "rake", "~> 13.0"
   spec.add_runtime_dependency "thor", "~> 1.1"
-  spec.add_development_dependency "codecov", "~> 0.6.0"
-  spec.add_development_dependency "pry"
-  spec.add_development_dependency "rspec", "~> 3.10"
-  spec.add_development_dependency "rubocop", "~> 1.7"
-  spec.add_development_dependency "simplecov"
-  spec.add_development_dependency "super_diff", "~> 0.9.0"
-  spec.add_development_dependency "timecop", "~> 0.9.4"
-  spec.add_development_dependency "webmock", "~> 3.14"
+  spec.add_runtime_dependency "zeitwerk", "~> 2.6"
 end

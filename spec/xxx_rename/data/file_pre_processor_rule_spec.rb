@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "rspec"
-require "xxx_rename/data/file_pre_processor_rule"
 
 RSpec.describe XxxRename::Data::FilePreProcessorRule do
   describe "replace" do
