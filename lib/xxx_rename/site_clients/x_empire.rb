@@ -22,7 +22,7 @@ module XxxRename
       def search(_filename, parsed_scene_data:, unprocessed:)
         if unprocessed
           parsed_scene_data = Data::ParsedSceneData.new(
-            actors: parsed_scene_data.actors.split("_"),
+            actors: parsed_scene_data.actors,
             title: parsed_scene_data.title.titleize_custom,
             index: parsed_scene_data.index
           )

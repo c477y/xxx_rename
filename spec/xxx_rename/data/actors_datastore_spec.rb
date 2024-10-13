@@ -7,7 +7,7 @@ RSpec.describe XxxRename::Data::ActorsDatastoreQuery do
 
   subject(:data_store) { described_class.new(store, Mutex.new) }
 
-  let(:store) { XxxRename::Data::ActorsDatastore.new("test_folder").store }
+  let(:store) { XxxRename::Data::ActorsDatastore.new(".").store }
   let(:actor) { "Actor" }
   let(:female) { "FEMALE" }
   let(:male) { "MALE" }

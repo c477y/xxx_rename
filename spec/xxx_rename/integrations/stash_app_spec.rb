@@ -3,15 +3,15 @@
 require "rspec"
 
 describe XxxRename::Integrations::StashApp do
+  include_context "config provider"
+
   let(:stash_url) { "http://localhost:9999" }
 
   describe ".setup_credentials!" do
-    subject(:call) { described_class.new(config).setup_credentials! }
+    subject(:call) { described_class.new.setup_credentials! }
 
     context "when no credentials are provided" do
-      include_context "config provider" do
-        let(:override_config) { { "stash_app" => { "url" => stash_url } } }
-      end
+      let(:override_config) { { "stash_app" => { "url" => stash_url } } }
 
       context "and stash app does not require any credentials" do
         before do
@@ -82,7 +82,7 @@ describe XxxRename::Integrations::StashApp do
   end
 
   describe ".fetch_studio" do
-    subject(:call) { described_class.new(config).fetch_studio(name) }
+    subject(:call) { described_class.new.fetch_studio(name) }
 
     include_context "config provider" do
       let(:override_config) { { "stash_app" => { "url" => stash_url } } }
@@ -122,7 +122,7 @@ describe XxxRename::Integrations::StashApp do
   end
 
   describe ".fetch_movie" do
-    subject(:call) { described_class.new(config).fetch_movie(name) }
+    subject(:call) { described_class.new.fetch_movie(name) }
 
     include_context "config provider" do
       let(:override_config) { { "stash_app" => { "url" => stash_url } } }
@@ -189,7 +189,7 @@ describe XxxRename::Integrations::StashApp do
   end
 
   describe ".create_movie" do
-    subject(:call) { described_class.new(config).create_movie(scene_data, studio_id) }
+    subject(:call) { described_class.new.create_movie(scene_data, studio_id) }
 
     let(:scene_data) do
       XxxRename::Data::SceneData.new(
@@ -269,14 +269,14 @@ describe XxxRename::Integrations::StashApp do
 
       it "does not create the movie again" do
         # create movie once
-        described_class.new(config).create_movie(scene_data, studio_id)
-        expect { call }.to raise_error(XxxRename::Integrations::StashAPIError, /Stash API returned error/)
+        described_class.new.create_movie(scene_data, studio_id)
+        expect { call }.to raise_error(XxxRename::Errors::StashAPIError, /Stash API returned error/)
       end
     end
   end
 
   describe ".fetch_scene" do
-    subject(:call) { described_class.new(config).fetch_scene(path) }
+    subject(:call) { described_class.new.fetch_scene(path) }
 
     include_context "config provider" do
       let(:override_config) { { "stash_app" => { "url" => stash_url } } }
@@ -351,7 +351,7 @@ describe XxxRename::Integrations::StashApp do
   end
 
   describe ".fetch_scene_by_id_body" do
-    subject(:call) { described_class.new(config).fetch_scene_by_id(id) }
+    subject(:call) { described_class.new.fetch_scene_by_id(id) }
 
     include_context "config provider" do
       let(:override_config) { { "stash_app" => { "url" => stash_url } } }
@@ -398,7 +398,7 @@ describe XxxRename::Integrations::StashApp do
   end
 
   describe ".update_scene" do
-    subject(:call) { described_class.new(config).update_scene(scene_id, movie_id) }
+    subject(:call) { described_class.new.update_scene(scene_id, movie_id) }
 
     include_context "config provider" do
       let(:override_config) { { "stash_app" => { "url" => stash_url } } }
@@ -466,7 +466,7 @@ describe XxxRename::Integrations::StashApp do
       end
 
       it "raises an error" do
-        expect { call }.to raise_error(XxxRename::Integrations::StashAPIError, /Stash API returned error/)
+        expect { call }.to raise_error(XxxRename::Errors::StashAPIError, /Stash API returned error/)
       end
     end
   end

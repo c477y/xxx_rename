@@ -13,11 +13,6 @@ module XxxRename
           }
         }/x
 
-      ALGOLIA_RATE_LIMIT_MESSAGE = "Too many requests"
-      ALGOLIA_RATE_LIMIT_STATUS = 429
-      ALGOLIA_EXPIRY_MESSAGE = "\"validUntil\" parameter expired (less than current date)"
-      ALGOLIA_EXPIRY_STATUS = 400
-
       AlgoliaParams = Struct.new(:application_id, :api_key, keyword_init: true)
 
       def algolia_params!(site)

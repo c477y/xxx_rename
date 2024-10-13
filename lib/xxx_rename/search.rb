@@ -91,7 +91,8 @@ module XxxRename
     # @param [Data::MatchResponse] match_response
     # @return [Nil, Data::SceneData]
     def site_client_search(match_response)
-      result = match_response.site_client.search(file,
+      site_client = match_response.site_client
+      result = site_client.search(file,
                                                  parsed_scene_data: match_response.parsed_scene_data,
                                                  unprocessed: match_response.unprocessed)
 
@@ -133,7 +134,7 @@ module XxxRename
 
     # @return [Data::DataStoreQueryHelper]
     def query_helper
-      DataStoreQueryHelper.new(scene_datastore)
+      Data::DataStoreQueryHelper.new(scene_datastore)
     end
 
     def save_scene_in_datastore(scene_data, file)

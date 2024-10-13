@@ -107,23 +107,6 @@ module XxxRename
       zero_tolerance: SiteClients::ZeroTolerance
     }.freeze
 
-    # @return [Nil, String]
-    def override_sc_original_pattern
-      @override_sc_original_pattern ||=
-        begin
-          pattern = nil
-          original_file_regexes.map do |i_pattern, i_site_clients|
-            i_site_clients.each do |sc|
-              if override_site == sc
-                pattern = i_pattern
-                break
-              end
-            end
-          end
-          pattern
-        end
-    end
-
     # @param [Symbol] site_client_sym
     # @param [Data::ParsedSceneData] parsed_scene_data
     # @param [String] file
@@ -224,7 +207,7 @@ module XxxRename
           site_client_configs = if override_site.nil?
                                   config.site.attributes
                                 else
-                                  config.site.attributes.select { |site, _| site.to_sym == override_site }
+                                  config.site.attributes.select { |site, _| site.to_sym == override_site.to_sym }
                                 end
           site_client_configs.each_pair do |site, site_config|
             site_config.file_source_format.map { |format| file_patterns[format] = site }
@@ -259,14 +242,11 @@ module XxxRename
       end
     end
 
+    delegate :override_site, to: :config
+
     # @return [Data::Config]
     def config
       XxxRename.config
-    end
-
-    # @return [String]
-    def override_site
-      config.override_site
     end
   end
 end

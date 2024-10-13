@@ -3,12 +3,12 @@
 require "rspec"
 
 RSpec.describe XxxRename::StashAppClient, type: :stash_scraper do
-  include_context "config provider" do
-    let(:override_config) { { "stash_app" => { "url" => "localhost:9999" } } }
-  end
+  include_context "config provider"
+
+  let(:override_config) { { "stash_app" => { "url" => "localhost:9999" } } }
 
   describe "scene_by_fragment" do
-    subject(:scene_by_fragment) { described_class.new(config).scene_by_fragment }
+    subject(:scene_by_fragment) { described_class.new.scene_by_fragment }
 
     let(:title) { stub_scene_data.title }
     let(:filename1) { "file_name-1.mp4" }
@@ -56,8 +56,7 @@ RSpec.describe XxxRename::StashAppClient, type: :stash_scraper do
 
     before do
       allow($stdin).to receive(:gets) { input }
-      StashStubs::StashApp.enable_version_stub
-      StashStubs::StashApp.enable_scene_paths_by_id_stub(1, stub_scene_data.title, [filename1_path])
+      # StashStubs::StashApp.enable_scene_paths_by_id_stub(1, stub_scene_data.title, [filename1_path])
     end
 
     context "when scene datastore does not contain any matching scene data" do

@@ -4,36 +4,19 @@ require "base64"
 
 module XxxRename
   module Integrations
-    class StashAPIError < StandardError
-      def initialize(errors)
-        @errors = errors
-        super(message)
-      end
-
-      def message
-        msg = "Stash API returned error:\n"
-        @errors.each do |e|
-          s  = "\tMESSAGE #{e["message"]}\n"
-          s += "\tOPERATION #{e["path"]} \n"
-          msg += s
-        end
-        msg
-      end
-    end
-
     class StashApp
       include FileUtilities
+      include HTTParty
+      include Utils
 
-      # FIXME
-      base_uri XxxRename.config.stash_app.url
       default_options.update verify: false
 
       GRAPHQL_ENDPOINT = "/graphql"
 
       def initialize
-        return unless XxxRename.config.stash_app.url.present?
+        raise Errors::FatalError, "Stash App requires 'url'. Check your configuration." unless XxxRename.config.stash_app.url.present?
 
-        raise Errors::FatalError, "Stash App requires 'url'. Check your configuration."
+        self.class.base_uri XxxRename.config.stash_app.url
       end
 
       def config
@@ -62,10 +45,10 @@ module XxxRename
         response = handle_response! do
           self.class.post(GRAPHQL_ENDPOINT, body: create_movie_body(scene_data.movie, studio_id))
         end
-        raise StashAPIError, response["errors"] if response["errors"]
+        raise Errors::StashAPIError, response["errors"] if response["errors"]
 
         response.dig("data", "movieCreate")
-      rescue StashAPIError => e
+      rescue Errors::StashAPIError => e
         # re-raise if already retried
         raise e if retried
 
@@ -100,7 +83,7 @@ module XxxRename
 
       def update_scene(scene_id, movie_id)
         response = handle_response! { self.class.post(GRAPHQL_ENDPOINT, body: update_scene_body(scene_id, movie_id)) }
-        raise StashAPIError, response["errors"] if response["errors"]
+        raise Errors::StashAPIError, response["errors"] if response["errors"]
 
         response.dig("data", "sceneUpdate")
       end

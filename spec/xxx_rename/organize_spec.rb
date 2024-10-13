@@ -8,7 +8,7 @@ describe XxxRename::Organize do
     include_context "stubs provider"
 
     subject(:stats) { organizer.gather_stats }
-    let(:organizer) { described_class.new(config, source_dir: source_dir, destination_dir: destination_dir, force: force) }
+    let(:organizer) { described_class.new(source_dir: source_dir, destination_dir: destination_dir, force: force) }
     let(:force) { false }
     let(:source_dir) { create_dir("source") }
     let(:destination_dir) { create_dir("destination") }
@@ -69,7 +69,7 @@ describe XxxRename::Organize do
     include_context "stubs provider"
 
     subject(:organize) { organizer.organize(dry_run, minimum_scenes_threshold) }
-    let(:organizer) { described_class.new(config, source_dir: source_dir, destination_dir: destination_dir, force: false) }
+    let(:organizer) { described_class.new(source_dir: source_dir, destination_dir: destination_dir, force: false) }
     let(:source_dir) { create_dir("source") }
     let(:destination_dir) { create_dir("destination") }
 

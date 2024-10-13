@@ -2,23 +2,14 @@
 
 module XxxRename
   module Data
-    class StashPerformerData < Base
-      attribute :name, Types::String
-      attribute? :gender, Types::String.optional
-    end
-
-    class StashStudioData < Base
-      attribute :name, Types::String
-    end
-
-    class StashAppSceneInput < Base
-      attribute :id, Types::String
-      attribute :title, Types::String
-    end
-
     # Match this to schema provided in
     # https://github.com/stashapp/stash/blob/develop/graphql/stash-box/query.graphql#L94-L120
     class StashAppSceneFragment < Base
+      class StashPerformerData < Base
+        attribute :name, Types::String
+        attribute? :gender, Types::String.optional
+      end
+
       # id: assigned by stash
       attribute :title, Types::String
       attribute? :code, Types::String # Map this to scene ID created by site
@@ -29,7 +20,9 @@ module XxxRename
       attribute? :url, Types::String
       attribute? :image, Types::String
       # noinspection RubyMismatchedArgumentType
-      attribute :studio, StashStudioData
+      attribute :studio do
+        attribute :name, Types::String
+      end
       attribute :performers, Types::Array.of(StashPerformerData).default([].freeze)
       # fingerprints: not supported
 

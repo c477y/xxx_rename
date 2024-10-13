@@ -4,27 +4,27 @@ require "rspec"
 
 describe XxxRename::Actions::LogNewFilename do
   subject(:perform) { action.perform(dir, file, search_result) }
-  let(:action) { described_class.new(config) }
-  let(:output_recorder) { config.output_recorder }
 
-  include_context "config provider" do
-    let(:override_config) do
-      {
-        "global" => {
-          "output_format" => [
-            "%id %title_prefix %title",
-            "%id %female_actors_prefix %female_actors"
-          ],
-          "site" => {
-            "brazzers" => {
-              "output_format" => [
-                "%yyyy_mm_dd %title_prefix %title"
-              ]
-            }
+  include_context "config provider"
+
+  let(:action) { described_class.new }
+  let(:output_recorder) { config.output_recorder }
+  let(:override_config) do
+    {
+      "global" => {
+        "output_format" => [
+          "%id %title_prefix %title",
+          "%id %female_actors_prefix %female_actors"
+        ],
+        "site" => {
+          "brazzers" => {
+            "output_format" => [
+              "%yyyy_mm_dd %title_prefix %title"
+            ]
           }
         }
       }
-    end
+    }
   end
 
   let(:dir) { nil }
@@ -35,7 +35,7 @@ describe XxxRename::Actions::LogNewFilename do
                       site_client: site_client })
   end
 
-  let(:site_client) { XxxRename::SiteClients::Brazzers.new(config) }
+  let(:site_client) { XxxRename::SiteClients::Brazzers.new }
 
   let(:female_actor) { "female-actor" }
   let(:male_actor) { "male-actor" }

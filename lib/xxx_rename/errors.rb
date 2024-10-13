@@ -37,5 +37,22 @@ module XxxRename
 
     class FatalError < StandardError; end
     class UnprocessedEntity < StandardError; end
+
+    class StashAPIError < StandardError
+      def initialize(errors)
+        @errors = errors
+        super(message)
+      end
+
+      def message
+        msg = "Stash API returned error:\n"
+        @errors.each do |e|
+          s  = "\tMESSAGE #{e["message"]}\n"
+          s += "\tOPERATION #{e["path"]} \n"
+          msg += s
+        end
+        msg
+      end
+    end
   end
 end

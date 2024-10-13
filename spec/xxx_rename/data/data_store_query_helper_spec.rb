@@ -13,13 +13,13 @@ RSpec.describe XxxRename::Data::DataStoreQueryHelper do
 
     context "when matching with absolute path is successful" do
       before do
-        FileUtils.touch(File.join("test_folder", file))
+        FileUtils.touch(file)
         config.scene_datastore.create!(stub_scene_data)
         config.scene_datastore.register_file(stub_scene_data, absolute_path)
       end
 
       let(:file) { "file_name.mp4" }
-      let(:absolute_path) { File.expand_path(File.join("test_folder", file)) }
+      let(:absolute_path) { File.expand_path(file) }
       let(:basename) { nil }
       let(:scene_data) { nil }
 
@@ -31,13 +31,13 @@ RSpec.describe XxxRename::Data::DataStoreQueryHelper do
     context "when matching with basename" do
       context "when single file exists in datastore with the given filename" do
         before do
-          FileUtils.touch(File.join("test_folder", file))
+          FileUtils.touch(file)
           config.scene_datastore.create!(scene_data)
           config.scene_datastore.register_file(scene_data, absolute_path_file)
         end
 
         let(:file) { "file_name.mp4" }
-        let(:absolute_path_file) { File.expand_path(File.join("test_folder", file)) }
+        let(:absolute_path_file) { File.expand_path(file) }
         let(:absolute_path) { nil }
         let(:basename) { file }
         let(:scene_data) { stub_scene_data }
@@ -51,10 +51,10 @@ RSpec.describe XxxRename::Data::DataStoreQueryHelper do
         before do
           # Create two different files with the same name
           # File 1
-          FileUtils.touch(File.join("test_folder", file))
+          FileUtils.touch(file)
           # File 2
-          FileUtils.mkpath(File.join("test_folder", "nested_folder"))
-          FileUtils.touch(File.join("test_folder", "nested_folder", file))
+          FileUtils.mkpath("nested_folder")
+          FileUtils.touch(File.join("nested_folder", file))
 
           # Store the first scene
           config.scene_datastore.create!(scene_data)
@@ -66,8 +66,8 @@ RSpec.describe XxxRename::Data::DataStoreQueryHelper do
         end
 
         let(:file) { "file_name.mp4" }
-        let(:absolute_path_file1) { File.expand_path(File.join("test_folder", file)) }
-        let(:absolute_path_file2) { File.expand_path(File.join("test_folder", "nested_folder", file)) }
+        let(:absolute_path_file1) { File.expand_path(file) }
+        let(:absolute_path_file2) { File.expand_path(File.join("nested_folder", file)) }
 
         let(:basename) { file }
         let(:absolute_path) { nil }
@@ -83,10 +83,10 @@ RSpec.describe XxxRename::Data::DataStoreQueryHelper do
         before do
           # Create two different files with the same name
           # File 1
-          FileUtils.touch(File.join("test_folder", file))
+          FileUtils.touch(File.join(file))
           # File 2
-          FileUtils.mkpath(File.join("test_folder", "nested_folder"))
-          FileUtils.touch(File.join("test_folder", "nested_folder", file))
+          FileUtils.mkpath("nested_folder")
+          FileUtils.touch(File.join("nested_folder", file))
 
           # Store the scenes
           config.scene_datastore.create!(stub_scene_data2)
@@ -97,8 +97,8 @@ RSpec.describe XxxRename::Data::DataStoreQueryHelper do
         end
 
         let(:file) { "file_name.mp4" }
-        let(:absolute_path_file1) { File.expand_path(File.join("test_folder", file)) }
-        let(:absolute_path_file2) { File.expand_path(File.join("test_folder", "nested_folder", file)) }
+        let(:absolute_path_file1) { File.expand_path(file) }
+        let(:absolute_path_file2) { File.expand_path(File.join("nested_folder", file)) }
 
         let(:basename) { file }
         let(:absolute_path) { nil }

@@ -7,7 +7,7 @@ describe XxxRename::Data::SceneDatastoreQuery do
 
   subject(:data_store) { described_class.new(store, Mutex.new) }
 
-  let(:store) { XxxRename::Data::SceneDatastore.new("test_folder").store }
+  let(:store) { XxxRename::Data::SceneDatastore.new(".").store }
   # scene 1
   let(:scene1) do
     XxxRename::Data::SceneData.new(
@@ -30,10 +30,10 @@ describe XxxRename::Data::SceneDatastoreQuery do
   let(:key1) { scene1.key }
   let(:id1) { "9999" }
   let(:filename1) { "file_name-1.mp4" }
-  let(:filename1_path) { File.expand_path(File.join("test_folder", filename1)) }
-  let(:duplicate_filename1_path) { File.expand_path(File.join("test_folder", "nested_folder", filename1)) }
+  let(:filename1_path) { File.expand_path(filename1) }
+  let(:duplicate_filename1_path) { File.expand_path(File.join("nested_folder", filename1)) }
   let(:filename1_old) { "file_name-1_old.mp4" }
-  let(:filename1_old_path) { File.expand_path(File.join("test_folder", filename1_old)) }
+  let(:filename1_old_path) { File.expand_path(filename1_old) }
 
   # scene 2
   let(:scene2) do
@@ -57,14 +57,14 @@ describe XxxRename::Data::SceneDatastoreQuery do
   let(:key2) { scene2.key }
   let(:id2) { "8888" }
   let(:filename2) { "file_name-2.mp4" }
-  let(:filename2_path) { File.expand_path(File.join("test_folder", filename2)) }
+  let(:filename2_path) { File.expand_path(filename2) }
 
   before(:each) do
-    FileUtils.touch(File.join("test_folder", filename1))
-    FileUtils.mkpath(File.join("test_folder", "nested_folder"))
-    FileUtils.touch(File.join("test_folder", "nested_folder", filename1))
-    FileUtils.touch(File.join("test_folder", filename1_old))
-    FileUtils.touch(File.join("test_folder", filename2))
+    FileUtils.touch(filename1)
+    FileUtils.mkpath(File.join("nested_folder"))
+    FileUtils.touch(File.join("nested_folder", filename1))
+    FileUtils.touch(filename1_old)
+    FileUtils.touch(filename2)
   end
 
   describe ".create" do
@@ -160,7 +160,7 @@ describe XxxRename::Data::SceneDatastoreQuery do
 
       it "stores the metadata" do
         store.transaction(true) do
-          actual_metadata = store[XxxRename::Data::METADATA_ROOT]
+          actual_metadata = store[XxxRename::Data::SceneDatastoreQuery::METADATA_ROOT]
           expect(actual_metadata).to eq(metadata)
         end
       end
@@ -172,7 +172,7 @@ describe XxxRename::Data::SceneDatastoreQuery do
 
         it "stores the metadata" do
           store.transaction(true) do
-            actual_metadata = store[XxxRename::Data::METADATA_ROOT]
+            actual_metadata = store[XxxRename::Data::SceneDatastoreQuery::METADATA_ROOT]
             expect(actual_metadata).to eq(updated_metadata)
           end
         end
@@ -273,14 +273,14 @@ describe XxxRename::Data::SceneDatastoreQuery do
 
       it "adds the absolute path of filename to the index" do
         store.transaction(true) do
-          key = data_store.generate_lookup_key(XxxRename::Data::REGISTERED_FILE_PATHS_PREFIX, filename1_path)
+          key = data_store.generate_lookup_key(XxxRename::Data::SceneDatastoreQuery::REGISTERED_FILE_PATHS_PREFIX, filename1_path)
           expect(store[key]).to eq(scene1.key)
         end
       end
 
       it "adds the base filename to the index" do
         store.transaction(true) do
-          key = data_store.generate_lookup_key(XxxRename::Data::REGISTERED_FILE_BASENAME_PATH_PREFIX, File.basename(filename1_path))
+          key = data_store.generate_lookup_key(XxxRename::Data::SceneDatastoreQuery::REGISTERED_FILE_BASENAME_PATH_PREFIX, File.basename(filename1_path))
           expect(store[key]).to eq([scene1.key])
         end
       end
@@ -295,14 +295,14 @@ describe XxxRename::Data::SceneDatastoreQuery do
 
         it "adds the absolute path of file to the index and removes the old name" do
           store.transaction(true) do
-            key = data_store.generate_lookup_key(XxxRename::Data::REGISTERED_FILE_PATHS_PREFIX, filename1_path)
+            key = data_store.generate_lookup_key(XxxRename::Data::SceneDatastoreQuery::REGISTERED_FILE_PATHS_PREFIX, filename1_path)
             expect(store[key]).to eq(key1)
           end
         end
 
         it "adds the basename of file to the index and removes the old name" do
           store.transaction(true) do
-            key = data_store.generate_lookup_key(XxxRename::Data::REGISTERED_FILE_BASENAME_PATH_PREFIX, File.basename(filename1_path))
+            key = data_store.generate_lookup_key(XxxRename::Data::SceneDatastoreQuery::REGISTERED_FILE_BASENAME_PATH_PREFIX, File.basename(filename1_path))
             expect(store[key]).to eq([key1])
           end
         end
@@ -310,15 +310,15 @@ describe XxxRename::Data::SceneDatastoreQuery do
 
       context "when the old file does not exist" do
         before do
-          FileUtils.touch(File.join("test_folder", "xyz"))
-          non_existent_file = File.expand_path(File.join("test_folder", "xyz"))
+          FileUtils.touch("xyz")
+          non_existent_file = File.expand_path("xyz")
 
           data_store.register_file(scene1, filename1_path, old_filename: non_existent_file)
         end
 
         it "does not raise an error if old filename does not exist in data store" do
           store.transaction(true) do
-            key = data_store.generate_lookup_key(XxxRename::Data::REGISTERED_FILE_PATHS_PREFIX, filename1_path)
+            key = data_store.generate_lookup_key(XxxRename::Data::SceneDatastoreQuery::REGISTERED_FILE_PATHS_PREFIX, filename1_path)
             expect(store[key]).to eq(key1)
           end
         end
@@ -460,7 +460,7 @@ describe XxxRename::Data::SceneDatastoreQuery do
       end
 
       context "missing file path" do
-        let(:index_key) { data_store.generate_lookup_key(XxxRename::Data::REGISTERED_FILE_PATHS_PREFIX, filename1_path) }
+        let(:index_key) { data_store.generate_lookup_key(XxxRename::Data::SceneDatastoreQuery::REGISTERED_FILE_PATHS_PREFIX, filename1_path) }
 
         before { store.transaction { store.delete(index_key) } }
 

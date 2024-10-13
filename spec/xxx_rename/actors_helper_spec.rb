@@ -6,19 +6,16 @@ describe XxxRename::ActorsHelper do
   include_context "config provider"
 
   subject(:call) { config.actor_helper }
-  let(:actor_details) { double(XxxRename::FetchActorDetails) }
-  let(:matcher) { XxxRename::SiteClientMatcher.new(config) }
 
-  before do
-    expect(XxxRename::FetchActorDetails).to receive(:new).and_return(actor_details)
-  end
+  let(:actor_details) { instance_double("XxxRename::FetchActorDetails") }
+  before { expect(XxxRename::FetchActorDetails).to receive(:new).and_return(actor_details) }
 
   context "successful actor match" do
     let(:actor) { "Bridgette B" }
     let(:compressed_name) { "bridgetteb" }
 
     before do
-      expect(actor_details).to receive(:details).and_return(
+      allow(actor_details).to receive(:details).and_return(
         {
           "name" => actor,
           "gender" => "female"
@@ -28,6 +25,7 @@ describe XxxRename::ActorsHelper do
     end
 
     it "actor specific methods should return correct response" do
+      expect(actor_details).to have_received(:details).with(actor)
       expect(call.female?(actor)).to eq(true)
       expect(call.male?(actor)).to eq(false)
     end
@@ -38,13 +36,13 @@ describe XxxRename::ActorsHelper do
     let(:actor_alias) { "Bridgette B." }
 
     before do
-      expect(actor_details).to receive(:details).with(actor).and_return(
+      allow(actor_details).to receive(:details).with(actor).and_return(
         {
           "name" => actor,
           "gender" => "female"
         }
       )
-      expect(actor_details).to receive(:details).with(actor_alias).and_return(
+      allow(actor_details).to receive(:details).with(actor_alias).and_return(
         {
           "name" => actor_alias,
           "gender" => "female"
@@ -55,6 +53,8 @@ describe XxxRename::ActorsHelper do
     end
 
     it "actor specific methods should return correct response" do
+      expect(actor_details).to have_received(:details).with(actor)
+      expect(actor_details).to have_received(:details).with(actor_alias)
       expect(call.female?(actor)).to eq(true)
       expect(call.male?(actor)).to eq(false)
     end
@@ -65,13 +65,13 @@ describe XxxRename::ActorsHelper do
     let(:male_actor) { "Keiran Lee" }
 
     before do
-      expect(actor_details).to receive(:details).with(female_actor).and_return(
+      allow(actor_details).to receive(:details).with(female_actor).and_return(
         {
           "name" => female_actor,
           "gender" => "female"
         }
       )
-      expect(actor_details).to receive(:details).with(male_actor).and_return(
+      allow(actor_details).to receive(:details).with(male_actor).and_return(
         {
           "name" => male_actor,
           "gender" => "male"
@@ -82,6 +82,9 @@ describe XxxRename::ActorsHelper do
     end
 
     it "actor specific methods should return correct response" do
+      expect(actor_details).to have_received(:details).with(female_actor)
+      expect(actor_details).to have_received(:details).with(male_actor)
+
       expect(call.female?(female_actor)).to eq(true)
       expect(call.male?(female_actor)).to eq(false)
 
@@ -94,7 +97,7 @@ describe XxxRename::ActorsHelper do
     let(:actor) { "abc" }
 
     before do
-      expect(actor_details).to receive(:details).with(actor).and_return(nil)
+      allow(actor_details).to receive(:details).with(actor).and_return(nil)
     end
 
     it "raises an error on fetching" do
@@ -103,6 +106,8 @@ describe XxxRename::ActorsHelper do
 
     it "actor specific methods should return nil" do
       call.auto_fetch(actor)
+
+      expect(actor_details).to have_received(:details).with(actor)
       expect(call.female?(actor)).to eq(false)
       expect(call.male?(actor)).to eq(false)
     end
@@ -115,15 +120,13 @@ describe XxxRename::FetchActorDetails do
   let(:call) { described_class.new(config.site_client_matcher).details(name) }
 
   let(:brazzers_client) { instance_double("XxxRename::SiteClients::Brazzers") }
-  let(:wicked_client) { instance_double("XxxRename::SiteClients::Wicked") }
-  let(:realitykings_client) { instance_double("XxxRename::SiteClients::RealityKings") }
   let(:evilangel_client) { instance_double("XxxRename::SiteClients::EvilAngel") }
+  let(:stash_db_client) { instance_double("XxxRename::SiteClients::StashDb") }
 
   before do
     expect(XxxRename::SiteClients::Brazzers).to receive(:new).and_return(brazzers_client)
-    expect(XxxRename::SiteClients::Wicked).to receive(:new).and_return(wicked_client)
-    expect(XxxRename::SiteClients::RealityKings).to receive(:new).and_return(realitykings_client)
     expect(XxxRename::SiteClients::EvilAngel).to receive(:new).and_return(evilangel_client)
+    expect(XxxRename::SiteClients::StashDb).to receive(:new).and_return(stash_db_client)
   end
 
   let(:site_client_success_response) do
@@ -158,7 +161,7 @@ describe XxxRename::FetchActorDetails do
     context "when second site client returns a successful match" do
       before do
         expect(brazzers_client).to receive(:actor_details).with(name).and_return(nil)
-        expect(wicked_client).to receive(:actor_details).with(name).and_return(site_client_success_response)
+        expect(evilangel_client).to receive(:actor_details).with(name).and_return(site_client_success_response)
       end
 
       it "returns correct response" do
@@ -169,21 +172,8 @@ describe XxxRename::FetchActorDetails do
     context "when third site client returns a successful match" do
       before do
         expect(brazzers_client).to receive(:actor_details).with(name).and_return(nil)
-        expect(wicked_client).to receive(:actor_details).with(name).and_return(nil)
-        expect(realitykings_client).to receive(:actor_details).with(name).and_return(site_client_success_response)
-      end
-
-      it "returns correct response" do
-        expect(call).to eq(response)
-      end
-    end
-
-    context "when fourth site client returns a successful match" do
-      before do
-        expect(brazzers_client).to receive(:actor_details).with(name).and_return(nil)
-        expect(wicked_client).to receive(:actor_details).with(name).and_return(nil)
-        expect(realitykings_client).to receive(:actor_details).with(name).and_return(nil)
-        expect(evilangel_client).to receive(:actor_details).with(name).and_return(site_client_success_response)
+        expect(evilangel_client).to receive(:actor_details).with(name).and_return(nil)
+        expect(stash_db_client).to receive(:actor_details).with(name).and_return(site_client_success_response)
       end
 
       it "returns correct response" do
@@ -197,9 +187,8 @@ describe XxxRename::FetchActorDetails do
 
     before do
       expect(brazzers_client).to receive(:actor_details).with(name).and_return(nil)
-      expect(wicked_client).to receive(:actor_details).with(name).and_return(nil)
-      expect(realitykings_client).to receive(:actor_details).with(name).and_return(nil)
       expect(evilangel_client).to receive(:actor_details).with(name).and_return(nil)
+      expect(stash_db_client).to receive(:actor_details).with(name).and_return(nil)
     end
 
     it "returns correct response" do

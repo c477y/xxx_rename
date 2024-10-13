@@ -3,8 +3,7 @@
 require "rspec"
 
 RSpec.describe XxxRename::SiteClients::ArchAngelVideo do
-  subject(:site_client) { described_class.new(config) }
-
+  subject { described_class.new }
   include_context "config provider"
 
   shared_context "hardcoded scene details" do

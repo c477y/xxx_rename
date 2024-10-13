@@ -29,6 +29,10 @@ module XxxRename
       raise Errors::FatalError, "[UNKNOWN OBJECT #{object}] pass a valid file or directory"
     end
 
+    def matcher
+      XxxRename.config.site_client_matcher
+    end
+
     def resolver
       @resolver ||= Actions::Resolver.new
     end

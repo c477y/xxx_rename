@@ -7,7 +7,7 @@ describe XxxRename::MigrationClient do
   include_context "stubs provider"
 
   describe ".version_file!" do
-    subject(:version_file!) { described_class.new(config, version).version_file! }
+    subject(:version_file!) { described_class.new(version).version_file! }
 
     let(:version) { "latest" }
     let(:time1) { Timecop.freeze(Time.local(2022, "jan", 1, 0, 0, 0)) { Time.now.strftime("%Y%m%d%H%M").to_s } }
@@ -24,7 +24,7 @@ describe XxxRename::MigrationClient do
     end
 
     def create_files(*files)
-      dir = File.join("test_folder", ".config", "xxx_rename", "generated", "output")
+      dir = File.join(".config", "xxx_rename", "generated", "output")
       files.each { |f| Dir.chdir(dir) { FileUtils.touch(f) } }
     end
 
@@ -86,23 +86,23 @@ describe XxxRename::MigrationClient do
   end
 
   describe ".apply" do
-    subject(:client) { described_class.new(config, "latest") }
+    subject(:client) { described_class.new("latest") }
     let(:datastore) { client.datastore }
 
     let(:time) { Timecop.freeze(Time.local(2022, "jan", 1, 0, 0, 0)) { Time.now.strftime("%Y%m%d%H%M").to_s } }
-    let(:file) { File.join("test_folder", ".config", "xxx_rename", "generated", "output", "output_#{time}.yml") }
+    let(:file) { File.join(".config", "xxx_rename", "generated", "output", "output_#{time}.yml") }
     let(:source_file) { "foo.mp4" }
     let(:output_file) { "bar.mp4" }
-    let(:directory) { File.join(Dir.pwd, "test_folder") }
+    let(:directory) { Dir.pwd }
 
     let(:scene_data) { stub_scene_data }
 
     before do
       expect(client).to receive(:version_file!).and_return(file)
-      FileUtils.touch(File.join("test_folder", source_file))
+      FileUtils.touch(File.join(source_file))
       datastore.migration_status = 0
       config.scene_datastore.create!(scene_data)
-      config.scene_datastore.register_file(scene_data, File.join(Dir.pwd, "test_folder", source_file))
+      config.scene_datastore.register_file(scene_data, File.join(Dir.pwd, source_file))
       datastore.create!(scene_data, source_file, output_file, directory)
     end
 
@@ -110,7 +110,7 @@ describe XxxRename::MigrationClient do
       before { client.apply }
 
       it "should rename the file" do
-        Dir.chdir("test_folder") { expect(Dir["*.mp4"]).to eq([output_file]) }
+        expect(Dir["*.mp4"]).to eq([output_file])
       end
 
       it "migration should be up" do
@@ -118,10 +118,10 @@ describe XxxRename::MigrationClient do
       end
 
       it "scene datastore should register the new filename" do
-        old_path = File.join(Dir.pwd, "test_folder", source_file)
+        old_path = File.join(Dir.pwd, source_file)
         expect(config.scene_datastore.find_by_abs_path?(old_path)).to be nil
 
-        new_path = File.join(Dir.pwd, "test_folder", output_file)
+        new_path = File.join(Dir.pwd, output_file)
         expect(config.scene_datastore.find_by_abs_path?(new_path)).to eq(scene_data)
       end
 
@@ -138,13 +138,13 @@ describe XxxRename::MigrationClient do
         end
 
         it "should not rename the file" do
-          Dir.chdir("test_folder") { expect(Dir["*.mp4"]).to eq([source_file]) }
+          expect(Dir["*.mp4"]).to eq([source_file])
         end
       end
 
       context "when source file is deleted" do
         before do
-          FileUtils.rm(File.join("test_folder", source_file))
+          FileUtils.rm(File.join(source_file))
           client.apply
         end
 
@@ -166,24 +166,24 @@ describe XxxRename::MigrationClient do
   end
 
   describe ".rollback" do
-    subject(:client) { described_class.new(config, "latest") }
+    subject(:client) { described_class.new("latest") }
     let(:datastore) { client.datastore }
 
     let(:time) { Timecop.freeze(Time.local(2022, "jan", 1, 0, 0, 0)) { Time.now.strftime("%Y%m%d%H%M").to_s } }
-    let(:file) { File.join("test_folder", ".config", "xxx_rename", "generated", "output", "output_#{time}.yml") }
+    let(:file) { File.join(".config", "xxx_rename", "generated", "output", "output_#{time}.yml") }
     let(:source_file) { "foo.mp4" }
     let(:output_file) { "bar.mp4" }
-    let(:directory) { File.join(Dir.pwd, "test_folder") }
+    let(:directory) { Dir.pwd }
 
     let(:scene_data) { stub_scene_data }
 
     before do
       # Apply a migration first
       expect(client).to receive(:version_file!).and_return(file)
-      FileUtils.touch(File.join("test_folder", source_file))
+      FileUtils.touch(File.join(source_file))
       datastore.migration_status = 0
       config.scene_datastore.create!(scene_data)
-      config.scene_datastore.register_file(scene_data, File.join(Dir.pwd, "test_folder", source_file))
+      config.scene_datastore.register_file(scene_data, File.join(Dir.pwd, source_file))
       datastore.create!(scene_data, source_file, output_file, directory)
       client.apply
     end
@@ -192,7 +192,7 @@ describe XxxRename::MigrationClient do
       before { client.rollback }
 
       it "should rename the file back to original" do
-        Dir.chdir("test_folder") { expect(Dir["*.mp4"]).to eq([source_file]) }
+        expect(Dir["*.mp4"]).to eq([source_file])
       end
 
       it "migration should be set back to down" do
@@ -200,10 +200,10 @@ describe XxxRename::MigrationClient do
       end
 
       it "scene datastore should register the old filename" do
-        new_path = File.join(Dir.pwd, "test_folder", output_file)
+        new_path = File.join(Dir.pwd, output_file)
         expect(config.scene_datastore.find_by_abs_path?(new_path)).to be nil
 
-        old_path = File.join(Dir.pwd, "test_folder", source_file)
+        old_path = File.join(Dir.pwd, source_file)
         expect(config.scene_datastore.find_by_abs_path?(old_path)).to eq(scene_data)
       end
 
@@ -219,14 +219,14 @@ describe XxxRename::MigrationClient do
         end
 
         it "should not rename the file" do
-          Dir.chdir("test_folder") { expect(Dir["*.mp4"]).to eq([source_file]) }
+          expect(Dir["*.mp4"]).to eq([source_file])
         end
       end
 
       context "when destination file is deleted after migration" do
         before do
           client.apply
-          FileUtils.rm(File.join("test_folder", output_file))
+          FileUtils.rm(File.join(output_file))
           client.rollback
         end
 

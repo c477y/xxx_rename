@@ -3,9 +3,8 @@
 require "rspec"
 
 describe XxxRename::ProcessedFile do
-  include_context "config provider" do
-    let(:override_config) { override }
-  end
+  include_context "config provider"
+  let(:override_config) { override }
   let(:override) { {} }
 
   RSpec.shared_examples "a valid file" do
@@ -70,8 +69,8 @@ describe XxxRename::ProcessedFile do
       let(:female) { (female1 + female2).sort }
       let(:male) { [] }
       let(:actors) { female }
-      let(:collection_tag) { "" }
-      let(:collection) { "" }
+      let(:collection_tag) { nil }
+      let(:collection) { nil }
 
       let(:file_name) { "Making A Splash [F] Violet Starr, Amber Jade.mp4" }
       let(:pattern) { "%title [F] %female_actors" }
@@ -150,8 +149,8 @@ describe XxxRename::ProcessedFile do
 
       let(:female) { female1 }
       let(:male) { male1 }
-      let(:collection) { "" }
-      let(:collection_tag) { "" }
+      let(:collection) { nil }
+      let(:collection_tag) { nil }
       let(:actors) { (female1 + male1).flatten }
       let(:file_name) { "[F] Violet Starr [M] Isiah Maxwell [T] Making A Splash [start of some random text.mp4" }
       let(:pattern) { "%female_actors_prefix %female_actors %male_actors_prefix %male_actors %title_prefix %title" }

@@ -3,7 +3,7 @@
 require "rspec"
 
 describe XxxRename::Actions::Resolver do
-  subject(:resolver) { described_class.new(config) }
+  subject(:resolver) { described_class.new }
 
   let(:post_movie_to_stash_double) { instance_double("XxxRename::Actions::StashAppPostMovie") }
   let(:log_rename_op_double) { instance_double("XxxRename::Actions::LogNewFilename") }
@@ -12,7 +12,7 @@ describe XxxRename::Actions::Resolver do
 
   context "with valid action 'sync_to_stash'" do
     let(:action) { "sync_to_stash" }
-    before { expect(XxxRename::Actions::StashAppPostMovie).to receive(:new).with(config).and_return(post_movie_to_stash_double) }
+    before { expect(XxxRename::Actions::StashAppPostMovie).to receive(:new).and_return(post_movie_to_stash_double) }
 
     it "returns the expected action" do
       expect(resolver.resolve!(action)).to eq(post_movie_to_stash_double)
@@ -21,7 +21,7 @@ describe XxxRename::Actions::Resolver do
 
   context "with valid action :sync_to_stash" do
     let(:action) { :sync_to_stash }
-    before { expect(XxxRename::Actions::StashAppPostMovie).to receive(:new).with(config).and_return(post_movie_to_stash_double) }
+    before { expect(XxxRename::Actions::StashAppPostMovie).to receive(:new).and_return(post_movie_to_stash_double) }
 
     it "returns the expected action" do
       expect(resolver.resolve!(action)).to eq(post_movie_to_stash_double)

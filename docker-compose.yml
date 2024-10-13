@@ -1,0 +1,24 @@
+version: '3.4'
+services:
+  stash:
+    image: stashapp/stash:latest
+    container_name: stash
+    ports:
+      - "9999:9999"
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "2m"
+    environment:
+      - STASH_STASH=/data/
+      - STASH_GENERATED=/generated/
+      - STASH_METADATA=/metadata/
+      - STASH_CACHE=/cache/
+    volumes:
+      - ./stashapp/config:/root/.stash
+      - ./stashapp/data:/data
+      - ./stashapp/metadata:/metadata
+      - ./stashapp/cache:/cache
+      - ./stashapp/blobs:/blobs
+      - ./stashapp/generated:/generated

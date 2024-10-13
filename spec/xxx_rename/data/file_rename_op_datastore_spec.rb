@@ -11,8 +11,8 @@ describe XxxRename::Data::FileRenameOpDatastore do
   subject { data_store.create!(stub_scene_data, source_file, output_file, dir) }
 
   let(:data_store) { described_class.new(store, Mutex.new) }
-  let(:store) { XxxRename::Data::OutputDatastore.new("test_folder").store }
-  let(:dir) { File.join(Dir.pwd, "test_folder") }
+  let(:store) { XxxRename::Data::OutputDatastore.new(".").store }
+  let(:dir) { Dir.pwd }
   let(:source_file) { "stub_scene.mp4" }
   let(:output_file) { "new_name_stub_scene.mp4" }
 
@@ -20,7 +20,7 @@ describe XxxRename::Data::FileRenameOpDatastore do
     context "when source file does not exist" do
       it "raises an error" do
         expect { subject }.to raise_error(XxxRename::Contract::FileRenameOpValidationFailure,
-                                          %r{file_not_found: .*test_folder/stub_scene.mp4})
+                                          /file_not_found: .*stub_scene.mp4/)
       end
     end
 
@@ -49,7 +49,7 @@ describe XxxRename::Data::FileRenameOpDatastore do
 
       it "raises an error" do
         expect { subject }.to raise_error(XxxRename::Contract::FileRenameOpValidationFailure,
-                                          %r{output_file_already_exists: .*test_folder/new_name_stub_scene.mp4})
+                                          %r{output_file_already_exists: .*new_name_stub_scene.mp4})
       end
     end
 

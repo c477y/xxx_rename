@@ -29,7 +29,7 @@ Dir["./spec/support/**/*.rb"].sort.each { |f| require f }
 module XxxRename
   module SystemConstants
     def home_dir
-      "test_folder"
+      "."
     end
   end
 end

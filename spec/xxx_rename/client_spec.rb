@@ -3,12 +3,12 @@
 require "rspec"
 
 describe XxxRename::Client do
-  include_context "config provider" do
-    let(:override_config) { { "actions" => actions } }
-  end
+  include_context "config provider"
+
+  let(:override_config) { { "actions" => actions } }
 
   describe ".generate" do
-    subject(:client) { described_class.new(config, verbose: false, nested: false) }
+    subject(:client) { described_class.new(nested: false) }
 
     let(:file) { "StunningCurves_s02_GracieGlam_ChrisStrokes_540p.mp4" }
     let(:actions) { [] }
@@ -27,14 +27,24 @@ describe XxxRename::Client do
         )
       end
 
+      let(:parsed_scene_data) do
+        XxxRename::Data::ParsedSceneData.new(
+          title: "StunningCurves",
+          actors: %w[GracieGlam ChrisStrokes],
+          index: "02"
+        )
+      end
+
+      let(:unprocessed) { true }
+
       before(:each) { FileUtils.touch(file) }
-      let(:object) { File.join("test_folder", file) }
+      let(:object) { file }
 
       before { client.matcher.initialise_site_client(:evil_angel) }
 
       context "successful match" do
         before do
-          expect(client.matcher.fetch(:evil_angel)).to receive(:search).with(file).and_return(scene_data)
+          expect(client.matcher.fetch(:evil_angel)).to receive(:search).with(file, { parsed_scene_data: parsed_scene_data, unprocessed: unprocessed }).and_return(scene_data)
         end
 
         let(:expected_search_results) do
@@ -43,18 +53,18 @@ describe XxxRename::Client do
 
         context "with no actions" do
           it "yields with expected parameters" do
-            expect { |b| client.generate(object, &b) }.to yield_with_args(/test_folder/, file, expected_search_results)
+            expect { |b| client.generate(object, &b) }.to yield_with_args(/.*/, file, expected_search_results)
           end
         end
       end
 
       context "no match" do
         before do
-          expect(client.matcher.fetch(:evil_angel)).to receive(:search).with(file).and_return(nil)
+          expect(client.matcher.fetch(:evil_angel)).to receive(:search).with(file, { parsed_scene_data: parsed_scene_data, unprocessed: unprocessed }).and_return(nil)
         end
 
         it "does not yield" do
-          expect { |b| client.generate(object, &b) }.not_to yield_with_args(/test_folder/, file, XxxRename::Search::SearchResult)
+          expect { |b| client.generate(object, &b) }.not_to yield_with_args(/.*/, file, XxxRename::Search::SearchResult)
         end
       end
     end

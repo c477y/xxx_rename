@@ -13,7 +13,7 @@ RSpec.describe XxxRename::Data::FilePreProcessorRule do
 
       let(:file) { "text ééé al ééé" }
 
-      it { expect(replace).to eq("text  al ") }
+      it { expect(replace).to eq("text  al") }
     end
 
     context "with default rule to replace double spaces" do
@@ -21,7 +21,7 @@ RSpec.describe XxxRename::Data::FilePreProcessorRule do
 
       let(:file) { "text   text text   " }
 
-      it { expect(replace).to eq("text text text ") }
+      it { expect(replace).to eq("text text text") }
     end
   end
 end

@@ -9,6 +9,10 @@ XXX_RENAME_STASH_DB_USERNAME=${XXX_RENAME_STASH_DB_USERNAME:-foo}
 XXX_RENAME_STASH_DB_PASSWORD=${XXX_RENAME_STASH_DB_PASSWORD:-bar}
 LOG_LEVEL=${LOG_LEVEL:-trace}
 
+echo "Starting up Stash App in test environment..."
+docker-compose -f docker-compose.yml up -d
+
+echo "Building the app..."
 docker build --quiet -t xxx_rename:0 .
 
 docker run \

@@ -55,6 +55,7 @@ module XxxRename
                       when "INFO"  then CustomLogger::INFO
                       when "WARN"  then CustomLogger::WARN
                       when "ERROR" then CustomLogger::ERROR
+                      when "FATAL" then CustomLogger::FATAL
                       else raise "Invalid log level #{level}"
                       end
       @logger.formatter = proc do |severity, datetime, _progname, msg|

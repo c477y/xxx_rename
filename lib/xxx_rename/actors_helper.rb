@@ -71,9 +71,9 @@ module XxxRename
 
     def clients
       [
-        matcher.initialise_site_client(:stash),
         matcher.initialise_site_client(:brazzers),
-        matcher.initialise_site_client(:evil_angel)
+        matcher.initialise_site_client(:evil_angel),
+        matcher.initialise_site_client(:stash)
       ].compact # remove any disabled site clients
     end
   end

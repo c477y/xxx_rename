@@ -4,27 +4,11 @@ require "yaml/store"
 
 module XxxRename
   module Data
-    OUTPUT_KEY = "___RENAME_ACTIONS___"
-    STATUS_KEY = "___MIGRATION_STATUS___"
-    FAILURES_KEY = "___FAILURES___"
-
-    class OutputDatastore
-      attr_reader :store
-
-      OUTPUT = "output"
-
-      def initialize(dir)
-        file = "#{OUTPUT}_#{Time.now.strftime("%Y%m%d%H%M")}.yml"
-
-        Dir.chdir(dir) { FileUtils.mkdir OUTPUT unless Dir.exist?(OUTPUT) }
-
-        path = File.join(dir, OUTPUT, file)
-        @store = YAML::Store.new path
-        XxxRename.logger.info "[OUTPUT FILE CREATED] #{file}"
-      end
-    end
-
     class FileRenameOpDatastore < QueryInterface
+      OUTPUT_KEY = "___RENAME_ACTIONS___"
+      STATUS_KEY = "___MIGRATION_STATUS___"
+      FAILURES_KEY = "___FAILURES___"
+
       def create!(scene_data, source_file, output_file, dir = Dir.pwd)
         hash = {
           key: scene_data.key,
